@@ -24,3 +24,5 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
 @media(max-width:900px){.filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.dashboard-grid,.filter-grid{grid-template-columns:1fr}.dashboard-tile{min-height:0}.wide-filters{padding:18px}.page-top h1{font-size:24px}.filter-bottom{align-items:stretch}.filter-bottom label{flex-basis:100%}}
 @media print{.page-top,.dashboard-grid,.wide-filters,.saved-panel,.owner-info,.results-heading{display:none!important}}
+
+.metadata-import{background:#eef7f7;border:1px solid #c8e3e5;border-radius:10px;padding:16px;margin-bottom:20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}.metadata-import strong{width:100%}.metadata-import p{font-size:13px;color:#48646b;margin:0;width:100%;line-height:1.5}.metadata-import input{max-width:100%}.metadata-import span{font-size:12px;color:#44626b}.mapped-record{border-left:4px solid #2a7b85}.mapped-record .prompt{font-size:16px;margin:12px 0}.mapped-record .hint{margin:8px 0 15px}
