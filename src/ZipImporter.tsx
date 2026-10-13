@@ -7,7 +7,7 @@ type Asset={row:RecordRow;kind:"question"|"mark";file:JSZip.JSZipObject;path:str
 const bucket="exam-materials-private";
 const questionName=(row:RecordRow)=>typeof row.metadata.id==="string"?row.metadata.id:"";
 function findAsset(files:Map<string,JSZip.JSZipObject>,name:string,kind:"question"|"mark"){
- const match=/^(20\\d{2})_(\\dH)_(Q\\d{2})$/.exec(name);
+ const match=/^(20\d{2})_(\dH)_(Q\d{2})$/.exec(name);
  if(!match)return null;
  const [,year,paper,q]=match;
  // V6.2 stores 2020 at the root and 2021 in a year folder.
@@ -31,8 +31,8 @@ export default function ZipImporter({onComplete}:{onComplete:()=>void}){
    const files=new Map<string,JSZip.JSZipObject>();
    for(const [name,entry] of Object.entries(zip.files)){
     if(entry.dir)continue;
-    const match=name.match(/(?:^|\\/)assets\\/(questions|markschemes)\\/(.*)$/);
-    if(match&&/\\.png$/i.test(name))files.set(`assets/${match[1]}/${match[2]}`,entry);
+    const match=name.match(/(?:^|\/)assets\/(questions|markschemes)\/(.*)$/);
+    if(match&&/\.png$/i.test(name))files.set(`assets/${match[1]}/${match[2]}`,entry);
    }
    const {data,error}=await supabase.from("questions").select("id,metadata,question_storage_path,mark_scheme_storage_path").limit(1000);
    if(error)throw Error(error.message);
