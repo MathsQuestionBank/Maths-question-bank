@@ -1,3 +1,4 @@
+import ZipImporter from "./ZipImporter";
 import { useEffect, useMemo, useState } from "react";
 import "./styles.css";
 import { loadBankQuestions } from "./questionData";
@@ -18,6 +19,7 @@ const [loadingQuestions,setLoadingQuestions]=useState(true);
 const [questionError,setQuestionError]=useState("");
 const [diagnostics,setDiagnostics]=useState("");
 const [checking,setChecking]=useState(false);
+const reloadQuestions=()=>{setLoadingQuestions(true);loadBankQuestions().then(data=>{setQuestions(data);setLoadingQuestions(false)}).catch(e=>{setQuestionError(e instanceof Error?e.message:String(e));setLoadingQuestions(false)})};
 const checkDatabase=async()=>{setChecking(true);try{const [{data:{user},error:authError},{data:owner,error:ownerError},{count,error:countError}]=await Promise.all([supabase.auth.getUser(),supabase.rpc("is_approved_owner"),supabase.from("questions").select("id",{count:"exact",head:true})]);setDiagnostics(`Session: ${user?"signed in":"missing"}${authError?" ("+authError.message+")":""}; owner permission: ${ownerError?"error "+ownerError.message:String(owner)}; visible database rows: ${countError?"error "+countError.message:String(count)}; displayed rows: ${questions.length}`);}catch(e){setDiagnostics(e instanceof Error?e.message:String(e))}finally{setChecking(false)}};
 useEffect(()=>{let mounted=true;loadBankQuestions().then(data=>{if(mounted){setQuestions(data);setLoadingQuestions(false)}}).catch(e=>{if(mounted){setQuestionError(e instanceof Error?e.message:"Could not load questions");setLoadingQuestions(false)}});return()=>{mounted=false}},[]);
 const [page,setPage]=useState<Page>("home");
