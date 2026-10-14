@@ -59,3 +59,15 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
 .v62-performance{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
 .v62-performance span{font-size:12px;border:1px solid #d9e4ea;border-radius:5px;background:#f2f7fa;color:#25475e;padding:6px 9px;font-weight:600}
 .v62-performance span.target{background:#d8f2e7;border-color:#8ccfb5;color:#14583f}
+
+/* Match the original V6.2 grade-performance strip */
+.v62-result-card{padding:12px 13px;grid-template-columns:minmax(0,1fr) 92px;gap:12px}
+.v62-result-card h3{font-size:15px;margin:0 0 4px}
+.v62-meta{font-size:11px;margin:0 0 6px}
+.v62-pills{gap:5px}
+.v62-pills span{font-size:10px;padding:2px 6px;border-radius:4px}
+.v62-performance{gap:5px;margin-top:7px;flex-wrap:wrap}
+.v62-performance span{font-size:10px;padding:4px 6px;font-weight:500;border:1px solid #dce3eb;background:#f8fafc;color:#193049;border-radius:4px}
+.v62-performance span.target{border:1px solid #efa71a;background:#fff7e7;color:#29313b;font-weight:700}
+.v62-card-actions{gap:5px}
+.v62-card-actions button{padding:8px 9px;border-radius:5px}
