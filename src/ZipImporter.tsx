@@ -1,3 +1,4 @@
+import RecoveryImporter from "./RecoveryImporter";
 import { useState } from "react";
 import JSZip from "jszip";
 import { supabase } from "./supabase";
@@ -7,7 +8,7 @@ type Asset={row:RecordRow;kind:"question"|"mark";file:JSZip.JSZipObject;path:str
 const bucket="exam-materials-private";
 const questionName=(row:RecordRow)=>typeof row.metadata.id==="string"?row.metadata.id:"";
 function findAsset(files:Map<string,JSZip.JSZipObject>,name:string,kind:"question"|"mark"){
- const match=/^(20\d{2})_(\dH)_(Q\d{2})$/.exec(name);
+ const match=/^(20\d{2})_(\dH)_(Q\d{2})(?:[a-z][a-z0-9]*)?$/i.exec(name);
  if(!match)return null;
  const [,year,paper,q]=match;
  // V6.2 stores 2020 at the root and 2021 in a year folder.
@@ -40,6 +41,8 @@ export default function ZipImporter({onComplete}:{onComplete:()=>void}){
    for(const row of (data||[]) as RecordRow[]){
     const id=questionName(row);if(!id)continue;
     for(const kind of ["question","mark"] as const){
+     const existing=kind==="question"?row.question_storage_path:row.mark_scheme_storage_path;
+     if(existing)continue; // Protect all existing crops and approvals; repair flagged images separately.
      const entry=findAsset(files,id,kind);
      if(!entry){missing.push(`${id} — ${kind==="question"?"question":"mark scheme"}`);continue}
      const path=`v6.2/${id.slice(0,4)}/${id.slice(5,7)}/${id.slice(8)}/${kind}.png`;
@@ -47,7 +50,7 @@ export default function ZipImporter({onComplete}:{onComplete:()=>void}){
     }
    }
    setAssets(planned);setIssues(missing);
-   setSummary(`Found ${planned.filter(x=>x.kind==="question").length} question images and ${planned.filter(x=>x.kind==="mark").length} mark schemes matching imported records. ${missing.length} assets not found in this archive.`);
+   setSummary(`Found ${planned.filter(x=>x.kind==="question").length} missing question images and ${planned.filter(x=>x.kind==="mark").length} missing mark schemes. Existing uploads are excluded; ${missing.length} unmatched missing items remain. Multipart questions reuse the source whole-question image and may need visual review.`);
    setProgress("");
   }catch(e){setSummary(e instanceof Error?e.message:String(e));setProgress("")}finally{setBusy(false)}
  };
@@ -61,7 +64,7 @@ export default function ZipImporter({onComplete}:{onComplete:()=>void}){
     setProgress(`Uploading ${success+1} of ${assets.length}: ${questionName(asset.row)} ${asset.kind}`);
     const bytes=await asset.file.async("uint8array");
     if(bytes.byteLength>10*1024*1024)throw Error(`Image too large: ${asset.file.name}`);
-    const {error:storageError}=await supabase.storage.from(bucket).upload(asset.path,new Blob([new Uint8Array(bytes)],{type:"image/png"}),{contentType:"image/png",upsert:true});
+    const {error:storageError}=await supabase.storage.from(bucket).upload(asset.path,new Blob([new Uint8Array(bytes)],{type:"image/png"}),{contentType:"image/png",upsert:false});
     if(storageError)throw Error(`Upload failed for ${asset.file.name}: ${storageError.message}`);
     const field=asset.kind==="question"?"question_storage_path":"mark_scheme_storage_path";
     const {error:updateError}=await supabase.from("questions").update({[field]:asset.path}).eq("id",asset.row.id);
@@ -72,5 +75,5 @@ export default function ZipImporter({onComplete}:{onComplete:()=>void}){
    setAssets([]);onComplete();
   }catch(e){setProgress(`Stopped after ${success} uploads. ${e instanceof Error?e.message:String(e)}. Re-select the ZIP to resume safely.`)}finally{setBusy(false)}
  };
- return <div className="panel"><h2>Import existing V6.2 question images</h2><p>Choose your original V6.2 ZIP. The archive is inspected in your browser; only matching PNG images are uploaded to your private Maths Question Bank Supabase storage. No PDFs or other files are uploaded.</p><label>V6.2 archive (.zip)<input type="file" accept=".zip,application/zip" disabled={busy} onChange={e=>{const f=e.target.files?.[0];if(f)void inspect(f)}}/></label>{summary&&<p role="status">{summary}</p>}{issues.length>0&&<details><summary>Missing or unmatched images ({issues.length})</summary><p>These are not uploaded or fabricated. The source archive does not contain all 2022 crops.</p><div style={{maxHeight:220,overflow:"auto"}}>{issues.slice(0,120).map(x=><div key={x}>{x}</div>)}</div></details>}{assets.length>0&&<button className="primary" disabled={busy} onClick={()=>void upload()}>Upload and link {assets.length} matched images</button>}{progress&&<p role="status">{progress}</p>}</div>
+ return <><div className="panel"><h2>Import existing V6.2 question images</h2><p>Choose your original V6.2 ZIP. The archive is inspected in your browser. Missing whole-question and multipart images can be linked to their original V6.2 crops. Existing question and mark-scheme images are never overwritten. No PDFs are uploaded.</p><label>V6.2 archive (.zip)<input type="file" accept=".zip,application/zip" disabled={busy} onChange={e=>{const f=e.target.files?.[0];if(f)void inspect(f)}}/></label>{summary&&<p role="status">{summary}</p>}{issues.length>0&&<details><summary>Missing or unmatched images ({issues.length})</summary><p>These are not uploaded or fabricated. The source archive does not contain all 2022 crops.</p><div style={{maxHeight:220,overflow:"auto"}}>{issues.slice(0,120).map(x=><div key={x}>{x}</div>)}</div></details>}{assets.length>0&&<button className="primary" disabled={busy} onClick={()=>void upload()}>Upload and link {assets.length} matched images</button>}{progress&&<p role="status">{progress}</p>}</div><RecoveryImporter onComplete={onComplete}/></>
 }
