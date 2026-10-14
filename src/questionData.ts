@@ -3,9 +3,29 @@ import { supabase } from "./supabase";
 export type BankQuestion = { id:string; topic:string; skill:string; tier:"Foundation"|"Higher"; grade:number; marks:number; calculator:boolean; series:string; ao:string; challenge:string; prompt:string; answer:string; tags:string[]; sourceId?:string; meanPct?:number; gradePerformance:Record<number,number|null>; imagePending?:boolean; questionUrl?:string; markSchemeUrl?:string; imageCrops:{question:Crop;mark:Crop}; cropReview:{question:string;mark:string} };
 type Row = { id:string; topic:string|null; skill:string|null; assessment_objective:string|null; marks:number|null; metadata:Record<string,unknown>; question_storage_path?:string|null; mark_scheme_storage_path?:string|null; exam_papers?:{series:string;tier:string|null}|null };
 const str=(v:unknown, fallback="")=>typeof v==="string"?v:fallback;
-export async function loadBankQuestions():Promise<BankQuestion[]> {
- await supabase.auth.getSession();
+export async function loadBankQuestions(onImageUrls?: (questions:BankQuestion[])=>void):Promise<BankQuestion[]> {
+ const {data:{session},error:sessionError}=await supabase.auth.getSession();
+ if(sessionError)throw new Error("Authentication unavailable: "+sessionError.message);
+ if(!session)throw new Error("Your owner session is not ready. Please sign in again.");
  const {data,error}=await supabase.from("questions").select("id,topic,skill,assessment_objective,marks,metadata,question_storage_path,mark_scheme_storage_path").order("created_at",{ascending:false}).limit(1000);
  if(error)throw new Error(`Supabase question query failed: ${error.message} (${error.code})`);
- const rows=(data||[]) as unknown as Row[]; const paths=[...new Set(rows.flatMap(r=>[r.question_storage_path,r.mark_scheme_storage_path].filter((p):p is string=>!!p)))]; const signed=new Map<string,string>(); for(let i=0;i<paths.length;i+=100){const {data:urls,error:signError}=await supabase.storage.from("exam-materials-private").createSignedUrls(paths.slice(i,i+100),3600);if(signError){console.warn("Some image links could not be refreshed",signError.message);continue;}for(const u of urls||[])if(u.signedUrl&&u.path)signed.set(u.path,u.signedUrl)} return rows.map(r=>{const m=r.metadata||{};return {id:r.id,topic:r.topic||"Unmapped",skill:r.skill||"Unmapped",tier:(m.tier==="Foundation"?"Foundation":"Higher"),grade:Number(m.grade)||0,marks:r.marks||0,calculator:m.calculator===true,series:str(m.series,"Unspecified"),ao:r.assessment_objective||str(m.ao,"Unmapped"),challenge:str(m.challenge,"Standard"),prompt:str(m.prompt,"Question image not yet uploaded — metadata only"),answer:str(m.answer,"Mark scheme pending"),tags:Array.isArray(m.tags)?m.tags.filter((t):t is string=>typeof t==="string"):[],sourceId:str(m.id),meanPct:typeof m.mean_pct==="number"?m.mean_pct:undefined,gradePerformance:Object.fromEntries([4,5,6,7,8,9].map(n=>[n,typeof m["g"+n]==="number"?m["g"+n]:null])) as Record<number,number|null>,imagePending:!r.question_storage_path,questionUrl:r.question_storage_path?signed.get(r.question_storage_path):undefined,markSchemeUrl:r.mark_scheme_storage_path?signed.get(r.mark_scheme_storage_path):undefined,imageCrops:{question:validCrop((m.image_crops as Record<string,unknown>|undefined)?.question),mark:validCrop((m.image_crops as Record<string,unknown>|undefined)?.mark)},cropReview:{question:str((m.crop_review as Record<string,unknown>|undefined)?.question,"unreviewed"),mark:str((m.crop_review as Record<string,unknown>|undefined)?.mark,"unreviewed")}};});
+ const rows=(data||[]) as unknown as Row[];
+ const mapRows=(signed:Map<string,string>):BankQuestion[]=>rows.map(r=>{const m=r.metadata||{};return {
+ id:r.id,topic:r.topic||"Unmapped",skill:r.skill||"Unmapped",tier:(m.tier==="Foundation"?"Foundation":"Higher"),grade:Number(m.grade)||0,marks:r.marks||0,calculator:m.calculator===true,series:str(m.series,"Unspecified"),ao:r.assessment_objective||str(m.ao,"Unmapped"),challenge:str(m.challenge,"Standard"),prompt:str(m.prompt,"Question image not yet uploaded — metadata only"),answer:str(m.answer,"Mark scheme pending"),tags:Array.isArray(m.tags)?m.tags.filter((t):t is string=>typeof t==="string"):[],sourceId:str(m.id),meanPct:typeof m.mean_pct==="number"?m.mean_pct:undefined,gradePerformance:Object.fromEntries([4,5,6,7,8,9].map(n=>[n,typeof m["g"+n]==="number"?m["g"+n]:null])) as Record<number,number|null>,imagePending:!r.question_storage_path,questionUrl:r.question_storage_path?signed.get(r.question_storage_path):undefined,markSchemeUrl:r.mark_scheme_storage_path?signed.get(r.mark_scheme_storage_path):undefined,imageCrops:{question:validCrop((m.image_crops as Record<string,unknown>|undefined)?.question),mark:validCrop((m.image_crops as Record<string,unknown>|undefined)?.mark)},cropReview:{question:str((m.crop_review as Record<string,unknown>|undefined)?.question,"unreviewed"),mark:str((m.crop_review as Record<string,unknown>|undefined)?.mark,"unreviewed")}
+ };});
+ // Render metadata immediately. Image signing must not block the question bank results.
+ const questions=mapRows(new Map());
+ if(onImageUrls&&rows.length){
+  const paths=[...new Set(rows.flatMap(r=>[r.question_storage_path,r.mark_scheme_storage_path].filter((p):p is string=>!!p)))];
+  void (async()=>{
+   const signed=new Map<string,string>();
+   for(let i=0;i<paths.length;i+=100){
+    const {data:urls,error:signError}=await supabase.storage.from("exam-materials-private").createSignedUrls(paths.slice(i,i+100),3600);
+    if(signError){console.warn("Some private image links could not be refreshed",signError.message);continue;}
+    for(const u of urls||[])if(u.signedUrl&&u.path)signed.set(u.path,u.signedUrl);
+   }
+   onImageUrls(mapRows(signed));
+  })().catch(err=>console.warn("Image URLs unavailable; question metadata remains visible",err));
+ }
+ return questions;
 }
