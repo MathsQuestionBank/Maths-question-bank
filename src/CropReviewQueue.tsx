@@ -11,6 +11,7 @@ export default function CropReviewQueue({questions,onUpdate}:{questions:ReviewQu
  const [index,setIndex]=useState(0);
  const [busy,setBusy]=useState(false);
  const [message,setMessage]=useState("");
+ const [showList,setShowList]=useState(true);
  const available=useMemo(()=>questions.filter(q=>kind==="mark"?!!q.markSchemeUrl:!!q.questionUrl),[questions,kind]);
  const list=useMemo(()=>available.filter(q=>(filter==="all"||q.cropReview[kind]===filter)&&(!search||[q.sourceId,q.topic,q.skill,q.series].join(" ").toLowerCase().includes(search.toLowerCase()))),[available,filter,search,kind]);
  const current=list[Math.min(index,Math.max(0,list.length-1))];
@@ -38,10 +39,12 @@ export default function CropReviewQueue({questions,onUpdate}:{questions:ReviewQu
  <label>Find question<input value={search} placeholder="e.g. 2021_3H_Q18" onChange={e=>{setSearch(e.target.value);setIndex(0)}}/></label>
  </div>
  <p role="status">{available.length} images available · {count("approved")} checked · {count("needs-fix")} flagged · {count("unreviewed")} not reviewed</p>
+ <button className="secondary small" onClick={()=>setShowList(x=>!x)}>{showList?"Hide question list":"Show question list"}</button>
+ {showList&&<div style={{maxHeight:230,overflow:"auto",display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:6,margin:"12px 0"}}>{list.map((q,i)=><button key={q.id} className={current?.id===q.id?"primary small":"secondary small"} onClick={()=>{setIndex(i);setMessage("")}}>{q.sourceId||q.id} · {q.cropReview[kind]}</button>)}</div>}
  {!current?<p>No images match these filters.</p>:<div>
  <div className="question-top"><strong>{current.sourceId||current.id} · {current.topic} · {current.skill}</strong><span>{Math.min(index+1,list.length)} / {list.length}</span></div>
- <div style={{maxHeight:650,overflow:"auto",background:"white",border:"1px solid #e0e6eb",margin:"12px 0"}}><CroppedImage src={(kind==="mark"?current.markSchemeUrl:current.questionUrl)!} crop={current.imageCrops[kind]} alt={`${current.sourceId||current.id} ${kind} crop review`}/></div>
- <CropEditor id={current.id} sourceId={current.sourceId} kind={kind} src={(kind==="mark"?current.markSchemeUrl:current.questionUrl)!} initial={current.imageCrops[kind]} onSaved={crop=>onUpdate(current.id,{imageCrops:{...current.imageCrops,[kind]:crop},cropReview:{...current.cropReview,[kind]:"unreviewed"}})}/>
+ <div style={{maxHeight:650,overflow:"auto",background:"white",border:"1px solid #e0e6eb",margin:"12px 0"}}><CroppedImage key={current.id+"-"+kind} src={(kind==="mark"?current.markSchemeUrl:current.questionUrl)!} crop={current.imageCrops[kind]} alt={`${current.sourceId||current.id} ${kind} crop review`}/></div>
+ <CropEditor key={current.id+"-"+kind} id={current.id} sourceId={current.sourceId} kind={kind} src={(kind==="mark"?current.markSchemeUrl:current.questionUrl)!} initial={current.imageCrops[kind]} onSaved={crop=>onUpdate(current.id,{imageCrops:{...current.imageCrops,[kind]:crop},cropReview:{...current.cropReview,[kind]:"unreviewed"}})}/>
  <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:16}}>
  <button className="secondary small" disabled={index===0} onClick={()=>setIndex(i=>Math.max(0,i-1))}>← Previous</button>
  <button className="primary small" disabled={busy} onClick={()=>void update("approved")}>✓ Mark as checked</button>
