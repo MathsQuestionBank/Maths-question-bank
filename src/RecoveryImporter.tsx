@@ -25,9 +25,9 @@ export default function RecoveryImporter({onComplete}:{onComplete:()=>void}){
    const planned:Pending[]=[],warnings:string[]=[];
    const seen=new Set<string>();
    for(const entry of manifest.recovered){
-    if(!entry||typeof entry.id!=="string"||!/^20\\d{2}_[123]H_Q\\d{2}$/.test(entry.id)||seen.has(entry.id)){warnings.push("Invalid or duplicate recovery ID");continue}
+    if(!entry||typeof entry.id!=="string"||!/^20\d{2}_[123]H_Q\d{2}$/.test(entry.id)||seen.has(entry.id)){warnings.push("Invalid or duplicate recovery ID");continue}
     seen.add(entry.id);
-    if(typeof entry.path!=="string"||!/^recovery\\/20\\d{2}\\/[123]H\\/Q\\d{2}\\/mark\\.png$/.test(entry.path)){warnings.push(entry.id+": invalid image path");continue}
+    if(typeof entry.path!=="string"||!/^recovery\/20\d{2}\/[123]H\/Q\d{2}\/mark\.png$/.test(entry.path)){warnings.push(entry.id+": invalid image path");continue}
     const row=lookup.get(entry.id);
     if(!row){warnings.push(entry.id+": not in question bank");continue}
     const meta=row.metadata as Record<string,unknown>;
