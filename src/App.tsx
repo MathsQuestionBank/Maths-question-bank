@@ -28,7 +28,7 @@ const reloadQuestions=async()=>{
  setQuestionError("");setLoadingQuestions(true);setLoadStatus("Loading records…");
  for(let attempt=0;attempt<5;attempt++){
   try{
-   const data=await loadBankQuestions();
+   const data=await loadBankQuestions(withImages=>{if(version===requestVersion.current)setQuestions(withImages)});
    if(version!==requestVersion.current)return;
    if(data.length>0){setQuestions(data);setQuestionError("");setLoadStatus(`${data.length} records loaded`);setLoadingQuestions(false);return;}
    if(attempt===4){setQuestionError("No question records returned from the database. Please check the connection.");setLoadStatus("No visible records");setLoadingQuestions(false);return;}
