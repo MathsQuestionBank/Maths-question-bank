@@ -8,7 +8,7 @@ type Asset={row:RecordRow;kind:"question"|"mark";file:JSZip.JSZipObject;path:str
 const bucket="exam-materials-private";
 const questionName=(row:RecordRow)=>typeof row.metadata.id==="string"?row.metadata.id:"";
 function findAsset(files:Map<string,JSZip.JSZipObject>,name:string,kind:"question"|"mark"){
- const match=/^(20\d{2})_(\dH)_(Q\d{2})$/.exec(name);
+ const match=/^(20\d{2})_(\dH)_(Q\d{2})(?:[a-z][a-z0-9]*)?$/i.exec(name);
  if(!match)return null;
  const [,year,paper,q]=match;
  // V6.2 stores 2020 at the root and 2021 in a year folder.
