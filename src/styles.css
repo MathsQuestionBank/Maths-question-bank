@@ -87,3 +87,6 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
 .paper-question .paper-row>span:nth-child(2){min-width:0}
 .paper-question .paper-row>span:nth-child(2) img{max-width:100%}
 @media print{.builder-choice,.paper-student-fields{visibility:visible}.mark-scheme-item{break-inside:avoid}}
+
+.cover-paper-type{font-size:19px;font-weight:700;color:#30485b;margin:0 0 22px;text-align:center}
+@media print{.cover-paper-type{font-size:18px;color:#111}}
