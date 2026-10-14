@@ -71,3 +71,19 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
 .v62-performance span.target{border:1px solid #efa71a;background:#fff7e7;color:#29313b;font-weight:700}
 .v62-card-actions{gap:5px}
 .v62-card-actions button{padding:8px 9px;border-radius:5px}
+
+/* Builder paper choices and optional student information */
+.builder-choice{border:0;margin:0 0 18px;padding:0;min-width:0}
+.builder-choice legend{font-size:13px;font-weight:700;color:#425365;margin-bottom:9px}
+.builder-choice-options{display:flex;flex-wrap:wrap;gap:6px}
+.builder-choice-options button{padding:8px 10px}
+.paper-student-fields{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;text-align:left}
+.paper-student-fields .name-line{flex:1;min-width:190px;margin-top:40px}
+.paper-inline-fields{border-bottom:1px solid #dce2e6;padding-bottom:25px;margin-bottom:20px}
+.paper-inline-fields .name-line{margin-top:0}
+.mark-scheme-item{break-inside:avoid;padding:16px 0;border-bottom:1px solid #e7eaed}
+.mark-scheme-item strong{display:inline-block;margin-right:10px}
+.mark-scheme-item>span{float:right}
+.paper-question .paper-row>span:nth-child(2){min-width:0}
+.paper-question .paper-row>span:nth-child(2) img{max-width:100%}
+@media print{.builder-choice,.paper-student-fields{visibility:visible}.mark-scheme-item{break-inside:avoid}}
