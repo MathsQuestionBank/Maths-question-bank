@@ -86,7 +86,7 @@ export default function ZipImporter({onComplete}:{onComplete:()=>void}){
     setProgress(`Linking original V6.2 crops ${linked+1}/${assets.length} (total ${total} files): ${questionName(asset.row)} ${asset.kind}`);
     const field=asset.kind==="question"?"question_storage_path":"mark_scheme_storage_path";
     // Double-check before writing in case this image has since been reviewed or imported elsewhere.
-    const {data:current,error:readError}=await supabase.from("questions").select(field).eq("id",asset.row.id).single();
+    const {data:current,error:readError}=await supabase.from("questions").select("question_storage_path,mark_scheme_storage_path").eq("id",asset.row.id).single();
     if(readError)throw readError;
     if(current?.[field]){skipped++;continue;}
     const bytes=await asset.file.async("uint8array");
