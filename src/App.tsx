@@ -1,5 +1,5 @@
 import CropReviewQueue from "./CropReviewQueue";
-import CropEditor, { CroppedImage, type Crop } from "./CropEditor";
+import { CroppedImage, type Crop } from "./CropEditor";
 import ZipImporter from "./ZipImporter";
 import { useEffect, useMemo, useState } from "react";
 import "./styles.css";
