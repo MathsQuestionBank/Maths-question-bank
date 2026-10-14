@@ -55,3 +55,7 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
 @media(max-width:900px){.v62-bank-layout{grid-template-columns:1fr}.v62-basket{position:static;max-height:none}.v62-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.v62-result-card{grid-template-columns:1fr}.v62-card-actions{flex-direction:row}.v62-stats{grid-template-columns:1fr 1fr}.v62-overview-heading{display:block}}
 @media print{.v62-overview,.v62-bank-layout,.v62-modal{display:none!important}}
+
+.v62-performance{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.v62-performance span{font-size:12px;border:1px solid #d9e4ea;border-radius:5px;background:#f2f7fa;color:#25475e;padding:6px 9px;font-weight:600}
+.v62-performance span.target{background:#d8f2e7;border-color:#8ccfb5;color:#14583f}
