@@ -1,3 +1,4 @@
+import Restore2022Parts from "./Restore2022Parts";
 import RecoveryImporter from "./RecoveryImporter";
 import { useState } from "react";
 import JSZip from "jszip";
@@ -123,5 +124,5 @@ export default function ZipImporter({onComplete}:{onComplete:()=>void}){
  {issues.length>0&&<details><summary>Unmatched images ({issues.length})</summary><p>2022 PDFs/crops were not present in V6.2. Multipart entries use their original whole-question PNG and should be reviewed where necessary.</p><div style={{maxHeight:220,overflow:"auto"}}>{issues.slice(0,150).map(x=><div key={x}>{x}</div>)}</div></details>}
  {(assets.length>0||originals.length>0)&&<button className="primary" disabled={busy} onClick={()=>void upload()}>Import all ${assets.length+originals.length} missing links and source files</button>}
  {progress&&<p role="status">{progress}</p>}
- </div><RecoveryImporter onComplete={onComplete}/></>;
+ </div><RecoveryImporter onComplete={onComplete}/><Restore2022Parts onComplete={onComplete}/></>;
 }
