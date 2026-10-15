@@ -78,7 +78,7 @@ const excluded=chosenAll.length-chosen.length;
 const includedIds=new Set(chosenAll.flatMap(group=>group.parts.map(part=>part.id)));
 const removeGroup=(key:string)=>setSelected(current=>current.filter(id=>{
  const q=questions.find(item=>item.id===id);
- return q && ((q.sourceId?.match(/^(20\\d{2}_[123][HF]_Q\\d{2})[a-z][a-z0-9]*$/i)?.[1]||q.id)!==key);
+ return q && ((q.sourceId?.match(/^(20\d{2}_[123][HF]_Q\d{2})[a-z][a-z0-9]*$/i)?.[1]||q.id)!==key);
 }));
 const previewQuestion=questions.find(q=>q.id===previewId);
 const bankPapers=new Set(questions.filter(q=>q.sourceId).map(q=>q.sourceId!.slice(0,7))).size;
@@ -88,12 +88,12 @@ const compactQuestionTitle=(q:Question)=>{const match=q.sourceId?.match(/^(\d{4}
 const total=chosen.reduce((n,g)=>n+g.marks,0);
 const toggle=(id:string)=>setSelected(current=>{
  const question=questions.find(q=>q.id===id);
- const key=question?.sourceId?.match(/^(20\\d{2}_[123][HF]_Q\\d{2})[a-z][a-z0-9]*$/i)?.[1];
+ const key=question?.sourceId?.match(/^(20\d{2}_[123][HF]_Q\d{2})[a-z][a-z0-9]*$/i)?.[1];
  if(includedIds.has(id)||current.includes(id)){
   if(!key)return current.filter(x=>x!==id);
   return current.filter(x=>{
    const q=questions.find(item=>item.id===x);
-   return (q?.sourceId?.match(/^(20\\d{2}_[123][HF]_Q\\d{2})[a-z][a-z0-9]*$/i)?.[1])!==key;
+   return (q?.sourceId?.match(/^(20\d{2}_[123][HF]_Q\d{2})[a-z][a-z0-9]*$/i)?.[1])!==key;
   });
  }
  return [...current,id];
