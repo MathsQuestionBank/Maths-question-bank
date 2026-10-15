@@ -136,3 +136,17 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
 .assessment-order-buttons{display:flex;gap:6px;flex-shrink:0}
 .assessment-order-buttons button{min-width:36px;min-height:34px}
 @media print{.assessment-order-list,.assessment-order-row,.assessment-order-buttons{display:none!important}}
+
+/* Compact V6.2-style sortable assessment list. */
+.assessment-order-list{gap:4px}
+.assessment-order-row{padding:5px 8px;min-height:38px;cursor:grab;background:#fff;transition:background .1s,border-color .1s}
+.assessment-order-row:active{cursor:grabbing}
+.assessment-order-row.is-dragging{opacity:.42}
+.assessment-order-row.drag-over{background:#eaf6f3;border-color:#16856d}
+.assessment-drag-handle{flex:0 0 20px;font-size:20px;color:#657887;line-height:1;user-select:none}
+.assessment-order-title{flex:1;min-width:0;overflow-wrap:anywhere;font-size:13px}
+.assessment-order-marks{color:#526878;white-space:nowrap}
+.assessment-order-position{flex:0 0 auto;display:flex;align-items:center}
+.assessment-order-position select{width:54px;height:32px;padding:3px 5px;margin:0;font-size:12px;border-radius:6px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media print{.assessment-drag-handle,.assessment-order-position{display:none!important}}
