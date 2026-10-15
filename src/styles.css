@@ -90,3 +90,41 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
 
 .cover-paper-type{font-size:19px;font-weight:700;color:#30485b;margin:0 0 22px;text-align:center}
 @media print{.cover-paper-type{font-size:18px;color:#111}}
+
+/* Clean student-facing assessment print.
+   Browser-generated URLs, timestamps and titles are best suppressed by an
+   edge-to-edge @page; keep the readable margins within the printed document. */
+@media print {
+ @page { size: A4 portrait; margin: 0; }
+ html,body,#root { margin: 0 !important; padding: 0 !important; background: #fff !important; }
+ .owner-banner,.header,.header-inner,.site>header,.main>footer,footer,
+ .page-top,.back-link,.print-hide,.filters,.section-heading {
+  display: none !important;
+ }
+ .site,.main,.layout,.results {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: #fff !important;
+ }
+ .paper {
+  box-sizing: border-box;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 15mm !important;
+  border: none !important;
+  box-shadow: none !important;
+  min-height: 0 !important;
+ }
+ .cover {
+  box-sizing: border-box;
+  min-height: 267mm !important;
+  break-after: page;
+  page-break-after: always;
+ }
+ .paper-question,.mark-scheme-item { break-inside: avoid; page-break-inside: avoid; }
+ .paper-question img,.mark-scheme-item img { max-width: 100% !important; height: auto !important; }
+}
