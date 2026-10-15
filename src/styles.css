@@ -128,3 +128,11 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
  .paper-question,.mark-scheme-item { break-inside: avoid; page-break-inside: avoid; }
  .paper-question img,.mark-scheme-item img { max-width: 100% !important; height: auto !important; }
 }
+
+/* Teacher-only assessment question reordering controls. */
+.assessment-order-list{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:8px}
+.assessment-order-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #d8e3ea;border-radius:8px;padding:7px 10px}
+.assessment-order-row>span:first-child{min-width:0;overflow-wrap:anywhere}
+.assessment-order-buttons{display:flex;gap:6px;flex-shrink:0}
+.assessment-order-buttons button{min-width:36px;min-height:34px}
+@media print{.assessment-order-list,.assessment-order-row,.assessment-order-buttons{display:none!important}}
