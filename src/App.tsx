@@ -116,7 +116,8 @@ const removeGroup=(key:string)=>setSelected(current=>current.filter(id=>{
 const moveAssessmentGroup=(from:number,to:number)=>{
  if(to<0||to>=chosenAll.length)return;
  const reordered=[...chosenAll];
- [reordered[from],reordered[to]]=[reordered[to],reordered[from]];
+ const [moved]=reordered.splice(from,1);
+ reordered.splice(to,0,moved);
  // Preserve exactly the saved part selections; moving a multipart question moves it as one unit.
  const selectedByGroup=new Map<string,string[]>();
  for(const group of chosenAll)selectedByGroup.set(group.key,[]);
