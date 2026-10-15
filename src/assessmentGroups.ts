@@ -8,12 +8,11 @@ export type AssessmentGroup = {
  label:string;
 };
 
-/** V6.2: selecting a later lettered part also selects the preceding parts.
- * A parent question's single original PNG is displayed exactly once.
- * Each part contributes its own recorded mark allocation exactly once.
+/** Interim whole-question rule: selecting any lettered part includes every
+ * available part of that original exam question, with the source image once.
+ * Each part's recorded marks contribute exactly once.
  */
 export function buildAssessmentGroups(all:BankQuestion[], selectedIds:string[]):AssessmentGroup[]{
- const selected=new Set(selectedIds);
  const byId=new Map(all.map(q=>[q.id,q]));
  const parents=new Map<string,BankQuestion[]>();
  for(const q of all){
@@ -33,9 +32,8 @@ export function buildAssessmentGroups(all:BankQuestion[], selectedIds:string[]):
   seen.add(key);
   if(!match){output.push({key,question:q,parts:[q],marks:q.marks,label:q.sourceId||q.id});continue}
   const siblings=(parents.get(key)||[]).slice().sort((a,b)=>(a.sourceId||"").localeCompare(b.sourceId||"",undefined,{numeric:true}));
-  const latest=siblings.reduce((max,s,i)=>selected.has(s.id)?Math.max(max,i):max,-1);
-  const parts=siblings.slice(0,latest+1);
-  // The image represents the whole printed question. Mark only the included parts.
+  const parts=siblings;
+  // The source image includes all parts, so assess all parts until individual-part cropping is supported.
   const representative=parts.find(p=>p.questionUrl)||q;
   const marks=parts.reduce((sum,p)=>sum+p.marks,0);
   output.push({key,question:representative,parts,marks,label:`${key} (${parts.map(p=>(p.sourceId||"").slice(key.length)).join(", ")})`});
