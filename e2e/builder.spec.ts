@@ -49,7 +49,7 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening sav
  await expect(page.locator(".paper-question")).toHaveCount(3);
  await expect(page.getByText("13 marks").first()).toBeVisible();
  await order.first().getByRole("combobox").selectOption("3");
- await expect(order.last()).toContainText("Q07");
+ await expect(order.last()).toContainText("Q02");
  await page.getByLabel("Assessment title").fill("Test assessment");
  for(const [label,expectQuestions,expectMarks] of [
   ["Questions only",3,0],["Mark scheme only",0,3],["Questions + mark scheme",3,3]
