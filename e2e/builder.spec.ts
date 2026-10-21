@@ -64,12 +64,22 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening sav
   expect(pdf.length).toBeGreaterThan(900);
   if(label==="Mark scheme only")await expect(page.locator(".cover")).toHaveCount(0);
  }
- await page.getByRole("button",{name:"Save assessment on this device"}).click();
+ await page.getByRole("button",{name:"Save new assessment on this device"}).click();
  await page.getByRole("button",{name:"← Home"}).click();
  await page.getByRole("button",{name:/Saved Worksheets \/ Assessments/}).click();
- await page.getByRole("button",{name:"Open",exact:true}).click();
+ await page.getByLabel("New folder name").fill("Year 11");
+ await page.getByRole("button",{name:"Create folder"}).click();
+ await page.getByRole("button",{name:"Unfiled (1)"}).click();
+ await page.getByRole("button",{name:"Edit",exact:true}).click();
  await expect(page.getByLabel("Assessment title")).toHaveValue("Test assessment");
  await expect(page.getByRole("button",{name:"Questions + mark scheme",exact:true})).toHaveAttribute("aria-pressed","true");
  await expect(page.locator(".paper-question")).toHaveCount(3);
+ await page.getByLabel("Assessment title").fill("Updated assessment");
+ await page.getByRole("button",{name:"Update saved assessment"}).click();
+ await page.getByRole("button",{name:"← Home"}).click();
+ await page.getByRole("button",{name:/Saved Worksheets \/ Assessments/}).click();
+ await expect(page.getByText("Updated assessment")).toHaveCount(1);
+ await page.getByRole("button",{name:"Duplicate"}).click();
+ await expect(page.getByText("Updated assessment (copy)")).toBeVisible();
  expect(errors).toEqual([]);
 });
