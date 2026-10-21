@@ -74,3 +74,15 @@ export function moveAssessmentGroupIds(all:ReadonlyArray<BankQuestion>,selectedI
  }
  return [...reordered.flatMap(g=>selectedByGroup.get(g.key)||[]),...stale];
 }
+
+export type AssessmentExportMode = "questions"|"marks"|"both";
+export type ExportReadiness = {ready:boolean; missingQuestions:string[]; missingMarks:string[]};
+
+/** Block PDF output until every selected question has the required image(s).
+ *  The print page must not quietly substitute incomplete metadata or marking notes.
+ */
+export function checkAssessmentExport(groups:ReadonlyArray<AssessmentGroup>,mode:AssessmentExportMode):ExportReadiness{
+ const missingQuestions=mode==="marks"?[]:groups.filter(g=>!g.question.questionUrl).map(g=>g.label);
+ const missingMarks=mode==="questions"?[]:groups.filter(g=>!g.question.markSchemeUrl).map(g=>g.label);
+ return {ready:groups.length>0&&missingQuestions.length===0&&missingMarks.length===0,missingQuestions,missingMarks};
+}
