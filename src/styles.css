@@ -172,3 +172,14 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
  .mark-scheme:not(.mark-scheme-only){break-before:page}
  .mark-scheme.mark-scheme-only{break-before:auto!important;page-break-before:auto!important}
 }
+
+/* Local worksheet library controls */
+.library-create{display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin:16px 0}
+.library-create label{font-size:13px;font-weight:600;flex:1;min-width:200px}
+.library-create input{display:block;width:100%;margin-top:7px;padding:9px;border:1px solid #cbd7df;border-radius:7px}
+.library-tabs,.library-folder-actions,.library-item-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.library-tabs{margin:15px 0}.library-folder-actions{margin:12px 0}
+.library-move-label{font-size:12px;color:#637486;display:flex;align-items:center;gap:6px}
+.library-move-label select{max-width:160px;padding:7px;border:1px solid #cbd7df;border-radius:6px}
+.library-item-actions .remove{padding:8px}
+@media(max-width:720px){.saved-item{align-items:flex-start;flex-direction:column}.library-item-actions{width:100%}}
