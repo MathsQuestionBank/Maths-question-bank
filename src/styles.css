@@ -157,3 +157,18 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
 @media print{
  .mark-scheme.mark-scheme-only{break-before:auto!important;page-break-before:auto!important;border:0!important;margin:0!important;padding:0!important}
 }
+
+/* V1.1d — print safeguards and readable A4 output. */
+.export-warning{border:1px solid #e6ae65;background:#fff8e9;border-radius:8px;padding:11px;margin:10px 0 14px;font-size:12px;line-height:1.4;color:#78460c}
+.export-warning p{margin:6px 0 0}
+@media print {
+ .export-warning{display:none!important}
+ .paper-question,.mark-scheme-item{max-width:100%;break-inside:avoid-page;page-break-inside:avoid}
+ .paper-row{min-width:0}
+ .paper-row>span:nth-child(2){min-width:0;max-width:100%}
+ .paper-question img,.mark-scheme-item img{display:block;max-width:100%!important;height:auto!important;object-fit:contain}
+ .working-space{height:20mm}
+ .cover{margin:0!important;border:0!important;min-height:267mm!important;break-after:page}
+ .mark-scheme:not(.mark-scheme-only){break-before:page}
+ .mark-scheme.mark-scheme-only{break-before:auto!important;page-break-before:auto!important}
+}
