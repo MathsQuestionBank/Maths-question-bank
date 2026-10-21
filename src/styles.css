@@ -172,3 +172,15 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
  .mark-scheme:not(.mark-scheme-only){break-before:page}
  .mark-scheme.mark-scheme-only{break-before:auto!important;page-break-before:auto!important}
 }
+
+/* My Worksheets V1.2a: locally saved resource organisation. */
+.library-toolbar{display:flex;flex-wrap:wrap;align-items:end;gap:12px;padding:12px 0 20px;border-bottom:1px solid #e6eaed}
+.library-toolbar label{display:grid;gap:6px;color:#425365;font-size:13px;font-weight:650;min-width:190px}
+.library-toolbar input,.library-toolbar select,.library-folder-picker select{max-width:100%;padding:9px 10px;background:white;border:1px solid #cbd7df;border-radius:7px;color:#203442}
+.library-toolbar button{margin-bottom:1px}
+.library-item{flex-wrap:wrap}
+.library-item>div:first-child{min-width:170px}
+.library-folder-picker{display:grid;gap:5px;color:#607181;font-size:12px}
+.library-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.library-actions .remove{padding:8px}
+@media(max-width:700px){.library-toolbar label{flex:1 1 100%}.library-item>div:first-child,.library-actions{flex:1 1 100%}}
