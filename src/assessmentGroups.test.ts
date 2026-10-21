@@ -1,0 +1,69 @@
+import { describe, expect, it } from "vitest";
+import { buildAssessmentGroups, calculateAssessmentMarks, getAssessmentGroupKey, moveAssessmentGroupIds, removeAssessmentGroupIds } from "./assessmentGroups";
+import type { BankQuestion } from "./questionData";
+
+const make=(id:string,sourceId:string,marks:number,image=false):BankQuestion=>({
+ id,sourceId,marks,questionUrl:image?"signed-question-url":undefined,markSchemeUrl:image?"signed-mark-url":undefined,
+ topic:"Algebra",skill:"Substitution",tier:"Higher",grade:6,calculator:false,series:"November 2022",ao:"AO1",challenge:"Standard",
+ prompt:"Question",answer:"Mark scheme",tags:[],gradePerformance:{4:null,5:null,6:null,7:null,8:null,9:null},
+ imageCrops:{question:{top:0,right:0,bottom:0,left:0},mark:{top:0,right:0,bottom:0,left:0}},cropReview:{question:"unreviewed",mark:"unreviewed"}
+});
+const a=make("a","2022_1H_Q02a",2,true);
+const b=make("b","2022_1H_Q02b",2,true);
+const c=make("c","2021_2H_Q11",6,true);
+const d=make("d","2020_3H_Q07",3,true);
+const all=[a,b,c,d];
+
+describe("V6.2 whole-question grouping",()=>{
+ it("selecting part a brings all sibling parts once and sums their marks",()=>{
+  const groups=buildAssessmentGroups(all,["a"]);
+  expect(groups).toHaveLength(1);
+  expect(groups[0].parts.map(q=>q.sourceId)).toEqual(["2022_1H_Q02a","2022_1H_Q02b"]);
+  expect(groups[0].marks).toBe(4);
+ });
+ it("selecting part b and then part a never duplicates the question or marks",()=>{
+  const groups=buildAssessmentGroups(all,["b","a","b"]);
+  expect(groups).toHaveLength(1);
+  expect(calculateAssessmentMarks(groups)).toBe(4);
+ });
+ it("uses the whole question image as one group, not one image per part",()=>{
+  const groups=buildAssessmentGroups(all,["a","b"]);
+  expect(groups).toHaveLength(1);
+  expect(groups[0].question.questionUrl).toBe("signed-question-url");
+ });
+ it("keeps question groups in selection order and totals all distinct marks",()=>{
+  const groups=buildAssessmentGroups(all,["d","b","c"]);
+  expect(groups.map(g=>g.key)).toEqual(["d","2022_1H_Q02","c"]);
+  expect(calculateAssessmentMarks(groups)).toBe(13);
+ });
+ it("groups use the full exam paper reference, avoiding collisions across papers",()=>{
+  const other=make("e","2022_2H_Q02a",5,true);
+  expect(buildAssessmentGroups([...all,other],["a","e"])).toHaveLength(2);
+ });
+});
+
+describe("assessment ordering and removal",()=>{
+ it("moves a whole multipart group rather than swapping two distant questions",()=>{
+  const order=moveAssessmentGroupIds(all,["a","c","d"],0,2);
+  expect(buildAssessmentGroups(all,order).map(g=>g.key)).toEqual(["c","d","2022_1H_Q02"]);
+ });
+ it("moving the second group to the first preserves the originally selected part ID",()=>{
+  const order=moveAssessmentGroupIds(all,["d","b","c"],1,0);
+  expect(order).toEqual(["b","d","c"]);
+  expect(calculateAssessmentMarks(buildAssessmentGroups(all,order))).toBe(13);
+ });
+ it("out-of-range moves do not alter selected IDs",()=>{
+  expect(moveAssessmentGroupIds(all,["a","c","d"],0,100)).toEqual(["a","c","d"]);
+ });
+ it("removes the entire multipart question even when both parts are selected",()=>{
+  expect(removeAssessmentGroupIds(all,["a","b","c"],getAssessmentGroupKey(a))).toEqual(["c"]);
+ });
+ it("keeps stale saved IDs rather than silently deleting them",()=>{
+  expect(moveAssessmentGroupIds(all,["unknown","a","c"],0,1)).toContain("unknown");
+ });
+ it("never changes the total when only the ordering changes",()=>{
+  const original=["a","c","d"];
+  const moved=moveAssessmentGroupIds(all,original,2,0);
+  expect(calculateAssessmentMarks(buildAssessmentGroups(all,moved))).toBe(calculateAssessmentMarks(buildAssessmentGroups(all,original)));
+ });
+});
