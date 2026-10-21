@@ -10,7 +10,7 @@ export type AssessmentGroup = {
 
 /** Parent IDs are shared by each lettered part of the same complete exam question. */
 export function getAssessmentGroupKey(q:Pick<BankQuestion,"id"|"sourceId">):string {
- return q.sourceId?.match(/^(20\\d{2}_[123][HF]_Q\\d{2})([a-z][a-z0-9]*)$/i)?.[1]||q.id;
+ return q.sourceId?.match(/^(20\d{2}_[123][HF]_Q\d{2})([a-z][a-z0-9]*)$/i)?.[1]||q.id;
 }
 
 /** Selecting any lettered part includes the complete original question exactly once. */
@@ -18,7 +18,7 @@ export function buildAssessmentGroups(all:BankQuestion[], selectedIds:string[]):
  const byId=new Map(all.map(q=>[q.id,q]));
  const parents=new Map<string,BankQuestion[]>();
  for(const q of all){
-  const match=q.sourceId?.match(/^(20\\d{2}_[123][HF]_Q\\d{2})([a-z][a-z0-9]*)$/i);
+  const match=q.sourceId?.match(/^(20\d{2}_[123][HF]_Q\d{2})([a-z][a-z0-9]*)$/i);
   if(!match)continue;
   const key=match[1];
   const entries=parents.get(key)||[];
@@ -28,7 +28,7 @@ export function buildAssessmentGroups(all:BankQuestion[], selectedIds:string[]):
  const seen=new Set<string>();
  for(const id of selectedIds){
   const q=byId.get(id);if(!q)continue;
-  const match=q.sourceId?.match(/^(20\\d{2}_[123][HF]_Q\\d{2})([a-z][a-z0-9]*)$/i);
+  const match=q.sourceId?.match(/^(20\d{2}_[123][HF]_Q\d{2})([a-z][a-z0-9]*)$/i);
   const key=getAssessmentGroupKey(q);
   if(seen.has(key))continue;
   seen.add(key);
