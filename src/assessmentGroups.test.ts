@@ -52,6 +52,13 @@ describe("assessment ordering and removal",()=>{
   expect(order).toEqual(["b","d","c"]);
   expect(calculateAssessmentMarks(buildAssessmentGroups(all,order))).toBe(13);
  });
+ it("direct position change shifts intervening groups and preserves all selected multipart parts",()=>{
+  const selected=["a","b","c","d"];
+  const result=moveAssessmentGroupIds(all,selected,0,2);
+  expect(buildAssessmentGroups(all,result).map(g=>g.key)).toEqual(["c","d","2022_1H_Q02"]);
+  expect(result).toEqual(["c","d","a","b"]);
+  expect(calculateAssessmentMarks(buildAssessmentGroups(all,result))).toBe(13);
+ });
  it("out-of-range moves do not alter selected IDs",()=>{
   expect(moveAssessmentGroupIds(all,["a","c","d"],0,100)).toEqual(["a","c","d"]);
  });
