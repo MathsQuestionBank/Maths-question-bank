@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildAssessmentGroups, calculateAssessmentMarks, getAssessmentGroupKey, moveAssessmentGroupIds, removeAssessmentGroupIds } from "./assessmentGroups";
+import { buildAssessmentGroups, calculateAssessmentMarks, checkAssessmentExport, getAssessmentGroupKey, moveAssessmentGroupIds, removeAssessmentGroupIds } from "./assessmentGroups";
 import type { BankQuestion } from "./questionData";
 
 const make=(id:string,sourceId:string,marks:number,image=false):BankQuestion=>({
@@ -72,5 +72,27 @@ describe("assessment ordering and removal",()=>{
   const original=["a","c","d"];
   const moved=moveAssessmentGroupIds(all,original,2,0);
   expect(calculateAssessmentMarks(buildAssessmentGroups(all,moved))).toBe(calculateAssessmentMarks(buildAssessmentGroups(all,original)));
+ });
+});
+
+describe("assessment PDF export readiness",()=>{
+ it("requires question images for a question-only paper",()=>{
+  expect(checkAssessmentExport(buildAssessmentGroups(all,["a","c"]),"questions").ready).toBe(true);
+  const unavailable=make("x","2022_1H_Q30",4);
+  expect(checkAssessmentExport(buildAssessmentGroups([...all,unavailable],["x"]),"questions").missingQuestions).toHaveLength(1);
+ });
+ it("requires mark-scheme images for marks-only export, not question images",()=>{
+  const markOnly={...make("x","2022_1H_Q30",4),markSchemeUrl:"signed-mark-url"};
+  expect(checkAssessmentExport(buildAssessmentGroups([markOnly],["x"]),"marks").ready).toBe(true);
+  expect(checkAssessmentExport(buildAssessmentGroups([markOnly],["x"]),"questions").ready).toBe(false);
+ });
+ it("combined export requires both images for every grouped question",()=>{
+  const partial={...make("x","2022_1H_Q30",4),questionUrl:"signed-question-url"};
+  const assessment=buildAssessmentGroups([...all,partial],["a","x"]);
+  expect(checkAssessmentExport(assessment,"both").ready).toBe(false);
+  expect(checkAssessmentExport(assessment,"both").missingMarks).toEqual(["2022_1H_Q30"]);
+ });
+ it("cannot print an empty assessment in any export mode",()=>{
+  for(const mode of ["questions","marks","both"] as const)expect(checkAssessmentExport([],mode).ready).toBe(false);
  });
 });
