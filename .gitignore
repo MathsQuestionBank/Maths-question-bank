@@ -3,3 +3,15 @@ dist/
 .env
 .env.*
 !.env.example
+
+# Supabase local runtime state and private exports (never commit database data)
+supabase/.temp/
+supabase/.branches/
+supabase/.profiles/
+backups/
+database-exports/
+storage-exports/
+*.dump
+*.backup
+*.pgdump
+*.sql.gz
