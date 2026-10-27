@@ -55,7 +55,7 @@ export default function StagedPaperReview(){
  };
  return <section className="panel" style={{padding:22}}>
  <div className="row" style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap"}}>
- <div><h2>Review Imported Papers</h2><p className="hint">Inspect uploaded source PDFs. Question extraction, image cropping and mapping approval will be added next.</p></div>
+ <div><h2>Review Imported Papers</h2><p className="hint">Inspect archived PDFs and prepare suggested question and mark-scheme crops for approval.</p></div>
  <button className="secondary small" disabled={loading} onClick={()=>void refresh()}>{loading?"Checking…":"Refresh list"}</button>
  </div>
  {message&&<p role="status">{message}</p>}
@@ -64,6 +64,7 @@ export default function StagedPaperReview(){
  <div className="library-actions">
  <button className="secondary small" disabled={!p.question||!!opening} onClick={()=>void open(p.path,"question-paper.pdf")}>View question paper</button>
  <button className="secondary small" disabled={!p.mark||!!opening} onClick={()=>void open(p.path,"mark-scheme.pdf")}>View mark scheme</button><button className="primary small" disabled={!p.question||!p.mark} onClick={()=>setSelectedPath(current=>current===p.path?"":p.path)}>{selectedPath===p.path?"Close review":"Extract & review"}</button>
+ </div>
  </div>
  {selectedPath===p.path&&<PaperExtractionReview source={{path:p.path,board:p.board,qualification:p.qualification,series:p.series,code:p.code}}/>}</div>)}
  </section>;
