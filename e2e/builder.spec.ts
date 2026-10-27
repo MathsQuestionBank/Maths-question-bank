@@ -66,8 +66,8 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening sav
  }
  await page.getByRole("button",{name:"Save assessment on this device"}).click();
  await page.getByRole("button",{name:"← Home"}).click();
- await page.getByRole("button",{name:/Saved Worksheets \/ Assessments/}).click();
- await page.getByRole("button",{name:"Open / Edit browser copy",exact:true}).click();
+ await page.getByRole("button",{name:/My Assessments/}).click();
+ await page.getByRole("button",{name:"Open browser version",exact:true}).click();
  await expect(page.getByLabel("Assessment title")).toHaveValue("Test assessment");
  await expect(page.getByRole("button",{name:"Questions + mark scheme",exact:true})).toHaveAttribute("aria-pressed","true");
  await expect(page.locator(".paper-question")).toHaveCount(3);
