@@ -32,11 +32,13 @@ export default function PaperExtractionReview({source,onPublished}:{source:Stage
  const [mappingFile,setMappingFile]=useState("");
  const [reviewSaved,setReviewSaved]=useState(false);
  const [publishedPaperId,setPublishedPaperId]=useState("");
+ const [publishProgress,setPublishProgress]=useState("");
  const [markSchemeStartPage,setMarkSchemeStartPage]=useState<number|null>(null);
  const [autoSchemeStartPage,setAutoSchemeStartPage]=useState<number|null>(null);
  const extracted=useRef<{matches:MappingRow[];questionLines:TextLine[];markLines:TextLine[]}|null>(null);
  const selectedDraft=drafts[selected];
  const update=(fn:(d:QuestionDraft)=>QuestionDraft)=>{
+  if(busy||publishedPaperId)return;
   setReviewSaved(false);
   setDrafts(current=>current.map((d,i)=>i===selected?fn({...d,approved:false}):d));
  };
@@ -45,6 +47,7 @@ export default function PaperExtractionReview({source,onPublished}:{source:Stage
   update(d=>({...d,[kind]:{...d[kind],[key]:value},[kind==="question"?"questionManuallyAdjusted":"markManuallyAdjusted"]:true}));
  };
  const recalculateSchemeCrops=()=>{
+  if(busy||publishedPaperId)return;
   if(!extracted.current||!schemePdf||markSchemeStartPage===null||!Number.isInteger(markSchemeStartPage)||markSchemeStartPage<1||markSchemeStartPage>schemePdf.numPages)return;
   const {matches,questionLines,markLines}=extracted.current;
   setReviewSaved(false);
@@ -59,7 +62,7 @@ export default function PaperExtractionReview({source,onPublished}:{source:Stage
   setStatus("Mark-scheme proposals recalculated from PDF page "+markSchemeStartPage+". Check each crop and approve it before publishing.");
  };
  const process=async()=>{
-  setReviewSaved(false);setPublishedPaperId("");
+  setReviewSaved(false);setPublishedPaperId("");setPublishProgress("");
   setBusy(true);setStatus("Downloading private PDFs…");setQuestionPdf(null);setSchemePdf(null);setDrafts([]);setSelected(0);setAutoSchemeStartPage(null);setMarkSchemeStartPage(null);extracted.current=null;
   try{
    const {data:{user}}=await supabase.auth.getUser();
@@ -161,19 +164,20 @@ export default function PaperExtractionReview({source,onPublished}:{source:Stage
   if(!window.confirm("Publish "+source.board+" "+source.series.replace(/-/g," ")+" "+source.code+
     " to the private Question Bank?\\n\\n"+summary.questions+" complete questions, "+summary.parts+" mapped parts, "+
     summary.marks+" marks.\\n\\nThis creates searchable records and cannot be undone here. The original review will be kept."))return;
-  setBusy(true);
+  setBusy(true);setPublishProgress("Preparing publication…");
   try{
-   const paperId=await publishReviewedPaper({source,drafts,questionPdf,schemePdf,mappingFile,progress:setStatus});
+   const paperId=await publishReviewedPaper({source,drafts,questionPdf,schemePdf,mappingFile,progress:message=>{setStatus(message);setPublishProgress(message)}});
    setPublishedPaperId(paperId);
+   setPublishProgress("Publication complete.");
    setStatus("Published successfully: "+summary.questions+" complete questions / "+summary.parts+
      " mapped parts / "+summary.marks+" marks. Open the Question Bank to see the Foundation questions.");
    onPublished?.();
-  }catch(error){setStatus(error instanceof Error?error.message:"Publishing failed; no database records were changed.");}
+  }catch(error){const message=error instanceof Error?error.message:"Publishing failed; no database records were changed.";setStatus(message);setPublishProgress(message)}
   finally{setBusy(false)}
  };
  const select=(i:number)=>setSelected(i);
  const approveAndNext=()=>{
-  if(!selectedDraft||!questionPdf||!schemePdf||
+  if(busy||publishedPaperId||!selectedDraft||!questionPdf||!schemePdf||
      !isReviewable(selectedDraft,questionPdf.numPages,schemePdf.numPages))return;
   setReviewSaved(false);
   setDrafts(current=>current.map((d,i)=>i===selected?{...d,approved:true}:d));
@@ -181,6 +185,7 @@ export default function PaperExtractionReview({source,onPublished}:{source:Stage
   else setStatus("Final question checked. Save review progress to your account when ready.");
  };
  const revokeApproval=()=>{
+  if(busy||publishedPaperId)return;
   setReviewSaved(false);
   setDrafts(current=>current.map((d,i)=>i===selected?{...d,approved:false}:d));
  };
@@ -234,7 +239,8 @@ export default function PaperExtractionReview({source,onPublished}:{source:Stage
  <p className="hint">Publishes approved question and mark-scheme images to your private, account-protected question bank. This does not grant permission to distribute copyrighted papers publicly.</p>
  <p>{drafts.filter(d=>d.approved).length}/{drafts.length} questions approved · {drafts.flatMap(d=>d.parts).length} parts · {totalMarks(drafts)} marks</p>
  {publishedPaperId?<p role="status"><strong>Paper published successfully.</strong> You can now open the Enhanced Skills Mapped Question Bank.</p>:
- <><button className="primary" disabled={busy||!reviewSaved||drafts.some(d=>!d.approved)||totalMarks(drafts)!==80} onClick={()=>void publish()}>Publish Approved Paper</button>
+ <><button className="primary" disabled={busy||!reviewSaved||drafts.some(d=>!d.approved)||totalMarks(drafts)!==80} onClick={()=>void publish()}>{busy?"Publishing reviewed images…":"Publish Approved Paper"}</button>
+ {publishProgress&&<p role="status">{publishProgress}</p>}
  {!reviewSaved&&<p className="hint">Save review progress to account before publishing.</p>}
  {drafts.some(d=>!d.approved)&&<p className="hint">All complete questions must be approved.</p>}</>}
  </section>
