@@ -1,5 +1,5 @@
 import { describe,it,expect } from "vitest";
-import { normaliseAssessments,replaceAssessment,removeAssessment,renameAssessment,moveAssessmentToFolder } from "./worksheetLibrary";
+import { normaliseAssessments,replaceAssessment,removeAssessment,renameAssessment,moveAssessmentToFolder,makeWorksheetBackup } from "./worksheetLibrary";
 const legacy={name:"Year 10 Assessment",ids:["q1","q2"],minutes:45,answers:true,cover:true};
 describe("saved worksheet library",()=>{
  it("migrates old browser drafts without losing question selection, settings or order",()=>{
@@ -26,6 +26,12 @@ describe("saved worksheet library",()=>{
  it("deleting a resource retains other saved assessments",()=>{
   const original=normaliseAssessments([legacy,{...legacy,name:"Other"}]);
   expect(removeAssessment(original,"legacy-0").map(x=>x.name)).toEqual(["Other"]);
+ });
+ it("backup preserves folders, assessment IDs, settings and question order",()=>{
+  const first=normaliseAssessments([legacy])[0];
+  const backup=makeWorksheetBackup([{...first,folder:"Year 10",exportMode:"both"}],["Year 10"],"2026-10-27T00:00:00.000Z");
+  expect(backup).toMatchObject({format:"maths-question-bank-worksheets",version:1,exportedAt:"2026-10-27T00:00:00.000Z",folders:["Year 10"]});
+  expect(backup.assessments[0]).toMatchObject({id:"legacy-0",folder:"Year 10",ids:["q1","q2"],exportMode:"both"});
  });
  it("ignores damaged entries rather than crashing the library",()=>{
   expect(normaliseAssessments([null,{},legacy])).toHaveLength(1);

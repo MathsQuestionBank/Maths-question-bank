@@ -32,3 +32,8 @@ export function moveAssessmentToFolder(saved:SavedAssessment[],id:string,folder:
 export function renameAssessment(saved:SavedAssessment[],id:string,name:string):SavedAssessment[]{
  return saved.map(a=>a.id===id?{...a,name:name.trim()||a.name}:a);
 }
+
+export type WorksheetBackup={format:"maths-question-bank-worksheets";version:1;exportedAt:string;assessments:SavedAssessment[];folders:string[]};
+export function makeWorksheetBackup(assessments:SavedAssessment[],folders:string[],exportedAt:string):WorksheetBackup{
+ return {format:"maths-question-bank-worksheets",version:1,exportedAt,assessments:normaliseAssessments(assessments),folders:[...folders]};
+}
