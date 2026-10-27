@@ -12,13 +12,15 @@ async function workbookFixture(){
  const zip=new JSZip();
  const headers=["Question ID","Tier","Exam board","Series","Paper","Question","Primary strand","All strands","Searchable skills","Review recommendation","Maximum marks","Assessment objective","Specification refs","Grade 1 success percent","Grade 2 success percent","Grade 3 success percent","Grade 4 success percent","Grade 5 success percent"];
  const values=["EDX-F-NOVEMBER2022-1F-Q01","Foundation","Edexcel","November 2022","1F","Q01","Number","Number; Ratio","Addition","Mapped","2","1","N2","66","77","83","89","94"];
+ const nextValues=values.map((v,i)=>i===0?"EDX-F-NOVEMBER2022-1F-Q02":i===5?"Q02":v);
  const cell=(text:string,index:number,row:number)=>{
   const col=String.fromCharCode(65+index);
   return '<c r="'+col+row+'" t="inlineStr"><is><t>'+text.replace(/&/g,"&amp;").replace(/</g,"&lt;")+'</t></is></c>';
  };
  const sheet='<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>'+
   '<row r="1">'+headers.map((s,i)=>cell(s,i,1)).join("")+'</row>'+
-  '<row r="2">'+values.map((s,i)=>cell(s,i,2)).join("")+'</row></sheetData></worksheet>';
+  '<row r="2">'+values.map((s,i)=>cell(s,i,2)).join("")+'</row>'+
+  '<row r="3">'+nextValues.map((s,i)=>cell(s,i,3)).join("")+'</row></sheetData></worksheet>';
  zip.file("xl/workbook.xml",'<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Foundation Enhanced Mapping" sheetId="1" r:id="rId1"/></sheets></workbook>');
  zip.file("xl/_rels/workbook.xml.rels",'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>');
  zip.file("xl/worksheets/sheet1.xml",sheet);
@@ -27,7 +29,7 @@ async function workbookFixture(){
 test("extracts question paper and mark scheme in the same review without invalid page request",async({page},testInfo)=>{
  test.skip(testInfo.project.name!=="chromium","Real PDF test runs once on desktop Chromium");
  test.setTimeout(90000);
- await page.setContent("<html><body><p style='margin:80px;font-size:24px'>1 Work out 3 + 4.</p></body></html>");
+ await page.setContent("<html><body><p style='margin:80px;font-size:24px'>1 Work out 3 + 4.</p><p style='margin:80px;font-size:24px'>2 Work out 5 + 6.</p></body></html>");
  const questionPdf=await page.pdf({format:"A4"});
  const intro=(text:string)=>'<section style="break-after:page;page-break-after:always;padding:75px;font-size:18px">'+text+'</section>';
  await page.setContent('<html><body>'+[
@@ -36,7 +38,7 @@ test("extracts question paper and mark scheme in the same review without invalid
   intro("General marking guidance: 1 All candidates must receive the same treatment. 2 All marks are designed to be awarded."),
   intro("7 Ignoring subsequent work; 8 Probability; 9 Linear equations"),
   intro("Guidance on the use of abbreviations"),
-  '<section style="padding:75px;font-size:18px"><p>Paper: 1MA1/1F</p><p>Question Answer Mark Mark scheme Additional guidance</p><p>1 7 B1 for 7</p></section>'
+  '<section style="padding:75px;font-size:18px"><p>Paper: 1MA1/1F</p><p>Question Answer Mark Mark scheme Additional guidance</p><p>1 7 B1 for 7</p><p>2 11 B1 for 11</p></section>'
  ].join("")+'</body></html>');
  const schemePdf=await page.pdf({format:"A4"});
  const mapping=await workbookFixture();
@@ -75,7 +77,7 @@ test("extracts question paper and mark scheme in the same review without invalid
  await expect(page.getByText("Edexcel · November-2022 · 1F")).toBeVisible();
  await page.getByRole("button",{name:"Extract & review"}).click();
  await page.getByRole("button",{name:"Prepare question review"}).click();
- await expect(page.getByRole("status").last()).toContainText("Prepared 1 complete questions from 1 mapped parts",{timeout:18000});
+ await expect(page.getByRole("status").last()).toContainText("Prepared 2 complete questions from 2 mapped parts",{timeout:18000});
  await expect(page.getByRole("heading",{name:/Q1 · 1 part/})).toBeVisible();
  await expect(page.getByLabel("First marking-table page")).toHaveValue("6");
  await expect(page.getByLabel("mark page")).toHaveValue("6");
@@ -83,4 +85,16 @@ test("extracts question paper and mark scheme in the same review without invalid
  await expect(page.getByLabel("Question image")).toBeVisible();
  await expect(page.getByLabel("Mark-scheme image")).toBeVisible();
  await expect(page.getByText("Invalid page request.",{exact:true})).toHaveCount(0);
+ await expect(page.getByRole("checkbox")).toHaveCount(0);
+ await page.getByRole("button",{name:"Approve Q1 & Next"}).click();
+ await expect(page.getByRole("heading",{name:/Q2 · 1 part/})).toBeVisible();
+ await expect(page.getByText("1/2")).toBeVisible();
+ await page.getByRole("button",{name:"Approve Q2"}).click();
+ await expect(page.getByText("2/2")).toBeVisible();
+ await page.getByRole("button",{name:/Q1$/}).click();
+ await expect(page.getByRole("button",{name:"Next question"})).toBeVisible();
+ await page.getByRole("button",{name:"Undo approval"}).click();
+ await expect(page.getByText("1/2")).toBeVisible();
+ await page.getByRole("button",{name:"Approve Q1 & Next"}).click();
+ await expect(page.getByRole("heading",{name:/Q2 · 1 part/})).toBeVisible();
 });
