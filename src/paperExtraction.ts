@@ -2,7 +2,7 @@ import type {MappingRow} from "./EnhancedMappingImporter";
 
 export type TextLine={page:number;top:number;left:number;text:string};
 export type Slice={page:number;top:number;bottom:number};
-export type QuestionDraft={number:number;parts:MappingRow[];question:Slice;mark:Slice;questionDetected:boolean;questionInferred:boolean;markDetected:boolean;approved:boolean;notes:string};
+export type QuestionDraft={number:number;parts:MappingRow[];question:Slice;mark:Slice;questionDetected:boolean;questionInferred:boolean;questionManuallyAdjusted?:boolean;markDetected:boolean;markManuallyAdjusted?:boolean;approved:boolean;notes:string};
 export const questionNumber=(row:Pick<MappingRow,"question"|"id">):number|null=>{
  const match=(row.question||row.id).match(/Q0*(\d{1,2})(?:[a-z]|$)/i);
  return match?Number(match[1]):null;
@@ -51,7 +51,6 @@ const bounded=(x:number)=>Math.max(0,Math.min(1,x));
 export function inferQuestionFromTotalMarker(
   number:number,
   lines:TextLine[],
-  anchors:Map<number,TextLine>,
   next:TextLine|undefined
 ):Slice|null{
  const totalPattern=new RegExp(`\\btotal\\s+for\\s+question\\s+0*${number}\\b`,"i");
@@ -91,7 +90,7 @@ export function makeReviewDrafts(rows:MappingRow[],questionLines:TextLine[],mark
   const nextQ=nums.slice(index+1).map(n=>questionAnchors.get(n)).find(Boolean);
   const previousQ=[...nums.slice(0,index)].reverse().map(n=>questionAnchors.get(n)).find(Boolean);
   const nextM=nums.slice(index+1).map(n=>markAnchors.get(n)).find(Boolean);
-  const inferred=q?null:inferQuestionFromTotalMarker(number,questionLines,questionAnchors,nextQ);
+  const inferred=q?null:inferQuestionFromTotalMarker(number,questionLines,nextQ);
   // Never use the cover page as the default for an undetected question.
   // Keep this estimate unapproved until a teacher inspects or adjusts it.
   const nearbyPage=previousQ&&nextQ?
@@ -111,5 +110,7 @@ export const isReviewable=(d:QuestionDraft,questionPages:number,markPages:number
  d.question.page>=1&&d.question.page<=questionPages&&d.mark.page>=1&&d.mark.page<=markPages&&
  d.question.top>=0&&d.question.bottom<=1&&d.mark.top>=0&&d.mark.bottom<=1&&
  d.question.bottom-d.question.top>=.025&&d.mark.bottom-d.mark.top>=.025&&
+ (d.questionDetected||d.questionInferred||d.questionManuallyAdjusted===true)&&
+ (d.markDetected||d.markManuallyAdjusted===true)&&
  d.parts.length>0&&d.parts.every(x=>x.marks>0&&/^AO[123]$/.test(x.ao)&&x.topic.trim()&&x.id.trim());
 export const totalMarks=(drafts:QuestionDraft[])=>drafts.flatMap(d=>d.parts).reduce((sum,p)=>sum+p.marks,0);
