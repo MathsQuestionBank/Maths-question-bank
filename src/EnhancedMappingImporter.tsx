@@ -79,14 +79,14 @@ export default function EnhancedMappingImporter(){
   if(!file||!audit)return;
   setBusy(true);
   try{
-   if(audit.duplicates.length||audit.issues.length)throw Error("Resolve duplicate IDs and incomplete entries before archiving the mapping.");
+   // Flag duplicates and incomplete mappings for human review; private staging is still allowed.
    const {data:{user},error:authError}=await supabase.auth.getUser();
    const {data:approved,error:ownerError}=await supabase.rpc("is_approved_owner");
    if(authError||!user||ownerError||approved!==true)throw Error("An approved owner session is required.");
    const path="enhanced-mapping-intake/"+user.id+"/"+Date.now()+"-"+file.name.replace(/[^A-Za-z0-9._-]/g,"_");
    const {error}=await supabase.storage.from("exam-materials-private").upload(path,file,{upsert:false,contentType:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
    if(error)throw Error(error.message);
-   setStatus("Spreadsheet archived privately for review. Existing question mappings have not been changed.");
+   setStatus("Spreadsheet archived privately with its audit warnings for review. Existing question mappings have not been changed.");
    setAudit(null);
   }catch(e){setStatus(e instanceof Error?e.message:"Could not archive the mapping.");}
   finally{setBusy(false)}
@@ -98,7 +98,7 @@ export default function EnhancedMappingImporter(){
  <label>Enhanced Skills Mapping (.xlsx)<input aria-label="Enhanced Skills Mapping spreadsheet" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" disabled={busy} onChange={e=>{setFile(e.target.files?.[0]||null);setAudit(null);setStatus("");}}/></label>
  <div className="row" style={{display:"flex",gap:12,flexWrap:"wrap"}}>
  <button className="secondary" disabled={busy||!file} onClick={()=>void inspect()}>Inspect spreadsheet</button>
- <button className="primary" disabled={busy||!audit||audit.duplicates.length>0||audit.issues.length>0} onClick={()=>void archive()}>Archive mapping for review</button>
+ <button className="primary" disabled={busy||!audit} onClick={()=>void archive()}>Archive mapping for review</button>
  </div>
  {audit&&<div style={{marginTop:12}}>
  <p role="status"><strong>{audit.rows.length}</strong> entries · <strong>{audit.duplicates.length}</strong> duplicate IDs · <strong>{audit.reviewCount}</strong> flagged for review · <strong>{audit.issues.length}</strong> incomplete entries</p>
