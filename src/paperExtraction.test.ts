@@ -40,12 +40,54 @@ describe("staged question extraction proposals",()=>{
   const d=makeReviewDrafts([row("Q01",1)],[],guidance)[0];
   expect(d.markDetected).toBe(false);
  });
+ it("recovers missing Q5 from the printed total-for-question line on the page before Q6",()=>{
+  const paper:TextLine[]=[
+   {page:2,top:.46,left:.08,text:"4 Write down a factor of 60"},
+   {page:2,top:.71,left:.12,text:"(Total for Question 4 is 1 mark)"},
+   {page:3,top:.145,left:.51,text:"Simplify 3 × w × 5 × t"},
+   {page:3,top:.33,left:.13,text:"(Total for Question 5 is 1 mark)"},
+   {page:3,top:.42,left:.09,text:"6 Fay is planning a trip to a theme park"},
+   {page:3,top:.91,left:.13,text:"(Total for Question 6 is 4 marks)"}
+  ];
+  const scheme:TextLine[]=[
+   {page:6,top:.08,left:.06,text:"Question Answer Mark"},
+   {page:6,top:.30,left:.09,text:"5 15wt B1"},
+   {page:6,top:.47,left:.09,text:"6 108 B4"}
+  ];
+  const drafts=makeReviewDrafts([row("Q04",1),row("Q05",1),row("Q06",4)],paper,scheme);
+  const q5=drafts.find(d=>d.number===5)!;
+  expect(q5.questionDetected).toBe(false);
+  expect(q5.questionInferred).toBe(true);
+  expect(q5.question.page).toBe(3);
+  expect(q5.question.top).toBeGreaterThan(.09);
+  expect(q5.question.bottom).toBeLessThan(.42);
+  expect(q5.markDetected).toBe(true);
+  expect(isReviewable(q5,24,20)).toBe(true);
+ });
+ it("never defaults to a cover page or permits approving an unlocated question",()=>{
+  const paper:TextLine[]=[
+   {page:2,top:.18,left:.08,text:"4 Write a fraction"},
+   {page:3,top:.41,left:.08,text:"6 Find the amount"}
+  ];
+  const scheme:TextLine[]=[
+   {page:6,top:.08,left:.08,text:"Question Answer Mark"},
+   {page:6,top:.19,left:.08,text:"4 one B1"},
+   {page:6,top:.32,left:.08,text:"5 two B1"},
+   {page:6,top:.50,left:.08,text:"6 three B1"}
+  ];
+  const q5=makeReviewDrafts([row("Q04",1),row("Q05",1),row("Q06",1)],paper,scheme)[1];
+  expect(q5.question.page).toBe(3);
+  expect(q5.questionInferred).toBe(false);
+  expect(isReviewable(q5,24,20)).toBe(false);
+  expect(isReviewable({...q5,questionManuallyAdjusted:true},24,20)).toBe(true);
+ });
  it("ignores footer numbers and requires complete valid crops before approval",()=>{
   const lines:TextLine[]=[{page:1,top:.99,left:.02,text:"7"},{page:2,top:.1,left:.1,text:"7 Test"}];
   expect(findQuestionAnchors(lines,[7]).get(7)?.page).toBe(2);
   const d=makeReviewDrafts([row("Q07",2)],lines,[])[0];
   expect(d.markDetected).toBe(false);
-  expect(isReviewable(d,10,10)).toBe(true);
+  expect(isReviewable(d,10,10)).toBe(false);
+  expect(isReviewable({...d,markManuallyAdjusted:true},10,10)).toBe(true);
   expect(isReviewable({...d,question:{page:30,top:0,bottom:1}},10,10)).toBe(false);
  });
 });
