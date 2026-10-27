@@ -29,7 +29,15 @@ test("extracts question paper and mark scheme in the same review without invalid
  test.setTimeout(90000);
  await page.setContent("<html><body><p style='margin:80px;font-size:24px'>1 Work out 3 + 4.</p></body></html>");
  const questionPdf=await page.pdf({format:"A4"});
- await page.setContent("<html><body><p style='margin:80px;font-size:24px'>1 Accept 7 (2 marks).</p></body></html>");
+ const intro=(text:string)=>'<section style="break-after:page;page-break-after:always;padding:75px;font-size:18px">'+text+'</section>';
+ await page.setContent('<html><body>'+[
+  intro("Mark Scheme (Results) November 2022"),
+  intro("Qualification information"),
+  intro("General marking guidance: 1 All candidates must receive the same treatment. 2 All marks are designed to be awarded."),
+  intro("7 Ignoring subsequent work; 8 Probability; 9 Linear equations"),
+  intro("Guidance on the use of abbreviations"),
+  '<section style="padding:75px;font-size:18px"><p>Paper: 1MA1/1F</p><p>Question Answer Mark Mark scheme Additional guidance</p><p>1 7 B1 for 7</p></section>'
+ ].join("")+'</body></html>');
  const schemePdf=await page.pdf({format:"A4"});
  const mapping=await workbookFixture();
  await page.addInitScript(({user,token})=>{
@@ -69,6 +77,9 @@ test("extracts question paper and mark scheme in the same review without invalid
  await page.getByRole("button",{name:"Prepare question review"}).click();
  await expect(page.getByRole("status").last()).toContainText("Prepared 1 complete questions from 1 mapped parts",{timeout:18000});
  await expect(page.getByRole("heading",{name:/Q1 · 1 part/})).toBeVisible();
+ await expect(page.getByLabel("First marking-table page")).toHaveValue("6");
+ await expect(page.getByLabel("mark page")).toHaveValue("6");
+ await expect(page.getByText(/Marking-table header detected on PDF page 6/)).toBeVisible();
  await expect(page.getByLabel("Question image")).toBeVisible();
  await expect(page.getByLabel("Mark-scheme image")).toBeVisible();
  await expect(page.getByText("Invalid page request.",{exact:true})).toHaveCount(0);
