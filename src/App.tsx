@@ -121,7 +121,7 @@ const [cloudBusy,setCloudBusy]=useState(false);
 const [cloudMessage,setCloudMessage]=useState("");
 const refreshCloud=async()=>{
  setCloudBusy(true);setCloudMessage("");
- try{const items=await getCloudAssessments();setCloudItems(items);setCloudMessage(`Loaded ${items.length} cloud assessments. Browser copies were not changed.`)}
+ try{const items=await getCloudAssessments();setCloudItems(items);setCloudMessage("")}
  catch(e){setCloudMessage(e instanceof Error?e.message:"Could not load cloud assessments.")}
  finally{setCloudBusy(false)}
 };
