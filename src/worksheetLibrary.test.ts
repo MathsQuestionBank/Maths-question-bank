@@ -47,6 +47,18 @@ describe("saved worksheet library",()=>{
   expect(merged.assessments[1].ids).toEqual(["q1","q2"]);
   expect(merged.folders).toEqual(["Original","Imported folder"]);
  });
+ it("skips identical backups and labels changed versions",()=>{
+  const current=normaliseAssessments([legacy]);
+  const same=makeWorksheetBackup(current,[],"2026-10-27");
+  const skipped=mergeWorksheetBackup(current,[],same);
+  expect(skipped.added).toBe(0);expect(skipped.skipped).toBe(1);
+  const changed=makeWorksheetBackup([{...current[0],minutes:60}],[],"2026-10-27");
+  const restored=mergeWorksheetBackup(current,[],changed);
+  expect(restored.assessments[1].name).toBe("Year 10 Assessment (Restored)");
+  expect(restored.assessments[0].minutes).toBe(45);
+  const twice=mergeWorksheetBackup(restored.assessments,[],makeWorksheetBackup([{...current[0],minutes:75}],[],"2026-10-27"));
+  expect(twice.assessments[2].name).toBe("Year 10 Assessment (Restored 2)");
+ });
  it("ignores damaged entries rather than crashing the library",()=>{
   expect(normaliseAssessments([null,{},legacy])).toHaveLength(1);
  });

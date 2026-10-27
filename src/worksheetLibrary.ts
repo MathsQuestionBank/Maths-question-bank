@@ -47,20 +47,32 @@ export function parseWorksheetBackup(input:unknown):WorksheetBackup{
  if(!b.folders.every(x=>typeof x==="string"&&x.trim().length>0))throw new Error("Backup has invalid folders.");
  return {format:"maths-question-bank-worksheets",version:1,exportedAt:typeof b.exportedAt==="string"?b.exportedAt:"",assessments:normaliseAssessments(b.assessments),folders:b.folders};
 }
-export function mergeWorksheetBackup(existing:SavedAssessment[],existingFolders:string[],backup:WorksheetBackup):{assessments:SavedAssessment[];folders:string[];added:number}{
+export function mergeWorksheetBackup(existing:SavedAssessment[],existingFolders:string[],backup:WorksheetBackup):{assessments:SavedAssessment[];folders:string[];added:number;skipped:number}{
  const usedIds=new Set(existing.map(a=>a.id));
- let counter=0;
- const incoming=backup.assessments.map(a=>{
+ const names=new Set(existing.map(a=>a.name.toLowerCase()));
+ const merged=[...existing];
+ let counter=0,skipped=0;
+ const signature=(a:SavedAssessment)=>JSON.stringify({folder:a.folder,ids:a.ids,minutes:a.minutes,nameBox:a.nameBox??true,classBox:a.classBox??false,paperTier:a.paperTier??"Any",paperCalc:a.paperCalc??"Any",cover:a.cover??true,exportMode:a.exportMode??(a.answers?"both":"questions")});
+ for(const a of backup.assessments){
+  // Same name and same content/settings means restoring would add an indistinguishable duplicate.
+  if(merged.some(item=>item.name===a.name&&signature(item)===signature(a))){skipped++;continue;}
+  let name=a.name;
+  if(names.has(name.toLowerCase())){
+   name=`${a.name} (Restored)`;
+   let number=2;
+   while(names.has(name.toLowerCase()))name=`${a.name} (Restored ${number++})`;
+  }
+  names.add(name.toLowerCase());
   let id=a.id;
-  while(usedIds.has(id)){id=`restored-${++counter}-${a.id}`;}
+  while(usedIds.has(id))id=`restored-${++counter}-${a.id}`;
   usedIds.add(id);
-  return {...a,id,ids:[...a.ids]};
- });
+  merged.push({...a,id,name,ids:[...a.ids]});
+ }
  const folders=[...existingFolders];
- for(const folder of [...backup.folders,...incoming.map(a=>a.folder)]){
+ for(const folder of [...backup.folders,...merged.map(a=>a.folder)]){
   const cleaned=folder.trim();
   if(cleaned==="Unfiled"||cleaned==="All"||!cleaned)continue;
   if(!folders.some(x=>x.toLowerCase()===cleaned.toLowerCase()))folders.push(cleaned);
  }
- return {assessments:[...existing,...incoming],folders,added:incoming.length};
+ return {assessments:merged,folders,added:merged.length-existing.length,skipped};
 }
