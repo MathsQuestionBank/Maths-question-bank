@@ -38,6 +38,7 @@ declare
   v_question_path text;
   v_mark_path text;
   v_parts_seen text[] := array[]::text[];
+  v_part_numbers_seen text[] := array[]::text[];
   v_numbers_seen integer[] := array[]::integer[];
   v_part_id text;
   v_part_number text;
@@ -62,7 +63,7 @@ begin
     then raise exception 'A full set of reviewed questions is required'; end if;
   v_prefix := 'published-papers/' || lower(p_board) || '/' ||
     replace(lower(p_series),' ','-') || '/' || lower(p_code) || '/' || auth.uid()::text || '/';
-  if p_review_path not like ('new-paper-intake/%/' || auth.uid()::text || '/extraction-review.json')
+  if p_review_path <> ('new-paper-intake/' || p_board || '/GCSE-Mathematics/' || replace(p_series,' ','-') || '/' || p_code || '/' || auth.uid()::text || '/extraction-review.json')
     or not exists (
       select 1 from storage.objects
       where bucket_id='exam-materials-private' and name=p_review_path
@@ -71,10 +72,10 @@ begin
 
   -- Storage is owned by the same approved user. Check all images before inserting anything.
   for v_item in select value from jsonb_array_elements(p_items) loop
-    if v_item->>'approved' <> 'true' then
+    if coalesce(v_item->>'approved','') <> 'true' then
       raise exception 'All questions must be approved and saved first'; end if;
     v_number := (v_item->>'number')::integer;
-    if v_number < 1 or v_number > 50 or v_number=any(v_numbers_seen) then
+    if v_number is null or v_number < 1 or v_number > 50 or v_number=any(v_numbers_seen) then
       raise exception 'Invalid or repeated complete question number'; end if;
     v_numbers_seen := array_append(v_numbers_seen,v_number);
     v_question_path := v_item->>'question_path';
@@ -98,13 +99,15 @@ begin
       v_part_id := btrim(v_part->>'id');
       if v_part_id is null or v_part_id='' or v_part_number is null
         or v_part_number !~* ('^Q0*'||v_number::text||'([a-z]|[ivx]|$)')
-        or lower(v_part_id)=any(v_parts_seen) then
+        or lower(v_part_id)=any(v_parts_seen)
+        or lower(v_part_number)=any(v_part_numbers_seen) then
         raise exception 'Duplicate or mismatched question part'; end if;
       v_parts_seen := array_append(v_parts_seen,lower(v_part_id));
+      v_part_numbers_seen := array_append(v_part_numbers_seen,lower(v_part_number));
       v_marks := (v_part->>'marks')::integer;
-      if v_marks<1 or v_marks>20
-        or coalesce(v_part->>'topic','')=''
-        or coalesce(v_part->>'skill','')=''
+      if v_marks is null or v_marks<1 or v_marks>20
+        or btrim(coalesce(v_part->>'topic',''))=''
+        or btrim(coalesce(v_part->>'skill',''))=''
         or v_part->>'ao' not in ('AO1','AO2','AO3') then
         raise exception 'Invalid marks, topic, skill, or assessment objective'; end if;
       v_total := v_total+v_marks;
