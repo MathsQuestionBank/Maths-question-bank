@@ -27,13 +27,13 @@ export default function PaperExtractionReview({source}:{source:StagedSource}){
  const [busy,setBusy]=useState(false),[status,setStatus]=useState("");
  const [questionPdf,setQuestionPdf]=useState<PDFDocumentProxy|null>(null),[schemePdf,setSchemePdf]=useState<PDFDocumentProxy|null>(null);
  const [drafts,setDrafts]=useState<QuestionDraft[]>([]),[selected,setSelected]=useState(0);
- const [mappingFile,setMappingFile]=useState(""),[confirmApproval,setConfirmApproval]=useState(false);
+ const [mappingFile,setMappingFile]=useState("");
  const [markSchemeStartPage,setMarkSchemeStartPage]=useState<number|null>(null);
  const [autoSchemeStartPage,setAutoSchemeStartPage]=useState<number|null>(null);
  const extracted=useRef<{matches:MappingRow[];questionLines:TextLine[];markLines:TextLine[]}|null>(null);
  const selectedDraft=drafts[selected];
  const update=(fn:(d:QuestionDraft)=>QuestionDraft)=>{
-  setDrafts(current=>current.map((d,i)=>i===selected?fn({...d,approved:false}):d));setConfirmApproval(false);
+  setDrafts(current=>current.map((d,i)=>i===selected?fn({...d,approved:false}):d));
  };
  const updatePart=(id:string,key:"topic"|"strands"|"skills",value:string)=>update(d=>({...d,parts:d.parts.map(p=>p.id===id?{...p,[key]:value}:p)}));
  const adjust=(kind:"question"|"mark",key:keyof Slice,value:number)=>{
@@ -50,7 +50,6 @@ export default function PaperExtractionReview({source}:{source:StagedSource}){
    if(d.approved&&d.mark.page>=markSchemeStartPage)return d;
    return {...d,mark:fresh.mark,markDetected:fresh.markDetected,approved:false};
   }));
-  setConfirmApproval(false);
   setStatus("Mark-scheme proposals recalculated from PDF page "+markSchemeStartPage+". Check each crop and approve it before publishing.");
  };
  const process=async()=>{
@@ -139,7 +138,17 @@ export default function PaperExtractionReview({source}:{source:StagedSource}){
   }catch(e){setStatus(e instanceof Error?e.message:"Could not save review progress.")}
   finally{setBusy(false)}
  };
- const select=(i:number)=>{setSelected(i);setConfirmApproval(false)};
+ const select=(i:number)=>setSelected(i);
+ const approveAndNext=()=>{
+  if(!selectedDraft||!questionPdf||!schemePdf||
+     !isReviewable(selectedDraft,questionPdf.numPages,schemePdf.numPages))return;
+  setDrafts(current=>current.map((d,i)=>i===selected?{...d,approved:true}:d));
+  if(selected<drafts.length-1)setSelected(selected+1);
+  else setStatus("Final question checked. Save review progress to your account when ready.");
+ };
+ const revokeApproval=()=>{
+  setDrafts(current=>current.map((d,i)=>i===selected?{...d,approved:false}:d));
+ };
  return <section className="panel" style={{marginTop:14,padding:18}}>
  <h3>Extract & match — {source.series} {source.code}</h3>
  <p className="hint">This works with complete question groups: multipart answers remain together. Auto-detected PDF crops are proposals only; check the images and scheme before approval.</p>
@@ -175,8 +184,14 @@ export default function PaperExtractionReview({source}:{source:StagedSource}){
  </div>
  <label>Review notes<textarea value={selectedDraft.notes} onChange={e=>update(d=>({...d,notes:e.target.value}))} rows={2} placeholder="Record image, answer or tag corrections needed"/></label>
  <p className="hint">Topic and skill fields can be corrected here; the original Pearson spreadsheet remains unchanged. Recheck both images after any edit.</p><div style={{overflowX:"auto"}}><table><thead><tr><th>Part</th><th>Marks</th><th>AO</th><th>Primary topic</th><th>All topics</th><th>Searchable skills</th><th>Grade 1–5 success (%)</th><th>Mapping review</th></tr></thead><tbody>{selectedDraft.parts.map(x=><tr key={x.id}><td>{x.question}</td><td>{x.marks}</td><td>{x.ao}</td><td><input aria-label={x.question+" primary topic"} value={x.topic} onChange={e=>updatePart(x.id,"topic",e.target.value)}/></td><td><input aria-label={x.question+" all topics"} value={x.strands} onChange={e=>updatePart(x.id,"strands",e.target.value)}/></td><td><input aria-label={x.question+" searchable skills"} value={x.skills} onChange={e=>updatePart(x.id,"skills",e.target.value)}/></td><td>{[1,2,3,4,5].map(g=>x.gradePercent[g]??"–").join(" / ")}</td><td>{x.review}</td></tr>)}</tbody></table></div>
- <label><input type="checkbox" checked={confirmApproval} onChange={e=>setConfirmApproval(e.target.checked)}/> I have checked both crops, all parts, the mark scheme and any suggested topic tags.</label>
- <button className="secondary" disabled={!confirmApproval||!isReviewable(selectedDraft,questionPdf.numPages,schemePdf.numPages)} onClick={()=>{setDrafts(current=>current.map((x,i)=>i===selected?{...x,approved:true}:x));setConfirmApproval(false)}}>Approve Q{selectedDraft.number}</button>
+ <p className="hint">Approve each complete question only after checking the question crop, mark scheme, parts and topic tags. One tap approves it and opens the next question. Any later edit removes its approval.</p>
+ <div className="row" style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap"}}>
+ <button className="primary" disabled={busy||!isReviewable(selectedDraft,questionPdf.numPages,schemePdf.numPages)} onClick={approveAndNext}>
+ {selectedDraft.approved?(selected<drafts.length-1?"Next question":"Q"+selectedDraft.number+" approved"):(selected<drafts.length-1?"Approve Q"+selectedDraft.number+" & Next":"Approve Q"+selectedDraft.number)}
+ </button>
+ {selectedDraft.approved&&<button className="secondary" disabled={busy} onClick={revokeApproval}>Undo approval</button>}
+ <span className="hint">{selectedDraft.approved?"Approved":selectedDraft.questionDetected&&selectedDraft.markDetected?"Ready for your review":"Check and adjust the proposed crops"}</span>
+ </div>
  </div>}
  <div className="row" style={{display:"flex",gap:10,flexWrap:"wrap",marginTop:16}}><button className="primary" disabled={busy} onClick={()=>void save()}>Save review progress to account</button></div>
  <p className="hint">Approvals are saved as private review drafts. They do not publish exam questions. Source files and existing assessments are unchanged.</p>
