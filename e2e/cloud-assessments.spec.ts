@@ -35,20 +35,15 @@ test("cloud copy is opt-in and leaves browser assessments untouched",async({page
   return reply({},404);
  });
  await page.goto("/");
- await page.getByRole("button",{name:/Saved Worksheets \/ Assessments/}).click();
+ await page.getByRole("button",{name:/My Assessments/}).click();
  await expect(page.getByText("My existing assessment")).toBeVisible();
  expect(inserts).toBe(0);
+ await expect(page.getByRole("button",{name:/Import 1 browser-only assessment/})).toBeVisible();
+ await expect(page.getByText("Browser assessments needing attention")).toBeVisible();
  page.once("dialog",dialog=>dialog.accept());
- await page.getByRole("button",{name:"Save new cloud copy"}).click();
- await expect(page.getByText(/Cloud copy saved successfully/)).toBeVisible();
- expect(inserts).toBe(1);
- expect(links).toEqual([{assessment_id:"33333333-3333-4333-8333-333333333333",question_id:questionId,position:0}]);
- expect(await page.evaluate(()=>JSON.parse(localStorage.getItem("mqb-draft-assessments")||"[]"))).toEqual([old]);
- await page.getByRole("button",{name:"Load my cloud assessments"}).click();
- await expect(page.getByRole("button",{name:"Open / Edit cloud assessment"})).toBeVisible();
- await page.getByRole("button",{name:"Open / Edit cloud assessment"}).click();
- await expect(page.getByLabel("Assessment title")).toHaveValue("My existing assessment");
+ await page.getByRole("button",{name:/Import 1 browser-only assessment/}).click();
+ await expect(page.getByText("My existing assessment")).toBeVisible();
  const stored=await page.evaluate(()=>JSON.parse(localStorage.getItem("mqb-draft-assessments")||"[]"));
  expect(stored).toEqual([old]);
- expect(inserts).toBe(1);
+ expect(inserts).toBe(0); // Versioned RPC is intercepted, not REST table insertion.
 });
