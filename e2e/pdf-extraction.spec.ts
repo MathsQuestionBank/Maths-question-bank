@@ -53,7 +53,7 @@ test("extracts question paper and mark scheme in the same review without invalid
    if(prefix==="enhanced-mapping-intake/"+uid)return json([{name:"fixture.xlsx",id:"4",created_at:"2026-10-27T20:30:00Z"}]);
    return json([]);
   }
-  if(path.startsWith("/storage/v1/object/authenticated/")){
+  if(path.startsWith("/storage/v1/object/")&&!path.includes("/list/")){
    if(path.endsWith("/question-paper.pdf"))return route.fulfill({status:200,contentType:"application/pdf",body:questionPdf});
    if(path.endsWith("/mark-scheme.pdf"))return route.fulfill({status:200,contentType:"application/pdf",body:schemePdf});
    if(path.endsWith("/fixture.xlsx"))return route.fulfill({status:200,contentType:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",body:mapping});
