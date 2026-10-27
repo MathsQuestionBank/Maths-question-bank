@@ -111,7 +111,7 @@ export default function PaperExtractionReview({source}:{source:StagedSource}){
        if(!prior)continue;
        // Older unreviewed drafts stored the missing-question default (cover, 5–95%).
        // Prefer the newly detected source location instead of restoring that stale crop.
-       const obsoleteCoverDefault=!prior.approved&&!d.questionDetected&&d.question.page>1&&
+       const obsoleteCoverDefault=!d.questionDetected&&d.question.page>1&&
         prior.question?.page===1&&Math.abs((prior.question.top??0)-.05)<.002&&Math.abs((prior.question.bottom??0)-.95)<.002;
        if(!obsoleteCoverDefault)d.question=safeSlice(prior.question,d.question,qPdf.numPages);
        d.questionManuallyAdjusted=!obsoleteCoverDefault&&(prior.questionManuallyAdjusted===true||
@@ -123,7 +123,7 @@ export default function PaperExtractionReview({source}:{source:StagedSource}){
        d.markManuallyAdjusted=prior.markManuallyAdjusted===true;
        d.notes=typeof prior.notes==="string"?prior.notes.slice(0,1500):"";
        if(Array.isArray(prior.overrides))d.parts=d.parts.map(original=>{const edit=prior.overrides?.find(x=>x.id===original.id);return edit?{...original,topic:String(edit.topic||original.topic).slice(0,100),strands:String(edit.strands||original.strands).slice(0,400),skills:String(edit.skills||original.skills).slice(0,600)}:original});
-       d.approved=prior.approved===true&&!invalidPreTable&&isReviewable(d,qPdf.numPages,mPdf.numPages);
+       d.approved=prior.approved===true&&!invalidPreTable&&!obsoleteCoverDefault&&isReviewable(d,qPdf.numPages,mPdf.numPages);
       }
      }
     }catch{/* Invalid draft must never block extraction. */}
