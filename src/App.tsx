@@ -127,6 +127,29 @@ const refreshCloud=async()=>{
 };
 useEffect(()=>{if(page==="saved")void refreshCloud()},[page]);
 const [libraryFolder,setLibraryFolder]=useState("All");
+const importMissingBrowserAssessments=async()=>{
+ if(cloudBusy)return;
+ setCloudBusy(true);setCloudWriteStatus("Checking account copies…");
+ let added=0;
+ try{
+  let remote=await getCloudAssessments();
+  const plan=reconcileAssessments(saved,remote);
+  if(plan.conflicts.length){setCloudWriteStatus("Resolve different browser and account versions before importing.");return}
+  if(!plan.browserOnly.length){setCloudWriteStatus("All browser assessments are already in your account.");return}
+  if(!window.confirm(`Import ${plan.browserOnly.length} browser-only assessment(s) into your account?`))return;
+  for(const item of plan.browserOnly){
+   remote=await getCloudAssessments();
+   const fresh=reconcileAssessments([item],remote);
+   if(fresh.conflicts.length)throw new Error("A conflicting account copy exists for "+item.name);
+   if(!fresh.browserOnly.length)continue;
+   await saveVersionedAssessment(item);
+   added++;
+  }
+  await refreshCloud();
+  setCloudWriteStatus(`Imported ${added} assessment(s). Browser originals remain unchanged.`);
+ }catch(e){setCloudWriteStatus(`Imported ${added} before stopping. ${e instanceof Error?e.message:"Import failed"}`)}
+ finally{setCloudBusy(false)}
+};
 const restoreBackup=async(file:File|undefined)=>{
  if(!file)return;
  try{
