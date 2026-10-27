@@ -2,7 +2,7 @@ import {useState} from "react";
 import JSZip from "jszip";
 import {supabase} from "./supabase";
 
-type MappingRow={id:string;board:string;tier:string;series:string;paper:string;question:string;topic:string;strands:string;skills:string;review:string;excelRow:number};
+export type MappingRow={id:string;board:string;tier:string;series:string;paper:string;question:string;topic:string;strands:string;skills:string;review:string;excelRow:number;marks:number;ao:string;spec:string;gradePercent:Record<number,number|null>};
 type Audit={rows:MappingRow[];duplicates:string[];reviewCount:number;issues:string[]};
 const MAX_SIZE=8*1024*1024;
 function parseSheet(xml:string,shared:string[]):string[][]{
@@ -56,6 +56,8 @@ export async function inspectFoundationMap(file:File):Promise<Audit>{
  if(missing.length)throw Error("Missing required columns: "+missing.join(", "));
  const col=(row:string[],label:string)=>row[headers.indexOf(label)]?.trim()||"";
  const rows:MappingRow[]=cells.slice(1).filter(row=>col(row,"question id")).map((row,i)=>({
+  marks:Number(col(row,"maximum marks"))||0,ao:"AO"+col(row,"assessment objective").replace(/^AO/i,""),spec:col(row,"specification refs"),
+  gradePercent:Object.fromEntries([1,2,3,4,5].map(g=>{const val=col(row,"grade "+g+" success percent");return [g,val!==""&&Number.isFinite(Number(val))?Number(val):null]})),
   id:col(row,"question id"),board:col(row,"exam board"),tier:col(row,"tier"),series:col(row,"series"),paper:col(row,"paper"),question:col(row,"question"),topic:col(row,"primary strand"),strands:col(row,"all strands"),skills:col(row,"searchable skills"),review:col(row,"review recommendation"),excelRow:Number(col(row,"source excel row"))||i+2
  }));
  const seen=new Set<string>(),duplicates:string[]=[];
