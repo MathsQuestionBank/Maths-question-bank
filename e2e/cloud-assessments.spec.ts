@@ -6,7 +6,7 @@ const user={id:uid,aud:"authenticated",role:"authenticated",email:"owner@example
 const old={id:"browser-original",name:"My existing assessment",ids:[questionId],minutes:45,folder:"Unfiled"};
 const token=()=>{const b64=(x:object)=>Buffer.from(JSON.stringify(x)).toString("base64url");return `${b64({alg:"HS256",typ:"JWT"})}.${b64({exp:4102444800,sub:uid,role:"authenticated",aud:"authenticated"})}.signature`;};
 
-test("cloud copy is opt-in and preserves existing browser assessments",async({page})=>{
+test("cloud copy is opt-in and leaves browser assessments untouched",async({page})=>{
  let inserts=0;
  const cloudRows:Array<{id:string;created_by:string;title:string;configuration:object;created_at:string}>=[];
  const links:Array<{assessment_id:string;question_id:string;position:number}>=[];
@@ -22,7 +22,7 @@ test("cloud copy is opt-in and preserves existing browser assessments",async({pa
   if(path.startsWith("/rest/v1/questions"))return reply([]);
   if(path.startsWith("/rest/v1/assessments")){
    if(request.method()==="POST"){
-    inserts++;const body=request.postDataJSON();const record={...body,id:"33333333-3333-4333-8333-333333333333",created_at:"2026-10-27T15:00:00Z"};
+    inserts++;const body=request.postDataJSON();const record={...body,id:"33333333-3333-4333-8333-333333333333",created_at:"2026-10-27T15:00:00Z",revision:1};
     cloudRows.push(record);return reply(record,201);
    }
    return reply(cloudRows);
@@ -45,11 +45,10 @@ test("cloud copy is opt-in and preserves existing browser assessments",async({pa
  expect(links).toEqual([{assessment_id:"33333333-3333-4333-8333-333333333333",question_id:questionId,position:0}]);
  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem("mqb-draft-assessments")||"[]"))).toEqual([old]);
  await page.getByRole("button",{name:"Load my cloud assessments"}).click();
- await expect(page.getByRole("button",{name:"Copy to this browser (keep existing)"})).toBeVisible();
- await page.getByRole("button",{name:"Copy to this browser (keep existing)"}).click();
+ await expect(page.getByRole("button",{name:"Open / Edit cloud assessment"})).toBeVisible();
+ await page.getByRole("button",{name:"Open / Edit cloud assessment"}).click();
+ await expect(page.getByLabel("Assessment title")).toHaveValue("My existing assessment");
  const stored=await page.evaluate(()=>JSON.parse(localStorage.getItem("mqb-draft-assessments")||"[]"));
- expect(stored).toHaveLength(2);
- expect(stored[0]).toEqual(old);
- expect(stored[1].id).not.toBe(old.id);
+ expect(stored).toEqual([old]);
  expect(inserts).toBe(1);
 });
