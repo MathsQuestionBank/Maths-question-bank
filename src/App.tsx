@@ -154,7 +154,7 @@ const importMissingBrowserAssessments=async()=>{
 };
 const addFolder=async()=>{
  if(cloudBusy)return;setCloudBusy(true);setCloudWriteStatus("");
- try{await createAccountFolder(newFolderName);setNewFolderName("");const names=await loadAccountFolders();setFolders(names);setLibraryFolder(names[names.length-1]||"All")}
+ try{const createdName=newFolderName.trim();await createAccountFolder(createdName);setNewFolderName("");const names=await loadAccountFolders();setFolders(names);setLibraryFolder(createdName)}
  catch(e){setCloudWriteStatus(e instanceof Error?e.message:"Could not create folder")}
  finally{setCloudBusy(false)}
 };
