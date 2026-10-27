@@ -1,3 +1,4 @@
+import PaperExtractionReview from "./PaperExtractionReview";
 import {useEffect,useState} from "react";
 import {supabase} from "./supabase";
 
@@ -14,6 +15,7 @@ export default function StagedPaperReview(){
  const [loading,setLoading]=useState(false);
  const [message,setMessage]=useState("");
  const [opening,setOpening]=useState("");
+ const [selectedPath,setSelectedPath]=useState("");
  const refresh=async()=>{
   setLoading(true);setMessage("");
   try{
@@ -57,11 +59,11 @@ export default function StagedPaperReview(){
  <button className="secondary small" disabled={loading} onClick={()=>void refresh()}>{loading?"Checking…":"Refresh list"}</button>
  </div>
  {message&&<p role="status">{message}</p>}
- {papers.map(p=><div className="saved-item" key={p.path}>
+ {papers.map(p=><div key={p.path}><div className="saved-item">
  <div><strong>{p.board} · {p.series} · {p.code}</strong><p>{p.qualification} · {p.code.endsWith("F")?"Foundation":"Higher"} · {p.question&&p.mark?"Both PDFs archived":"Missing source file"} · Awaiting extraction</p></div>
  <div className="library-actions">
  <button className="secondary small" disabled={!p.question||!!opening} onClick={()=>void open(p.path,"question-paper.pdf")}>View question paper</button>
- <button className="secondary small" disabled={!p.mark||!!opening} onClick={()=>void open(p.path,"mark-scheme.pdf")}>View mark scheme</button>
+ <button className="secondary small" disabled={!p.mark||!!opening} onClick={()=>void open(p.path,"mark-scheme.pdf")}>View mark scheme</button><button className="primary small" disabled={!p.question||!p.mark} onClick={()=>setSelectedPath(current=>current===p.path?"":p.path)}>{selectedPath===p.path?"Close review":"Extract & review"}</button>
  </div>
  </div>)}
  </section>;
