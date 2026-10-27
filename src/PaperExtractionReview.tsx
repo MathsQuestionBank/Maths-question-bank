@@ -47,7 +47,14 @@ export default function PaperExtractionReview({source}:{source:StagedSource}){
     supabase.storage.from(bucket).download(source.path+"/mark-scheme.pdf")
    ]);
    if(qResponse.error||mResponse.error||!qResponse.data||!mResponse.data)throw Error("Question paper or mark scheme cannot be downloaded.");
-   const [qPdf,mPdf]=await Promise.all([loadSourcePdf(qResponse.data),loadSourcePdf(mResponse.data)]);
+   // PDF.js must not process both documents in parallel: older versions shared page mappings.
+   // Read the question paper to completion before starting the mark scheme.
+   setStatus("Reading question-paper pages…");
+   const qPdf=await loadSourcePdf(qResponse.data);
+   const questionLines=await readPdfLines(qPdf,undefined,"Question paper");
+   setStatus("Reading mark-scheme pages…");
+   const mPdf=await loadSourcePdf(mResponse.data);
+   const markLines=await readPdfLines(mPdf,undefined,"Mark scheme");
    setQuestionPdf(qPdf);setSchemePdf(mPdf);
    setStatus("Finding the Enhanced Skills Mapping uploaded to your account…");
    const {data:allFiles,error:fileError}=await supabase.storage.from(bucket).list("enhanced-mapping-intake/"+user.id,{limit:200,sortBy:{column:"created_at",order:"desc"}});
@@ -66,8 +73,7 @@ export default function PaperExtractionReview({source}:{source:StagedSource}){
    for(const row of matches){if(ids.has(cleaned(row.id)))repeated.add(row.id);ids.add(cleaned(row.id))}
    if(repeated.size)throw Error("Mapping contains repeated IDs for this paper: "+[...repeated].join(", ")+". Resolve them before review.");
    setMappingFile(sourceName);
-   setStatus("Reading PDF page text and proposing question and mark-scheme positions…");
-   const [questionLines,markLines]=await Promise.all([readPdfLines(qPdf),readPdfLines(mPdf)]);
+   setStatus("Matching questions and suggesting crop positions…");
    const prepared=makeReviewDrafts(matches,questionLines,markLines);
    const {data:old}=await supabase.storage.from(bucket).download(source.path+"/extraction-review.json");
    if(old){
