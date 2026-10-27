@@ -84,7 +84,7 @@ const [editingCloud,setEditingCloud]=useState<{cloudId:string;revision:number}|n
 const [cloudWriteStatus,setCloudWriteStatus]=useState("");
 const saveToAccount=async(asNew=false)=>{
  if(cloudBusy)return;
- const item:SavedAssessment={id:currentAssessmentId||"assessment-"+Date.now(),folder:saved.find(x=>x.id===currentAssessmentId)?.folder||"Unfiled",name:assessmentTitle.trim()||"Untitled assessment",ids:[...selected],minutes,nameBox:includeName,classBox:includeClass,paperTier:builderTier,paperCalc:builderCalc,cover,answers:exportMode!=="questions",exportMode};
+ const item:SavedAssessment={id:asNew?"assessment-"+Date.now():currentAssessmentId||"assessment-"+Date.now(),folder:saved.find(x=>x.id===currentAssessmentId)?.folder||"Unfiled",name:assessmentTitle.trim()||"Untitled assessment",ids:[...selected],minutes,nameBox:includeName,classBox:includeClass,paperTier:builderTier,paperCalc:builderCalc,cover,answers:exportMode!=="questions",exportMode};
  setCloudBusy(true);setCloudWriteStatus("Saving to your account…");
  try{const result=await saveVersionedAssessment(item,asNew?undefined:editingCloud??undefined);setEditingCloud(result);setCloudWriteStatus("Saved to your account");await refreshCloud()}
  catch(e){setCloudWriteStatus(e instanceof Error?e.message:"Save failed. Your open assessment has not been discarded.")}
@@ -207,15 +207,8 @@ const toggle=(id:string)=>setSelected(current=>{
  }
  return [...current,id];
 });
-const navigate=(p:Page)=>{setPage(p);window.scrollTo(0,0)};
-const save=(asNew=false)=>{
- if(editingCloud){void saveToAccount(asNew);return;}
- const id=(!asNew&&currentAssessmentId)||`assessment-${Date.now()}-${Math.random().toString(36).slice(2,9)}`;
- const previous=saved.find(item=>item.id===id);
- const next:SavedAssessment={id,folder:previous?.folder||"Unfiled",name:assessmentTitle||"Untitled assessment",ids:[...selected],minutes,nameBox:includeName,classBox:includeClass,paperTier:builderTier,paperCalc:builderCalc,cover,answers:exportMode!=="questions",exportMode};
- const updated=replaceAssessment(saved,next);
- try{localStorage.setItem(ASSESSMENTS_KEY,JSON.stringify(updated));setSaved(updated);setCurrentAssessmentId(id)}catch{window.alert("Assessment could not be saved. Please check browser storage and download a backup of existing assessments.")}
-};
+const navigate=(p:Page)=>{if(p==="builder"&&page!=="builder")setEditingCloud(null);setPage(p);window.scrollTo(0,0)};
+const save=(asNew=false)=>{void saveToAccount(asNew)};
 const openSavedAssessment=(item:SavedAssessment)=>{
  setCurrentAssessmentId(item.id);setAssessmentTitle(item.name);setSelected(item.ids);setMinutes(item.minutes);
  setIncludeName(item.nameBox??true);setIncludeClass(item.classBox??false);
