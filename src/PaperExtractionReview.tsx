@@ -102,8 +102,8 @@ export default function PaperExtractionReview({source}:{source:StagedSource}){
     try{
      const previous=JSON.parse(await old.text()) as SavedReview;
      if(previous.version===1&&previous.mappingFile===sourceName&&Array.isArray(previous.items)){
-      if(Number.isInteger(previous.markSchemeStartPage)&&previous.markSchemeStartPage!>=1&&previous.markSchemeStartPage!<=mPdf.numPages){
-       effectiveSchemeStart=previous.markSchemeStartPage!;
+      if(typeof previous.markSchemeStartPage==="number"&&Number.isInteger(previous.markSchemeStartPage)&&previous.markSchemeStartPage>=1&&previous.markSchemeStartPage<=mPdf.numPages){
+       effectiveSchemeStart=previous.markSchemeStartPage;
        setMarkSchemeStartPage(effectiveSchemeStart);
        prepared=makeReviewDrafts(matches,questionLines,markLines,effectiveSchemeStart);
       }
@@ -113,7 +113,7 @@ export default function PaperExtractionReview({source}:{source:StagedSource}){
        d.question=safeSlice(prior.question,d.question,qPdf.numPages);
        // Older drafts could contain a crop from the numbered guidance (eg PDF page 3).
        // Never restore or keep approval for a page before the detected marking table.
-       const invalidPreTable=effectiveSchemeStart!==null&&prior.mark?.page<effectiveSchemeStart;
+       const invalidPreTable=effectiveSchemeStart!==null&&typeof prior.mark?.page==="number"&&prior.mark.page<effectiveSchemeStart;
        if(!invalidPreTable)d.mark=safeSlice(prior.mark,d.mark,mPdf.numPages);
        d.notes=typeof prior.notes==="string"?prior.notes.slice(0,1500):"";
        if(Array.isArray(prior.overrides))d.parts=d.parts.map(original=>{const edit=prior.overrides?.find(x=>x.id===original.id);return edit?{...original,topic:String(edit.topic||original.topic).slice(0,100),strands:String(edit.strands||original.strands).slice(0,400),skills:String(edit.skills||original.skills).slice(0,600)}:original});
