@@ -7,11 +7,14 @@ export async function loadSourcePdf(blob:Blob):Promise<PDFDocumentProxy>{
  if(data.byteLength<5||String.fromCharCode(...data.slice(0,5))!=="%PDF-")throw new Error("Source is not a valid PDF.");
  return await getDocument({data}).promise;
 }
-export async function readPdfLines(pdf:PDFDocumentProxy,onProgress?:(page:number,total:number)=>void):Promise<TextLine[]>{
+export async function readPdfLines(pdf:PDFDocumentProxy,onProgress?:(page:number,total:number)=>void,label="PDF"):Promise<TextLine[]>{
  const lines:TextLine[]=[];
  for(let p=1;p<=pdf.numPages;p++){
-  const page=await pdf.getPage(p),view=page.getViewport({scale:1});
-  const content=await page.getTextContent();
+  let page:Awaited<ReturnType<PDFDocumentProxy["getPage"]>>;
+  try{page=await pdf.getPage(p)}catch(error){throw new Error(`${label}: could not open page ${p}/${pdf.numPages}. ${error instanceof Error?error.message:String(error)}`)}
+  const view=page.getViewport({scale:1});
+  let content:Awaited<ReturnType<typeof page.getTextContent>>;
+  try{content=await page.getTextContent()}catch(error){throw new Error(`${label}: could not extract text from page ${p}/${pdf.numPages}. ${error instanceof Error?error.message:String(error)}`)}
   const raw=content.items.filter((i):i is typeof i & {str:string;transform:number[]}=>"str" in i&&"transform" in i)
    .map(i=>({text:i.str.trim(),left:i.transform[4]/view.width,top:1-i.transform[5]/view.height}));
   const grouped:{top:number;left:number;parts:{x:number;text:string}[]}[]=[];
