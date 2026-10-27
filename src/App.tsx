@@ -265,6 +265,7 @@ const toggle=(id:string)=>setSelected(current=>{
 });
 const navigate=(p:Page)=>{setPage(p);window.scrollTo(0,0)};
 const save=(asNew=false)=>{
+ if(editingCloud){void saveToAccount(asNew);return;}
  const id=(!asNew&&currentAssessmentId)||`assessment-${Date.now()}-${Math.random().toString(36).slice(2,9)}`;
  const previous=saved.find(item=>item.id===id);
  const next:SavedAssessment={id,folder:previous?.folder||"Unfiled",name:assessmentTitle||"Untitled assessment",ids:[...selected],minutes,nameBox:includeName,classBox:includeClass,paperTier:builderTier,paperCalc:builderCalc,cover,answers:exportMode!=="questions",exportMode};
