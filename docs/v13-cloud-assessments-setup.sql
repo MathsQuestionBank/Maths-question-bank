@@ -1,0 +1,26 @@
+-- V1.3 IMPORTANT: NO NEW TABLE OR MIGRATION REQUIRED.
+-- Maths Question Bank project ljisttslifnyrbuybfud already contains:
+-- public.assessments(id,created_by,title,configuration,created_at)
+-- public.assessment_questions(assessment_id,question_id,position)
+-- This file is deliberately non-executable documentation.
+-- Do not create public.saved_assessments (the earlier draft schema was incorrect).
+--
+-- Existing RLS policies:
+-- assessments: authenticated, is_approved_owner() AND created_by = auth.uid()
+-- assessment_questions: authenticated, is_approved_owner() AND
+-- EXISTS (SELECT 1 FROM public.assessments a
+--         WHERE a.id = assessment_id AND a.created_by = auth.uid())
+-- Both policies cover USING and WITH CHECK.
+--
+-- Existing FKs:
+-- assessment_questions.assessment_id -> assessments.id ON DELETE CASCADE
+-- assessment_questions.question_id -> questions.id
+-- assessment_questions primary key (assessment_id,position)
+--
+-- Operational notes:
+-- - Do not modify or disable existing RLS.
+-- - Cloud saving is opt-in and INSERT ONLY; it creates a new cloud copy.
+-- - LocalStorage is neither replaced nor deleted.
+-- - Cloud records cannot currently be edited/deleted from UI.
+-- - Validate signed-in owner and signed-in non-owner access using two real
+--   authenticated test accounts before production release.
