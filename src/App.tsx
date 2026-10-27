@@ -152,7 +152,8 @@ const save=(asNew=false)=>{
  const id=(!asNew&&currentAssessmentId)||`assessment-${Date.now()}-${Math.random().toString(36).slice(2,9)}`;
  const previous=saved.find(item=>item.id===id);
  const next:SavedAssessment={id,folder:previous?.folder||"Unfiled",name:assessmentTitle||"Untitled assessment",ids:[...selected],minutes,nameBox:includeName,classBox:includeClass,paperTier:builderTier,paperCalc:builderCalc,cover,answers:exportMode!=="questions",exportMode};
- updateLibrary(items=>replaceAssessment(items,next));setCurrentAssessmentId(id);
+ const updated=replaceAssessment(saved,next);
+ try{localStorage.setItem(ASSESSMENTS_KEY,JSON.stringify(updated));setSaved(updated);setCurrentAssessmentId(id)}catch{window.alert("Assessment could not be saved. Please check browser storage and download a backup of existing assessments.")}
 };
 const openSavedAssessment=(item:SavedAssessment)=>{
  setCurrentAssessmentId(item.id);setAssessmentTitle(item.name);setSelected(item.ids);setMinutes(item.minutes);
