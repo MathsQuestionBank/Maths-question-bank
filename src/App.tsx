@@ -1,5 +1,5 @@
 import { buildAssessmentGroups, calculateAssessmentMarks, checkAssessmentExport, moveAssessmentGroupIds, removeAssessmentGroupIds } from "./assessmentGroups";
-import { ASSESSMENTS_KEY, FOLDERS_KEY, normaliseAssessments, replaceAssessment, removeAssessment, moveAssessmentToFolder, renameAssessment, makeWorksheetBackup, parseWorksheetBackup, mergeWorksheetBackup, type SavedAssessment } from "./worksheetLibrary";
+import { ASSESSMENTS_KEY, FOLDERS_KEY, normaliseAssessments, replaceAssessment, makeWorksheetBackup, parseWorksheetBackup, mergeWorksheetBackup, type SavedAssessment } from "./worksheetLibrary";
 import CropReviewQueue from "./CropReviewQueue";
 import { CroppedImage, type Crop } from "./CropEditor";
 import ZipImporter from "./ZipImporter";
@@ -7,7 +7,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import "./styles.css";
 import { loadBankQuestions } from "./questionData";
 import { supabase } from "./supabase";
-import { getCloudAssessments, saveCloudAssessment, type CloudAssessment } from "./cloudAssessments";
+import { getCloudAssessments, type CloudAssessment } from "./cloudAssessments";
 import { reconcileAssessments } from "./assessmentReconciliation";
 import { saveVersionedAssessment, deleteVersionedAssessment } from "./versionedAssessments";
 
@@ -17,7 +17,7 @@ const groups=["Algebra","Geometry","Number","Probability","Ratio","Statistics"];
 const tiles:{page:Page;icon:string;name:string;desc:string}[]=[
 {page:"bank",icon:"⌕",name:"Enhanced Skills Mapped Question Bank",desc:"Search GCSE questions by skill, topic, grade and assessment objective."},
 {page:"builder",icon:"▤",name:"Assessment Builder",desc:"Select questions and create printable assessments and mark schemes."},
-{page:"saved",icon:"▣",name:"Saved Worksheets / Assessments",desc:"Return to assessments you have saved on this device."},
+{page:"saved",icon:"▣",name:"My Assessments",desc:"Open assessments saved to your account."},
 {page:"qualifications",icon:"∑",name:"More Qualifications",desc:"Further Mathematics and GCSE Statistics question banks."}
 ];
 export default function App(){
@@ -126,57 +126,7 @@ const refreshCloud=async()=>{
  finally{setCloudBusy(false)}
 };
 useEffect(()=>{if(page==="saved")void refreshCloud()},[page]);
-const uploadCloud=async(item:SavedAssessment)=>{
- if(!window.confirm(`Create a NEW cloud copy of "${item.name}"? This does not change or replace the browser copy or any existing cloud assessment.`))return;
- setCloudBusy(true);setCloudMessage("");
- try{await saveCloudAssessment(item);await refreshCloud();setCloudMessage("Cloud copy saved successfully. Your browser assessment is unchanged.")}
- catch(e){setCloudMessage(e instanceof Error?e.message:"Cloud save failed. Your browser copy is unchanged.")}
- finally{setCloudBusy(false)}
-};
-const importMissingBrowserAssessments=async()=>{
- if(cloudBusy)return;
- setCloudBusy(true);setCloudWriteStatus("Checking your account for existing copies…");
- let added=0;
- try{
-  // Fetch immediately before importing: the browser's earlier cloud snapshot may be stale.
-  let remote=await getCloudAssessments();
-  const plan=reconcileAssessments(saved,remote);
-  if(plan.conflicts.length){
-   setCloudWriteStatus(`Import paused: ${plan.conflicts.length} browser copies have cloud versions with different contents. Review those first; nothing was overwritten.`);
-   return;
-  }
-  if(!plan.browserOnly.length){setCloudWriteStatus("Your browser assessments already have matching cloud copies.");return}
-  if(!window.confirm(`Add ${plan.browserOnly.length} missing browser assessment(s) to your account? Existing cloud records and browser copies will not be replaced.`))return;
-  for(const item of plan.browserOnly){
-   // Check again to reduce accidental duplicate imports after a partial failure.
-   remote=await getCloudAssessments();
-   const fresh=reconcileAssessments([item],remote);
-   if(fresh.conflicts.length)throw new Error('A conflicting cloud copy now exists for "'+item.name+'". Nothing was overwritten.');
-   if(!fresh.browserOnly.length)continue;
-   await saveVersionedAssessment(item);
-   added++;
-   setCloudWriteStatus(`Imported ${added} assessment(s). Checking remaining copies…`);
-  }
-  await refreshCloud();
-  setCloudWriteStatus(`Imported ${added} missing assessment(s); browser originals were preserved.`);
- }catch(e){
-  setCloudWriteStatus(`Imported ${added} assessment(s) before stopping. ${e instanceof Error?e.message:"An error occurred."} Refresh to reconcile before retrying.`);
- }finally{setCloudBusy(false)}
-};
-const restoreCloudCopy=(entry:CloudAssessment)=>{
- const existing=new Set(saved.map(a=>a.id));
- let id=`cloud-import-${entry.cloudId}`,counter=1;
- while(existing.has(id))id=`cloud-import-${entry.cloudId}-${counter++}`;
- const copy={...entry.item,id,name:`${entry.item.name} (Cloud copy)`,ids:[...entry.item.ids]};
- const next=[...saved,copy];
- try{localStorage.setItem(ASSESSMENTS_KEY,JSON.stringify(next));setSaved(next);setCloudMessage("Cloud assessment copied to this browser. Existing assessments were preserved.")}
- catch{setCloudMessage("Browser storage is full. Existing assessments were not changed.")}
-};
-
 const [libraryFolder,setLibraryFolder]=useState("All");
-const [newFolderName,setNewFolderName]=useState("");
-const updateLibrary=(update:(items:SavedAssessment[])=>SavedAssessment[])=>setSaved(old=>{const next=update(old);try{localStorage.setItem(ASSESSMENTS_KEY,JSON.stringify(next));return next}catch{window.alert("Unable to save assessments in this browser. Your previous saved library has not been changed.");return old}});
-const updateFolders=(names:string[])=>{try{localStorage.setItem(FOLDERS_KEY,JSON.stringify(names));setFolders(names)}catch{window.alert("Unable to save folders in this browser. Existing folders have not been changed.")}};
 const restoreBackup=async(file:File|undefined)=>{
  if(!file)return;
  try{
@@ -285,7 +235,7 @@ const reset=()=>{setTier("All");setTopic("All");setSkill("All");setAo("All");set
 const options=(items:string[])=>items.map(x=><option key={x}>{x}</option>);
 return <div className="site"><header className="header"><div className="header-inner"><button className="brand brand-button" onClick={()=>navigate("home")}><span className="logo">∑</span><span>Maths <strong>Question Bank</strong></span></button><span className="header-note">Made for UK mathematics teachers</span></div></header><main className="main">
 {page==="home"?<><section className="hero"><span className="eyebrow">MATHS QUESTION BANK</span><h1>Find questions. Build better assessments.</h1><p>Choose a tool to get started.</p></section><h2 className="dashboard-title">What would you like to do?</h2><div className="dashboard-grid">{tiles.map(t=><button className="dashboard-tile" key={t.page} onClick={()=>navigate(t.page)}><span className="tile-icon">{t.icon}</span><strong>{t.name}</strong><span>{t.desc}</span><span className="tile-arrow">Explore →</span></button>)}</div><div className="notice"><strong>Early preview:</strong> The mapped exam-question metadata is now in your private Supabase database. Import your existing V6.2 ZIP using the owner-only Import Exam Papers tool to add question images and mark schemes securely.</div><section className="owner-info"><h2>Owner tools</h2><div className="dashboard-grid"><button className="dashboard-tile" onClick={()=>navigate("import")}><span className="tile-icon">⇧</span><strong>Import Exam Papers</strong><span>Upload your V6.2 ZIP securely to private storage.</span><span className="tile-arrow">Open →</span></button><button className="dashboard-tile" onClick={()=>navigate("review")}><span className="tile-icon">✓</span><strong>Review image crops</strong><span>Check imported question images and mark schemes.</span><span className="tile-arrow">Open →</span></button><button className="dashboard-tile" onClick={()=>navigate("insights")}><span className="tile-icon">▥</span><strong>Question Bank Insights</strong><span>Review mapping coverage and question bank performance — in development.</span><span className="tile-arrow">Open →</span></button></div></section></>:
-<><div className="page-top"><button className="back-link" onClick={()=>navigate("home")}>← Home</button><h1>{page==="bank"?"Enhanced Skills Mapped Question Bank":page==="builder"?"Assessment Builder":page==="saved"?"Saved Worksheets / Assessments":page==="qualifications"?"More Qualifications":page==="import"?"Import Exam Papers":page==="review"?"Review image crops":"Question Bank Insights"}</h1></div>
+<><div className="page-top"><button className="back-link" onClick={()=>navigate("home")}>← Home</button><h1>{page==="bank"?"Enhanced Skills Mapped Question Bank":page==="builder"?"Assessment Builder":page==="saved"?"My Assessments":page==="qualifications"?"More Qualifications":page==="import"?"Import Exam Papers":page==="review"?"Review image crops":"Question Bank Insights"}</h1></div>
 {page==="bank"&&<><section className="panel v62-overview"><div className="v62-overview-heading"><h2>Question bank overview</h2><span className="hint">Live figures from your private question bank</span></div><div className="v62-stats"><div><strong>{questions.length}</strong><span>Mapped records</span></div><div><strong>{bankPapers}</strong><span>Exam papers</span></div><div><strong>{questions.length?Math.round(bankMapped/questions.length*100):0}%</strong><span>Mapping coverage</span></div><div><strong>{bankImages} / {questions.length}</strong><span>With both images</span></div></div></section><div className="panel wide-filters"><h2>Find questions</h2><div className="filter-grid">
 <label>Tier<select value={tier} onChange={e=>setTier(e.target.value)}>{options(["All","Foundation","Higher"])}</select></label>
 <label>Topic<select value={topic} onChange={e=>setTopic(e.target.value)}>{options(["All",...groups])}</select></label>
