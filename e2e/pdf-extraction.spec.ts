@@ -67,7 +67,7 @@ test("extracts question paper and mark scheme in the same review without invalid
  await expect(page.getByText("Edexcel · November-2022 · 1F")).toBeVisible();
  await page.getByRole("button",{name:"Extract & review"}).click();
  await page.getByRole("button",{name:"Prepare question review"}).click();
- await expect(page.getByText(/Prepared 1 complete questions from 1 mapped parts/)).toBeVisible({timeout:45000});
+ await expect(page.getByRole("status").last()).toContainText("Prepared 1 complete questions from 1 mapped parts",{timeout:18000});
  await expect(page.getByRole("heading",{name:/Q1 · 1 part/})).toBeVisible();
  await expect(page.getByLabel("Question image")).toBeVisible();
  await expect(page.getByLabel("Mark-scheme image")).toBeVisible();
