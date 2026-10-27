@@ -10,6 +10,7 @@ import { supabase } from "./supabase";
 import { getCloudAssessments, type CloudAssessment } from "./cloudAssessments";
 import { reconcileAssessments } from "./assessmentReconciliation";
 import { saveVersionedAssessment, deleteVersionedAssessment } from "./versionedAssessments";
+import { loadAccountFolders, createAccountFolder, renameAccountFolder, deleteAccountFolder } from "./accountFolders";
 
 type Page = "home" | "bank" | "builder" | "saved" | "qualifications" | "import" | "insights" | "review";
 type Question = { id:string; topic:string; skill:string; tier:"Foundation"|"Higher"; grade:number; marks:number; calculator:boolean; series:string; ao:string; challenge:string; prompt:string; answer:string; tags:string[]; sourceId?:string; meanPct?:number; gradePerformance:Record<number,number|null>; imagePending?:boolean; questionUrl?:string; markSchemeUrl?:string; imageCrops:{question:Crop;mark:Crop}; cropReview:{question:string;mark:string} };
@@ -77,14 +78,15 @@ const [includeClass,setIncludeClass]=useState(false);
 const [builderTier,setBuilderTier]=useState<"Any"|"Higher"|"Foundation"|"Crossover">("Any");
 const [builderCalc,setBuilderCalc]=useState<"Any"|"Calculator"|"Non-calculator">("Any");
 const [saved,setSaved]=useState<SavedAssessment[]>(()=>{try{return normaliseAssessments(JSON.parse(localStorage.getItem(ASSESSMENTS_KEY)||"[]"))}catch{return []}});
-const [folders]=useState<string[]>(()=>{try{const names=JSON.parse(localStorage.getItem(FOLDERS_KEY)||"[]");return Array.isArray(names)?names.filter((x):x is string=>typeof x==="string"&&!!x.trim()&&x!=="Unfiled"):[]}catch{return []}});
+const [folders,setFolders]=useState<string[]>([]);
+const [newFolderName,setNewFolderName]=useState("");
 const [currentAssessmentId,setCurrentAssessmentId]=useState<string|null>(null);
 const [cloudItems,setCloudItems]=useState<CloudAssessment[]>([]);
 const [editingCloud,setEditingCloud]=useState<{cloudId:string;revision:number}|null>(null);
 const [cloudWriteStatus,setCloudWriteStatus]=useState("");
 const saveToAccount=async(asNew=false)=>{
  if(cloudBusy)return;
- const item:SavedAssessment={id:asNew?"assessment-"+Date.now():currentAssessmentId||"assessment-"+Date.now(),folder:saved.find(x=>x.id===currentAssessmentId)?.folder||"Unfiled",name:assessmentTitle.trim()||"Untitled assessment",ids:[...selected],minutes,nameBox:includeName,classBox:includeClass,paperTier:builderTier,paperCalc:builderCalc,cover,answers:exportMode!=="questions",exportMode};
+ const item:SavedAssessment={id:asNew?"assessment-"+Date.now():currentAssessmentId||"assessment-"+Date.now(),folder:editingCloud?cloudItems.find(x=>x.cloudId===editingCloud.cloudId)?.item.folder||"Unfiled":saved.find(x=>x.id===currentAssessmentId)?.folder||"Unfiled",name:assessmentTitle.trim()||"Untitled assessment",ids:[...selected],minutes,nameBox:includeName,classBox:includeClass,paperTier:builderTier,paperCalc:builderCalc,cover,answers:exportMode!=="questions",exportMode};
  setCloudBusy(true);setCloudWriteStatus("Saving to your account…");
  try{const result=await saveVersionedAssessment(item,asNew?undefined:editingCloud??undefined);setEditingCloud(result);setCloudWriteStatus("Saved to your account");await refreshCloud()}
  catch(e){setCloudWriteStatus(e instanceof Error?e.message:"Save failed. Your open assessment has not been discarded.")}
@@ -121,7 +123,7 @@ const [cloudBusy,setCloudBusy]=useState(false);
 const [cloudMessage,setCloudMessage]=useState("");
 const refreshCloud=async()=>{
  setCloudBusy(true);setCloudMessage("");
- try{const items=await getCloudAssessments();setCloudItems(items);setCloudMessage("")}
+ try{const [items,folderNames]=await Promise.all([getCloudAssessments(),loadAccountFolders()]);setCloudItems(items);setFolders(folderNames);setCloudMessage("")}
  catch(e){setCloudMessage(e instanceof Error?e.message:"Could not load cloud assessments.")}
  finally{setCloudBusy(false)}
 };
@@ -148,6 +150,28 @@ const importMissingBrowserAssessments=async()=>{
   await refreshCloud();
   setCloudWriteStatus(`Imported ${added} assessment(s). Browser originals remain unchanged.`);
  }catch(e){setCloudWriteStatus(`Imported ${added} before stopping. ${e instanceof Error?e.message:"Import failed"}`)}
+ finally{setCloudBusy(false)}
+};
+const addFolder=async()=>{
+ if(cloudBusy)return;setCloudBusy(true);setCloudWriteStatus("");
+ try{await createAccountFolder(newFolderName);setNewFolderName("");const names=await loadAccountFolders();setFolders(names);setLibraryFolder(names[names.length-1]||"All")}
+ catch(e){setCloudWriteStatus(e instanceof Error?e.message:"Could not create folder")}
+ finally{setCloudBusy(false)}
+};
+const changeFolderName=async()=>{
+ if(!folders.includes(libraryFolder))return;
+ const next=window.prompt("Rename folder",libraryFolder)?.trim();if(!next||next===libraryFolder)return;
+ if(cloudItems.some(x=>x.item.folder===libraryFolder)){setCloudWriteStatus("Move assessments out of this folder before renaming it.");return}
+ setCloudBusy(true);try{await renameAccountFolder(libraryFolder,next);setFolders(await loadAccountFolders());setLibraryFolder(next);setCloudWriteStatus("Folder renamed.")}
+ catch(e){setCloudWriteStatus(e instanceof Error?e.message:"Rename failed")}
+ finally{setCloudBusy(false)}
+};
+const removeFolder=async()=>{
+ if(!folders.includes(libraryFolder))return;
+ if(cloudItems.some(x=>x.item.folder===libraryFolder)){setCloudWriteStatus("Move assessments out of this folder before deleting it.");return}
+ if(!window.confirm('Delete empty folder "'+libraryFolder+'"?'))return;
+ setCloudBusy(true);try{await deleteAccountFolder(libraryFolder);setFolders(await loadAccountFolders());setLibraryFolder("All");setCloudWriteStatus("Folder deleted.")}
+ catch(e){setCloudWriteStatus(e instanceof Error?e.message:"Delete failed")}
  finally{setCloudBusy(false)}
 };
 const challengeBands=[
@@ -252,7 +276,7 @@ return <div className="site"><header className="header"><div className="header-i
  <div className="row" style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap"}}><div><h2>My Assessments</h2><p className="hint">Assessments saved to your account are available when you sign in on another device.</p></div><button className="secondary small" disabled={cloudBusy} onClick={()=>void refreshCloud()}>{cloudBusy?"Refreshing…":"Refresh"}</button></div>
  {cloudWriteStatus&&<p role="status">{cloudWriteStatus}</p>}
  {cloudMessage&&<p role="status">{cloudMessage}</p>}
- <div className="library-toolbar"><label>Folder <select aria-label="Filter account assessments by folder" value={libraryFolder} onChange={e=>setLibraryFolder(e.target.value)}>{["All","Unfiled",...new Set([...folders,...cloudItems.map(x=>x.item.folder)].filter(x=>x!=="Unfiled"))].map(name=><option key={name} value={name}>{name}</option>)}</select></label><span className="hint">{cloudItems.length} assessment(s) saved to your account</span></div>
+ <div className="library-toolbar"><label>Folder <select aria-label="Filter account assessments by folder" value={libraryFolder} onChange={e=>setLibraryFolder(e.target.value)}>{["All","Unfiled",...new Set([...folders,...cloudItems.map(x=>x.item.folder)].filter(x=>x!=="Unfiled"))].map(name=><option key={name} value={name}>{name}</option>)}</select></label><label>Create folder <input aria-label="New account folder name" placeholder="e.g. Year 10" value={newFolderName} onChange={e=>setNewFolderName(e.target.value)}/></label><button className="secondary small" disabled={!newFolderName.trim()||cloudBusy} onClick={()=>void addFolder()}>Add folder</button>{folders.includes(libraryFolder)&&<><button className="secondary small" disabled={cloudBusy} onClick={()=>void changeFolderName()}>Rename folder</button><button className="remove" disabled={cloudBusy} onClick={()=>void removeFolder()}>Delete folder</button></>}<span className="hint">{cloudItems.length} assessment(s) saved to your account</span></div>
  {!cloudBusy&&cloudItems.length===0?<div className="empty">No account assessments yet. Build an assessment and save it to your account.</div>:cloudItems.filter(entry=>libraryFolder==="All"||entry.item.folder===libraryFolder).length===0?<div className="empty">No assessments in this folder.</div>:cloudItems.filter(entry=>libraryFolder==="All"||entry.item.folder===libraryFolder).map(entry=><div key={entry.cloudId} className="saved-item library-item"><div><strong>{entry.item.name}</strong><p>{entry.item.ids.length} question references · {entry.item.minutes} minutes · {entry.item.folder}</p></div><div className="library-actions"><button className="secondary small" disabled={cloudBusy} onClick={()=>openCloudForEdit(entry)}>Open / Edit</button><button className="secondary small" disabled={cloudBusy} onClick={()=>{const name=window.prompt("Rename assessment",entry.item.name)?.trim();if(name&&name!==entry.item.name)void modifyCloudEntry(entry,{name})}}>Rename</button><label className="library-folder-picker"><span>Folder</span><select aria-label={`Folder for account assessment ${entry.item.name}`} disabled={cloudBusy} value={entry.item.folder} onChange={e=>void modifyCloudEntry(entry,{folder:e.target.value})}>{[...new Set(["Unfiled",...folders,...cloudItems.map(x=>x.item.folder)])].map(name=><option key={name} value={name}>{name}</option>)}</select></label><button className="remove" disabled={cloudBusy} onClick={()=>void deleteCloudEntry(entry)}>Delete</button></div></div>)}
  {(reconciliation.browserOnly.length>0||reconciliation.conflicts.length>0)&&<div className="panel"><h3>Browser assessments needing attention</h3><p className="hint">These are older assessments saved only in this browser or different from an account copy. They will not be deleted or overwritten automatically.</p>{reconciliation.conflicts.length>0&&<p role="alert">{reconciliation.conflicts.length} browser version(s) differ from an account version. Review before importing.</p>}{reconciliation.browserOnly.length>0&&<button className="secondary small" disabled={cloudBusy} onClick={()=>void importMissingBrowserAssessments()}>Import {reconciliation.browserOnly.length} browser-only assessment(s)</button>}{[...reconciliation.browserOnly,...reconciliation.conflicts.map(x=>x.browser)].map(item=><div className="saved-item" key={item.id}><div><strong>{item.name}</strong><p>{item.ids.length} questions · Browser copy</p></div><button className="secondary small" onClick={()=>{setEditingCloud(null);openSavedAssessment(item)}}>Open browser version</button></div>)}</div>}
  </div>}
