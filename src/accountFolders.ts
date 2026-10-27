@@ -11,11 +11,9 @@ export async function createAccountFolder(name:string):Promise<void>{
  const {error}=await supabase.from("assessment_folders").insert({owner_id:owner,name:cleaned});
  if(error)throw new Error(error.message);
 }
-export async function renameAccountFolder(oldName:string,newName:string):Promise<void>{
- const name=newName.trim();if(!name||name.length>100||["all","unfiled"].includes(name.toLowerCase()))throw new Error("Choose a valid folder name.");
- const owner=await accountId();const {data,error}=await supabase.from("assessment_folders").update({name}).eq("owner_id",owner).eq("name",oldName).select("id");if(error)throw new Error(error.message);if(!data?.length)throw new Error("Folder no longer exists.");
-}
-export async function deleteAccountFolder(name:string):Promise<void>{
- const owner=await accountId();
- const {data,error}=await supabase.from("assessment_folders").delete().eq("owner_id",owner).eq("name",name).select("id");if(error)throw new Error(error.message);if(!data?.length)throw new Error("Folder no longer exists.");
+export async function changeAccountFolder(oldName:string,newName:string):Promise<number>{
+ await accountId();
+ const {data,error}=await supabase.rpc("change_owned_assessment_folder",{p_old_name:oldName,p_new_name:newName});
+ if(error)throw new Error(error.message);
+ return Number(data)||0;
 }
