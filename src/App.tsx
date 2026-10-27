@@ -1,5 +1,5 @@
 import { buildAssessmentGroups, calculateAssessmentMarks, checkAssessmentExport, moveAssessmentGroupIds, removeAssessmentGroupIds } from "./assessmentGroups";
-import { ASSESSMENTS_KEY, FOLDERS_KEY, normaliseAssessments, replaceAssessment, makeWorksheetBackup, parseWorksheetBackup, mergeWorksheetBackup, type SavedAssessment } from "./worksheetLibrary";
+import { ASSESSMENTS_KEY, FOLDERS_KEY, normaliseAssessments, replaceAssessment, type SavedAssessment } from "./worksheetLibrary";
 import CropReviewQueue from "./CropReviewQueue";
 import { CroppedImage, type Crop } from "./CropEditor";
 import ZipImporter from "./ZipImporter";
@@ -77,7 +77,7 @@ const [includeClass,setIncludeClass]=useState(false);
 const [builderTier,setBuilderTier]=useState<"Any"|"Higher"|"Foundation"|"Crossover">("Any");
 const [builderCalc,setBuilderCalc]=useState<"Any"|"Calculator"|"Non-calculator">("Any");
 const [saved,setSaved]=useState<SavedAssessment[]>(()=>{try{return normaliseAssessments(JSON.parse(localStorage.getItem(ASSESSMENTS_KEY)||"[]"))}catch{return []}});
-const [folders,setFolders]=useState<string[]>(()=>{try{const names=JSON.parse(localStorage.getItem(FOLDERS_KEY)||"[]");return Array.isArray(names)?names.filter((x):x is string=>typeof x==="string"&&!!x.trim()&&x!=="Unfiled"):[]}catch{return []}});
+const [folders]=useState<string[]>(()=>{try{const names=JSON.parse(localStorage.getItem(FOLDERS_KEY)||"[]");return Array.isArray(names)?names.filter((x):x is string=>typeof x==="string"&&!!x.trim()&&x!=="Unfiled"):[]}catch{return []}});
 const [currentAssessmentId,setCurrentAssessmentId]=useState<string|null>(null);
 const [cloudItems,setCloudItems]=useState<CloudAssessment[]>([]);
 const [editingCloud,setEditingCloud]=useState<{cloudId:string;revision:number}|null>(null);
@@ -150,35 +150,6 @@ const importMissingBrowserAssessments=async()=>{
  }catch(e){setCloudWriteStatus(`Imported ${added} before stopping. ${e instanceof Error?e.message:"Import failed"}`)}
  finally{setCloudBusy(false)}
 };
-const restoreBackup=async(file:File|undefined)=>{
- if(!file)return;
- try{
-  if(file.size>5_000_000)throw new Error("Backup exceeds the 5 MB file limit.");
-  const backup=parseWorksheetBackup(JSON.parse(await file.text()));
-  const merged=mergeWorksheetBackup(saved,folders,backup);
-  if(!window.confirm(`Restore ${merged.added} assessment(s)? ${merged.skipped} identical assessment(s) will be skipped. Existing assessments will be kept, and changed versions will be labelled Restored.`))return;
-  const oldAssessments=localStorage.getItem(ASSESSMENTS_KEY);
-  try{
-   localStorage.setItem(ASSESSMENTS_KEY,JSON.stringify(merged.assessments));
-   localStorage.setItem(FOLDERS_KEY,JSON.stringify(merged.folders));
-  }catch(error){
-   try{if(oldAssessments===null)localStorage.removeItem(ASSESSMENTS_KEY);else localStorage.setItem(ASSESSMENTS_KEY,oldAssessments)}catch{}
-   throw error;
-  }
-  setSaved(merged.assessments);setFolders(merged.folders);setLibraryFolder("All");
-  window.alert(`Restored ${merged.added} assessment(s); skipped ${merged.skipped} identical assessment(s). Existing assessments were preserved.`);
- }catch(error){window.alert(error instanceof Error?error.message:"Could not restore this backup.")}
-};
-const downloadBackup=()=>{
- try{
-  const backup=makeWorksheetBackup(saved,folders,new Date().toISOString());
-  const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
-  const url=URL.createObjectURL(blob);const link=document.createElement("a");
-  link.href=url;link.download="maths-question-bank-worksheets-backup.json";document.body.appendChild(link);link.click();link.remove();
-  window.setTimeout(()=>URL.revokeObjectURL(url),1000);
- }catch{window.alert("Could not create the worksheet backup file.")}
-};
-
 const challengeBands=[
  {label:"Accessible (70%+)",min:70,max:Infinity},
  {label:"Appropriate (45-70%)",min:45,max:70},
@@ -291,8 +262,6 @@ return <div className="site"><header className="header"><div className="header-i
  <div className="library-toolbar"><label>Folder <select aria-label="Filter account assessments by folder" value={libraryFolder} onChange={e=>setLibraryFolder(e.target.value)}>{["All","Unfiled",...new Set([...folders,...cloudItems.map(x=>x.item.folder)].filter(x=>x!=="Unfiled"))].map(name=><option key={name} value={name}>{name}</option>)}</select></label><span className="hint">{cloudItems.length} assessment(s) saved to your account</span></div>
  {!cloudBusy&&cloudItems.length===0?<div className="empty">No account assessments yet. Build an assessment and save it to your account.</div>:cloudItems.filter(entry=>libraryFolder==="All"||entry.item.folder===libraryFolder).length===0?<div className="empty">No assessments in this folder.</div>:cloudItems.filter(entry=>libraryFolder==="All"||entry.item.folder===libraryFolder).map(entry=><div key={entry.cloudId} className="saved-item library-item"><div><strong>{entry.item.name}</strong><p>{entry.item.ids.length} question references · {entry.item.minutes} minutes · {entry.item.folder}</p></div><div className="library-actions"><button className="secondary small" disabled={cloudBusy} onClick={()=>openCloudForEdit(entry)}>Open / Edit</button><button className="secondary small" disabled={cloudBusy} onClick={()=>{const name=window.prompt("Rename assessment",entry.item.name)?.trim();if(name&&name!==entry.item.name)void modifyCloudEntry(entry,{name})}}>Rename</button><label className="library-folder-picker"><span>Folder</span><select aria-label={`Folder for account assessment ${entry.item.name}`} disabled={cloudBusy} value={entry.item.folder} onChange={e=>void modifyCloudEntry(entry,{folder:e.target.value})}>{[...new Set(["Unfiled",...folders,...cloudItems.map(x=>x.item.folder)])].map(name=><option key={name} value={name}>{name}</option>)}</select></label><button className="remove" disabled={cloudBusy} onClick={()=>void deleteCloudEntry(entry)}>Delete</button></div></div>)}
  {(reconciliation.browserOnly.length>0||reconciliation.conflicts.length>0)&&<div className="panel"><h3>Browser assessments needing attention</h3><p className="hint">These are older assessments saved only in this browser or different from an account copy. They will not be deleted or overwritten automatically.</p>{reconciliation.conflicts.length>0&&<p role="alert">{reconciliation.conflicts.length} browser version(s) differ from an account version. Review before importing.</p>}{reconciliation.browserOnly.length>0&&<button className="secondary small" disabled={cloudBusy} onClick={()=>void importMissingBrowserAssessments()}>Import {reconciliation.browserOnly.length} browser-only assessment(s)</button>}{[...reconciliation.browserOnly,...reconciliation.conflicts.map(x=>x.browser)].map(item=><div className="saved-item" key={item.id}><div><strong>{item.name}</strong><p>{item.ids.length} questions · Browser copy</p></div><button className="secondary small" onClick={()=>{setEditingCloud(null);openSavedAssessment(item)}}>Open browser version</button></div>)}</div>}
- <div className="library-toolbar"><button className="secondary small" onClick={downloadBackup}>Download browser backup (JSON)</button><label className="library-import-label">Restore browser backup (JSON)<input aria-label="Restore worksheets from backup" type="file" accept=".json,application/json" onChange={event=>{const file=event.target.files?.[0];void restoreBackup(file);event.target.value=""}}/></label></div>
- <p className="hint">Backup and restore currently use browser data; imported assessments can then be added to your account.</p>
  </div>}
 {page==="import"&&<ZipImporter onComplete={()=>{void reloadQuestions()}}/>}{page==="review"&&<CropReviewQueue questions={questions} onUpdate={(id,patch)=>setQuestions(old=>old.map(q=>q.id===id?{...q,...patch}:q))}/>}{page==="insights"&&<div className="panel saved-panel"><p>The database-backed insights dashboard is planned.</p></div>}
 {page==="qualifications"&&<div className="dashboard-grid"><div className="dashboard-tile static-tile"><span className="tile-icon">∑</span><strong>Further Mathematics</strong><span>Dedicated question bank planned. Questions will be added when appropriately licensed or original content is available.</span></div><div className="dashboard-tile static-tile"><span className="tile-icon">▥</span><strong>GCSE Statistics</strong><span>Dedicated question bank planned. Questions will be added when appropriately licensed or original content is available.</span></div></div>}
