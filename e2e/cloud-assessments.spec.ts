@@ -20,6 +20,7 @@ test("cloud copy is opt-in and leaves browser assessments untouched",async({page
   if(path==="/auth/v1/user")return reply(user);
   if(path.startsWith("/rest/v1/profiles"))return reply([{role:"owner",approved:true}]);
   if(path.startsWith("/rest/v1/questions"))return reply([]);
+  if(path.startsWith("/rest/v1/assessment_folders"))return reply([]);
   if(path.startsWith("/rest/v1/assessments")){
    if(request.method()==="POST"){
     inserts++;const body=request.postDataJSON();const record={...body,id:"33333333-3333-4333-8333-333333333333",created_at:"2026-10-27T15:00:00Z",revision:1};

@@ -15,10 +15,11 @@ const makeToken=()=>{
  return `${b64({alg:"HS256",typ:"JWT"})}.${b64({exp:4102444800,sub:uid,role:"authenticated",aud:"authenticated"})}.signature`;
 };
 
-test("owner Assessment Builder: multipart, reordering, exports and reopening saved draft",async ({page,browserName})=>{
+test("owner Assessment Builder: multipart, reordering, exports and reopening account assessment",async ({page,browserName})=>{
  test.skip(browserName!=="chromium","Chromium PDF tests only");
  const errors:string[]=[];page.on("pageerror",e=>errors.push(e.message));
  const token=makeToken();
+ let storedAssessment:any=null;let storedQuestions:any[]=[];
  await page.addInitScript(({token,user})=>{
   localStorage.setItem("sb-ljisttslifnyrbuybfud-auth-token",JSON.stringify({access_token:token,refresh_token:"dummy",expires_at:4102444800,expires_in:999999999,token_type:"bearer",user}));
  },{token,user});
@@ -26,6 +27,16 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening sav
   const url=new URL(route.request().url());
   if(url.pathname==="/auth/v1/user")return route.fulfill({status:200,contentType:"application/json",body:JSON.stringify(user)});
   if(url.pathname.startsWith("/rest/v1/profiles"))return route.fulfill({status:200,contentType:"application/json",body:JSON.stringify([{role:"owner",approved:true}])});
+  if(url.pathname.startsWith("/rest/v1/assessment_folders"))return route.fulfill({status:200,contentType:"application/json",body:"[]"});
+  if(url.pathname.startsWith("/rest/v1/assessments"))return route.fulfill({status:200,contentType:"application/json",body:JSON.stringify(storedAssessment?[storedAssessment]:[])});
+  if(url.pathname.startsWith("/rest/v1/assessment_questions"))return route.fulfill({status:200,contentType:"application/json",body:JSON.stringify(storedQuestions)});
+  if(url.pathname==="/rest/v1/rpc/save_owned_assessment"){
+   const payload=route.request().postDataJSON();const id="33333333-3333-4333-8333-333333333333";
+   const revision=storedAssessment?storedAssessment.revision+1:1;
+   storedAssessment={id,created_by:uid,title:payload.p_title,configuration:payload.p_configuration,created_at:"2026-10-27T00:00:00Z",revision};
+   storedQuestions=payload.p_question_ids.map((question_id:string,position:number)=>({assessment_id:id,question_id,position}));
+   return route.fulfill({status:200,contentType:"application/json",body:JSON.stringify([{saved_id:id,saved_revision:revision}])});
+  }
   if(url.pathname.startsWith("/rest/v1/questions"))return route.fulfill({status:200,contentType:"application/json",body:JSON.stringify(rows)});
   if(url.pathname.includes("/storage/v1/object/sign/")){
    const body=route.request().postDataJSON();
@@ -64,10 +75,10 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening sav
   expect(pdf.length).toBeGreaterThan(900);
   if(label==="Mark scheme only")await expect(page.locator(".cover")).toHaveCount(0);
  }
- await page.getByRole("button",{name:"Save assessment on this device"}).click();
+ await page.getByRole("button",{name:"Save assessment to my account"}).click();
  await page.getByRole("button",{name:"← Home"}).click();
  await page.getByRole("button",{name:/My Assessments/}).click();
- await page.getByRole("button",{name:"Open browser version",exact:true}).click();
+ await page.getByRole("button",{name:"Open / Edit",exact:true}).click();
  await expect(page.getByLabel("Assessment title")).toHaveValue("Test assessment");
  await expect(page.getByRole("button",{name:"Questions + mark scheme",exact:true})).toHaveAttribute("aria-pressed","true");
  await expect(page.locator(".paper-question")).toHaveCount(3);
