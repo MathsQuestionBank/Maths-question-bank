@@ -3,7 +3,7 @@ const PaperExtractionReview=lazy(()=>import("./PaperExtractionReview"));
 import {supabase} from "./supabase";
 
 const BUCKET="exam-materials-private";
-type Staged={path:string;board:string;qualification:string;series:string;code:string;question:boolean;mark:boolean;manifest:boolean;};
+type Staged={path:string;board:string;qualification:string;series:string;code:string;question:boolean;mark:boolean;manifest:boolean;reviewSaved:boolean;};
 type Folder={name:string;id:string|null};
 async function listFolder(prefix:string):Promise<Folder[]>{
  const {data,error}=await supabase.storage.from(BUCKET).list(prefix,{limit:1000,sortBy:{column:"name",order:"asc"}});
@@ -34,7 +34,7 @@ export default function StagedPaperReview(){
        const root=["new-paper-intake",board.name,qualification.name,series.name,paper.name].join("/");
        const items=await listFolder(root+"/"+user.id);
        if(items.length===0)continue;
-       found.push({path:root+"/"+user.id,board:board.name,qualification:qualification.name,series:series.name,code:paper.name,question:items.some(x=>x.name==="question-paper.pdf"),mark:items.some(x=>x.name==="mark-scheme.pdf"),manifest:items.some(x=>x.name==="intake.json")});
+       found.push({path:root+"/"+user.id,board:board.name,qualification:qualification.name,series:series.name,code:paper.name,question:items.some(x=>x.name==="question-paper.pdf"),mark:items.some(x=>x.name==="mark-scheme.pdf"),manifest:items.some(x=>x.name==="intake.json"),reviewSaved:items.some(x=>x.name==="extraction-review.json")});
       }
      }
     }
@@ -60,7 +60,7 @@ export default function StagedPaperReview(){
  </div>
  {message&&<p role="status">{message}</p>}
  {papers.map(p=><div key={p.path}><div className="saved-item">
- <div><strong>{p.board} · {p.series} · {p.code}</strong><p>{p.qualification} · {p.code.endsWith("F")?"Foundation":"Higher"} · {p.question&&p.mark?"Both PDFs archived":"Missing source file"} · Awaiting extraction</p></div>
+ <div><strong>{p.board} · {p.series} · {p.code}</strong><p>{p.qualification} · {p.code.endsWith("F")?"Foundation":"Higher"} · {p.question&&p.mark?"Both PDFs archived":"Missing source file"} · {p.reviewSaved?"Review draft saved":"Awaiting extraction"}</p></div>
  <div className="library-actions">
  <button className="secondary small" disabled={!p.question||!!opening} onClick={()=>void open(p.path,"question-paper.pdf")}>View question paper</button>
  <button className="secondary small" disabled={!p.mark||!!opening} onClick={()=>void open(p.path,"mark-scheme.pdf")}>View mark scheme</button><button className="primary small" disabled={!p.question||!p.mark} onClick={()=>setSelectedPath(current=>current===p.path?"":p.path)}>{selectedPath===p.path?"Close review":"Extract & review"}</button>
