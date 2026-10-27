@@ -65,6 +65,6 @@ export default function StagedPaperReview(){
  <button className="secondary small" disabled={!p.question||!!opening} onClick={()=>void open(p.path,"question-paper.pdf")}>View question paper</button>
  <button className="secondary small" disabled={!p.mark||!!opening} onClick={()=>void open(p.path,"mark-scheme.pdf")}>View mark scheme</button><button className="primary small" disabled={!p.question||!p.mark} onClick={()=>setSelectedPath(current=>current===p.path?"":p.path)}>{selectedPath===p.path?"Close review":"Extract & review"}</button>
  </div>
- </div>)}
+ {selectedPath===p.path&&<PaperExtractionReview source={{path:p.path,board:p.board,qualification:p.qualification,series:p.series,code:p.code}}/>}</div>)}
  </section>;
 }
