@@ -52,7 +52,7 @@ export function mergeWorksheetBackup(existing:SavedAssessment[],existingFolders:
  const names=new Set(existing.map(a=>a.name.toLowerCase()));
  const merged=[...existing];
  let counter=0,skipped=0;
- const signature=(a:SavedAssessment)=>JSON.stringify({ids:a.ids,minutes:a.minutes,nameBox:a.nameBox??true,classBox:a.classBox??false,paperTier:a.paperTier??"Any",paperCalc:a.paperCalc??"Any",cover:a.cover??true,exportMode:a.exportMode??(a.answers?"both":"questions")});
+ const signature=(a:SavedAssessment)=>JSON.stringify({folder:a.folder,ids:a.ids,minutes:a.minutes,nameBox:a.nameBox??true,classBox:a.classBox??false,paperTier:a.paperTier??"Any",paperCalc:a.paperCalc??"Any",cover:a.cover??true,exportMode:a.exportMode??(a.answers?"both":"questions")});
  for(const a of backup.assessments){
   // Same name and same content/settings means restoring would add an indistinguishable duplicate.
   if(merged.some(item=>item.name===a.name&&signature(item)===signature(a))){skipped++;continue;}
