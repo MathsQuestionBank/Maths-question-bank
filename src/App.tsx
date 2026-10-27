@@ -10,7 +10,7 @@ import { supabase } from "./supabase";
 import { getCloudAssessments, type CloudAssessment } from "./cloudAssessments";
 import { reconcileAssessments } from "./assessmentReconciliation";
 import { saveVersionedAssessment, deleteVersionedAssessment } from "./versionedAssessments";
-import { loadAccountFolders, createAccountFolder, renameAccountFolder, deleteAccountFolder } from "./accountFolders";
+import { loadAccountFolders, createAccountFolder, changeAccountFolder } from "./accountFolders";
 
 type Page = "home" | "bank" | "builder" | "saved" | "qualifications" | "import" | "insights" | "review";
 type Question = { id:string; topic:string; skill:string; tier:"Foundation"|"Higher"; grade:number; marks:number; calculator:boolean; series:string; ao:string; challenge:string; prompt:string; answer:string; tags:string[]; sourceId?:string; meanPct?:number; gradePerformance:Record<number,number|null>; imagePending?:boolean; questionUrl?:string; markSchemeUrl?:string; imageCrops:{question:Crop;mark:Crop}; cropReview:{question:string;mark:string} };
@@ -161,16 +161,14 @@ const addFolder=async()=>{
 const changeFolderName=async()=>{
  if(!folders.includes(libraryFolder))return;
  const next=window.prompt("Rename folder",libraryFolder)?.trim();if(!next||next===libraryFolder)return;
- if(cloudItems.some(x=>x.item.folder===libraryFolder)){setCloudWriteStatus("Move assessments out of this folder before renaming it.");return}
- setCloudBusy(true);try{await renameAccountFolder(libraryFolder,next);setFolders(await loadAccountFolders());setLibraryFolder(next);setCloudWriteStatus("Folder renamed.")}
+ setCloudBusy(true);try{await changeAccountFolder(libraryFolder,next);await refreshCloud();setLibraryFolder(next);setCloudWriteStatus("Folder renamed.")}
  catch(e){setCloudWriteStatus(e instanceof Error?e.message:"Rename failed")}
  finally{setCloudBusy(false)}
 };
 const removeFolder=async()=>{
  if(!folders.includes(libraryFolder))return;
- if(cloudItems.some(x=>x.item.folder===libraryFolder)){setCloudWriteStatus("Move assessments out of this folder before deleting it.");return}
- if(!window.confirm('Delete empty folder "'+libraryFolder+'"?'))return;
- setCloudBusy(true);try{await deleteAccountFolder(libraryFolder);setFolders(await loadAccountFolders());setLibraryFolder("All");setCloudWriteStatus("Folder deleted.")}
+ if(!window.confirm('Delete folder "'+libraryFolder+'" and move its assessments to Unfiled?'))return;
+ setCloudBusy(true);try{await changeAccountFolder(libraryFolder,"Unfiled");await refreshCloud();setLibraryFolder("All");setCloudWriteStatus("Folder deleted.")}
  catch(e){setCloudWriteStatus(e instanceof Error?e.message:"Delete failed")}
  finally{setCloudBusy(false)}
 };
