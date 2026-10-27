@@ -1,3 +1,4 @@
+import NewExamPaperImporter from "./NewExamPaperImporter";
 import Restore2022Parts from "./Restore2022Parts";
 import RecoveryImporter from "./RecoveryImporter";
 import { useState } from "react";
@@ -116,7 +117,7 @@ export default function ZipImporter({onComplete}:{onComplete:()=>void}){
    setProgress(`Paused after linking ${linked} images and archiving ${archived} sources. ${e instanceof Error?e.message:String(e)}. Re-select the ZIP to resume; existing images will be skipped.`);
   }finally{setBusy(false);}
  };
- return <><div className="panel" style={{padding:22}}>
+ return <><NewExamPaperImporter/><details style={{marginTop:24}}><summary style={{cursor:"pointer",fontWeight:700}}>Archive Maintenance — V6.2 recovery tools</summary><div className="panel" style={{padding:22}}>
  <h2>Complete V6.2 archive import</h2>
  <p>Choose your original V6.2 ZIP to attach the missing question and mark-scheme images, including lettered parts such as Q11a. It will also preserve all 12 original 2020/2021 PDFs and original metadata in <strong>private storage</strong> for future extraction. Nothing already linked is overwritten.</p>
  <label>Original V6.2 archive (.zip)<input type="file" accept=".zip,application/zip" disabled={busy} onChange={e=>{const f=e.target.files?.[0];if(f)void inspect(f)}}/></label>
@@ -124,5 +125,5 @@ export default function ZipImporter({onComplete}:{onComplete:()=>void}){
  {issues.length>0&&<details><summary>Unmatched images ({issues.length})</summary><p>2022 PDFs/crops were not present in V6.2. Multipart entries use their original whole-question PNG and should be reviewed where necessary.</p><div style={{maxHeight:220,overflow:"auto"}}>{issues.slice(0,150).map(x=><div key={x}>{x}</div>)}</div></details>}
  {(assets.length>0||originals.length>0)&&<button className="primary" disabled={busy} onClick={()=>void upload()}>Import all ${assets.length+originals.length} missing links and source files</button>}
  {progress&&<p role="status">{progress}</p>}
- </div><RecoveryImporter onComplete={onComplete}/><Restore2022Parts onComplete={onComplete}/></>;
+ </div><RecoveryImporter onComplete={onComplete}/><Restore2022Parts onComplete={onComplete}/></details></>;
 }
