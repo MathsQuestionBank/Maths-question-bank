@@ -9,12 +9,12 @@ async function currentUserId(): Promise<string> {
  return user.id;
 }
 
-type CloudRow = { id:string; title:string; configuration:unknown; created_at:string };
-export type CloudAssessment = { cloudId:string; item:SavedAssessment; createdAt:string };
+type CloudRow = { id:string; title:string; configuration:unknown; created_at:string; revision?:number };
+export type CloudAssessment = { cloudId:string; item:SavedAssessment; createdAt:string; revision?:number };
 
 export async function getCloudAssessments():Promise<CloudAssessment[]> {
  const userId=await currentUserId();
- const {data,error}=await supabase.from("assessments").select("id,title,configuration,created_at").eq("created_by",userId).order("created_at",{ascending:false});
+ const {data,error}=await supabase.from("assessments").select("*").eq("created_by",userId).order("created_at",{ascending:false});
  if(error) throw new Error(`Cloud load failed: ${error.message}`);
  const rows=(data||[]) as CloudRow[];
  if(!rows.length)return [];
@@ -24,7 +24,7 @@ export async function getCloudAssessments():Promise<CloudAssessment[]> {
   const config=row.configuration && typeof row.configuration==="object" && !Array.isArray(row.configuration)?row.configuration as Record<string,unknown>:{};
   const ids=(links||[]).filter(link=>link.assessment_id===row.id).sort((a,b)=>a.position-b.position).map(link=>link.question_id as string);
   const saved=normaliseAssessments([{...config,id:`cloud-${row.id}`,name:row.title,ids}]);
-  return saved.length?[{cloudId:row.id,item:saved[0],createdAt:row.created_at}]:[];
+  return saved.length?[{cloudId:row.id,item:saved[0],createdAt:row.created_at,revision:row.revision}]:[];
  });
 }
 
