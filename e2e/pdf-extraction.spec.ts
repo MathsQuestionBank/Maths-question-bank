@@ -86,6 +86,7 @@ test("extracts question paper and mark scheme in the same review without invalid
  await expect(page.getByLabel("Mark-scheme image")).toBeVisible();
  await expect(page.getByText("Invalid page request.",{exact:true})).toHaveCount(0);
  await expect(page.getByRole("checkbox")).toHaveCount(0);
+ await expect(page.getByRole("button",{name:"Publish Approved Paper"})).toBeDisabled();
  await page.getByRole("button",{name:"Approve Q1 & Next"}).click();
  await expect(page.getByRole("heading",{name:/Q2 · 1 part/})).toBeVisible();
  await expect(page.getByText("1/2").first()).toBeVisible();
