@@ -9,16 +9,16 @@ function parseSheet(xml:string,shared:string[]):string[][]{
  const doc=new DOMParser().parseFromString(xml,"application/xml");
  if(doc.querySelector("parsererror"))throw Error("The spreadsheet XML is damaged.");
  const output:string[][]=[];
- for(const row of Array.from(doc.getElementsByTagName("row"))){
+ for(const row of Array.from(doc.getElementsByTagNameNS("*","row"))){
   const arr:string[]=[];
-  for(const cell of Array.from(row.getElementsByTagName("c"))){
+  for(const cell of Array.from(row.getElementsByTagNameNS("*","c"))){
    const cellName=cell.getAttribute("r")||"";
    const column=cellName.match(/^[A-Z]+/)?.[0]||"";
    let index=0;for(const c of column)index=index*26+c.charCodeAt(0)-64;index--;
    if(index<0||index>100)continue;
    const type=cell.getAttribute("t");
-   const raw=cell.getElementsByTagName("v")[0]?.textContent||"";
-   arr[index]=type==="s"?shared[Number(raw)]||"":type==="inlineStr"?cell.getElementsByTagName("is")[0]?.textContent||"":raw;
+   const raw=cell.getElementsByTagNameNS("*","v")[0]?.textContent||"";
+   arr[index]=type==="s"?shared[Number(raw)]||"":type==="inlineStr"?cell.getElementsByTagNameNS("*","is")[0]?.textContent||"":raw;
   }
   output.push(arr);
   if(output.length>15000)throw Error("Spreadsheet exceeds the 15,000-row review limit.");
@@ -32,18 +32,18 @@ export async function inspectFoundationMap(file:File):Promise<Audit>{
  let shared:string[]=[];
  if(stringsXml){
   const doc=new DOMParser().parseFromString(stringsXml,"application/xml");
-  shared=Array.from(doc.getElementsByTagName("si")).map(si=>si.textContent||"");
+  shared=Array.from(doc.getElementsByTagNameNS("*","si")).map(si=>si.textContent||"");
  }
  const workbookXml=await zip.file("xl/workbook.xml")?.async("string");
  const relationshipsXml=await zip.file("xl/_rels/workbook.xml.rels")?.async("string");
  if(!workbookXml||!relationshipsXml)throw Error("Missing workbook worksheets.");
  const workbook=new DOMParser().parseFromString(workbookXml,"application/xml");
  const rels=new DOMParser().parseFromString(relationshipsXml,"application/xml");
- const sheets=Array.from(workbook.getElementsByTagName("sheet"));
+ const sheets=Array.from(workbook.getElementsByTagNameNS("*","sheet"));
  const sheet=sheets.find(s=>/foundation enhanced mapping/i.test(s.getAttribute("name")||""))||sheets[0];
  if(!sheet)throw Error("No mapping worksheet found.");
  const relId=sheet.getAttribute("r:id")||sheet.getAttributeNS("http://schemas.openxmlformats.org/officeDocument/2006/relationships","id");
- const relationship=Array.from(rels.getElementsByTagName("Relationship")).find(x=>x.getAttribute("Id")===relId);
+ const relationship=Array.from(rels.getElementsByTagNameNS("*","Relationship")).find(x=>x.getAttribute("Id")===relId);
  const target=relationship?.getAttribute("Target");
  if(!target)throw Error("Mapping worksheet cannot be located.");
  const path=target.startsWith("/")?target.substring(1):"xl/"+target.replace(/^\.\//,"");
