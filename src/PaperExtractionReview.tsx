@@ -3,11 +3,11 @@ import type {PDFDocumentProxy} from "pdfjs-dist";
 import {supabase} from "./supabase";
 import {inspectFoundationMap,type MappingRow} from "./EnhancedMappingImporter";
 import {loadSourcePdf,readPdfLines,drawSlice} from "./pdfExtraction";
-import {makeReviewDrafts,isReviewable,totalMarks,type QuestionDraft,type Slice} from "./paperExtraction";
+import {makeReviewDrafts,findMarkSchemeStartPage,isReviewable,totalMarks,type QuestionDraft,type Slice,type TextLine} from "./paperExtraction";
 
 const bucket="exam-materials-private";
 export type StagedSource={path:string;board:string;series:string;code:string;qualification:string};
-type SavedReview={version:number;mappingFile:string;items:{number:number;question:Slice;mark:Slice;approved:boolean;notes:string;overrides?:{id:string;topic:string;strands:string;skills:string}[]}[]};
+type SavedReview={version:number;mappingFile:string;markSchemeStartPage?:number;items:{number:number;question:Slice;mark:Slice;approved:boolean;notes:string;overrides?:{id:string;topic:string;strands:string;skills:string}[]}[]};
 const cleaned=(s:string)=>s.toUpperCase().replace(/[^A-Z0-9]/g,"");
 const safeSlice=(x:Slice|undefined,original:Slice,pageCount:number):Slice=>{
  if(!x||!Number.isFinite(Number(x.page))||!Number.isFinite(Number(x.top))||!Number.isFinite(Number(x.bottom)))return original;
@@ -28,6 +28,9 @@ export default function PaperExtractionReview({source}:{source:StagedSource}){
  const [questionPdf,setQuestionPdf]=useState<PDFDocumentProxy|null>(null),[schemePdf,setSchemePdf]=useState<PDFDocumentProxy|null>(null);
  const [drafts,setDrafts]=useState<QuestionDraft[]>([]),[selected,setSelected]=useState(0);
  const [mappingFile,setMappingFile]=useState(""),[confirmApproval,setConfirmApproval]=useState(false);
+ const [markSchemeStartPage,setMarkSchemeStartPage]=useState<number|null>(null);
+ const [autoSchemeStartPage,setAutoSchemeStartPage]=useState<number|null>(null);
+ const extracted=useRef<{matches:MappingRow[];questionLines:TextLine[];markLines:TextLine[]}|null>(null);
  const selectedDraft=drafts[selected];
  const update=(fn:(d:QuestionDraft)=>QuestionDraft)=>{
   setDrafts(current=>current.map((d,i)=>i===selected?fn({...d,approved:false}):d));setConfirmApproval(false);
@@ -36,8 +39,22 @@ export default function PaperExtractionReview({source}:{source:StagedSource}){
  const adjust=(kind:"question"|"mark",key:keyof Slice,value:number)=>{
   update(d=>({...d,[kind]:{...d[kind],[key]:value}}));
  };
+ const recalculateSchemeCrops=()=>{
+  if(!extracted.current||!schemePdf||markSchemeStartPage===null||!Number.isInteger(markSchemeStartPage)||markSchemeStartPage<1||markSchemeStartPage>schemePdf.numPages)return;
+  const {matches,questionLines,markLines}=extracted.current;
+  const proposed=makeReviewDrafts(matches,questionLines,markLines,markSchemeStartPage);
+  setDrafts(existing=>existing.map(d=>{
+   const fresh=proposed.find(p=>p.number===d.number);
+   if(!fresh)return d;
+   // Keep individually verified work unless it points before the real table starts.
+   if(d.approved&&d.mark.page>=markSchemeStartPage)return d;
+   return {...d,mark:fresh.mark,markDetected:fresh.markDetected,approved:false};
+  }));
+  setConfirmApproval(false);
+  setStatus("Mark-scheme proposals recalculated from PDF page "+markSchemeStartPage+". Check each crop and approve it before publishing.");
+ };
  const process=async()=>{
-  setBusy(true);setStatus("Downloading private PDFs…");setQuestionPdf(null);setSchemePdf(null);setDrafts([]);setSelected(0);
+  setBusy(true);setStatus("Downloading private PDFs…");setQuestionPdf(null);setSchemePdf(null);setDrafts([]);setSelected(0);setAutoSchemeStartPage(null);setMarkSchemeStartPage(null);extracted.current=null;
   try{
    const {data:{user}}=await supabase.auth.getUser();
    const {data:approved,error:authError}=await supabase.rpc("is_approved_owner");
@@ -74,26 +91,39 @@ export default function PaperExtractionReview({source}:{source:StagedSource}){
    if(repeated.size)throw Error("Mapping contains repeated IDs for this paper: "+[...repeated].join(", ")+". Resolve them before review.");
    setMappingFile(sourceName);
    setStatus("Matching questions and suggesting crop positions…");
-   const prepared=makeReviewDrafts(matches,questionLines,markLines);
+   const detectedStart=findMarkSchemeStartPage(markLines);
+   setAutoSchemeStartPage(detectedStart);
+   setMarkSchemeStartPage(detectedStart);
+   extracted.current={matches,questionLines,markLines};
+   let effectiveSchemeStart=detectedStart;
+   let prepared=makeReviewDrafts(matches,questionLines,markLines,effectiveSchemeStart);
    const {data:old}=await supabase.storage.from(bucket).download(source.path+"/extraction-review.json");
    if(old){
     try{
      const previous=JSON.parse(await old.text()) as SavedReview;
      if(previous.version===1&&previous.mappingFile===sourceName&&Array.isArray(previous.items)){
+      if(Number.isInteger(previous.markSchemeStartPage)&&previous.markSchemeStartPage!>=1&&previous.markSchemeStartPage!<=mPdf.numPages){
+       effectiveSchemeStart=previous.markSchemeStartPage!;
+       setMarkSchemeStartPage(effectiveSchemeStart);
+       prepared=makeReviewDrafts(matches,questionLines,markLines,effectiveSchemeStart);
+      }
       for(const d of prepared){
        const prior=previous.items.find(x=>x.number===d.number);
        if(!prior)continue;
        d.question=safeSlice(prior.question,d.question,qPdf.numPages);
-       d.mark=safeSlice(prior.mark,d.mark,mPdf.numPages);
+       // Older drafts could contain a crop from the numbered guidance (eg PDF page 3).
+       // Never restore or keep approval for a page before the detected marking table.
+       const invalidPreTable=effectiveSchemeStart!==null&&prior.mark?.page<effectiveSchemeStart;
+       if(!invalidPreTable)d.mark=safeSlice(prior.mark,d.mark,mPdf.numPages);
        d.notes=typeof prior.notes==="string"?prior.notes.slice(0,1500):"";
        if(Array.isArray(prior.overrides))d.parts=d.parts.map(original=>{const edit=prior.overrides?.find(x=>x.id===original.id);return edit?{...original,topic:String(edit.topic||original.topic).slice(0,100),strands:String(edit.strands||original.strands).slice(0,400),skills:String(edit.skills||original.skills).slice(0,600)}:original});
-       d.approved=prior.approved===true&&isReviewable(d,qPdf.numPages,mPdf.numPages);
+       d.approved=prior.approved===true&&!invalidPreTable&&isReviewable(d,qPdf.numPages,mPdf.numPages);
       }
      }
     }catch{/* Invalid draft must never block extraction. */}
    }
    setDrafts(prepared);
-   setStatus(`Prepared ${prepared.length} complete questions from ${matches.length} mapped parts (${totalMarks(prepared)} marks). Auto-detected ${prepared.filter(x=>x.questionDetected).length} question positions and ${prepared.filter(x=>x.markDetected).length} scheme positions. Every crop must be visually verified before approval.`);
+   setStatus(`Prepared ${prepared.length} complete questions from ${matches.length} mapped parts (${totalMarks(prepared)} marks). Mark-scheme table start: ${effectiveSchemeStart===null?"not automatically identified":`PDF page ${effectiveSchemeStart}`}. Every crop must be visually verified before approval.`);
   }catch(e){setStatus(e instanceof Error?e.message:"Preparation failed.");}
   finally{setBusy(false)}
  };
@@ -102,7 +132,7 @@ export default function PaperExtractionReview({source}:{source:StagedSource}){
   try{
    const {data:{user}}=await supabase.auth.getUser();const {data:approved}=await supabase.rpc("is_approved_owner");
    if(!user||approved!==true)throw Error("Approved account required.");
-   const payload:SavedReview={version:1,mappingFile,items:drafts.map(d=>({number:d.number,question:d.question,mark:d.mark,approved:d.approved,notes:d.notes,overrides:d.parts.map(p=>({id:p.id,topic:p.topic,strands:p.strands,skills:p.skills}))}))};
+   const payload:SavedReview={version:1,mappingFile,markSchemeStartPage:markSchemeStartPage??undefined,items:drafts.map(d=>({number:d.number,question:d.question,mark:d.mark,approved:d.approved,notes:d.notes,overrides:d.parts.map(p=>({id:p.id,topic:p.topic,strands:p.strands,skills:p.skills}))}))};
    const {error}=await supabase.storage.from(bucket).upload(source.path+"/extraction-review.json",new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),{upsert:true,contentType:"application/json"});
    if(error)throw Error(error.message);
    setStatus(`Review progress saved privately: ${drafts.filter(d=>d.approved).length}/${drafts.length} complete questions approved. No live questions were changed.`);
@@ -117,6 +147,13 @@ export default function PaperExtractionReview({source}:{source:StagedSource}){
  {status&&<p role="status">{status}</p>}
  {drafts.length>0&&questionPdf&&schemePdf&&<>
  <p><strong>{drafts.filter(x=>x.approved).length}/{drafts.length}</strong> complete questions approved · <strong>{drafts.flatMap(x=>x.parts).length}</strong> parts · <strong>{totalMarks(drafts)}</strong> marks · Mapping: {mappingFile}</p>
+ <div className="library-toolbar" style={{alignItems:"end",flexWrap:"wrap"}}>
+ <label>First marking-table page (PDF page)
+ <input aria-label="First marking-table page" type="number" min="1" max={schemePdf.numPages} value={markSchemeStartPage??""} placeholder="Select page" onChange={e=>setMarkSchemeStartPage(e.target.value===""?null:Number(e.target.value))}/>
+ </label>
+ <button className="secondary small" disabled={busy||markSchemeStartPage===null||!Number.isInteger(markSchemeStartPage)||markSchemeStartPage<1||markSchemeStartPage>schemePdf.numPages} onClick={recalculateSchemeCrops}>Re-detect scheme crops</button>
+ <span className="hint">{autoSchemeStartPage===null?"No marking-table header identified. Select the first real answer page and re-detect.":`Marking-table header detected on PDF page ${autoSchemeStartPage} (not the examiner guidance pages).`}</span>
+ </div>
  <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:12}}>
  {drafts.map((d,i)=><button key={d.number} className={i===selected?"primary small":"secondary small"} onClick={()=>select(i)} aria-pressed={i===selected}>{d.approved?"✓ ":""}Q{d.number}</button>)}
  </div>
