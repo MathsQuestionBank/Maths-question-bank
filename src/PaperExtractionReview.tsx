@@ -7,7 +7,7 @@ import {makeReviewDrafts,isReviewable,totalMarks,type QuestionDraft,type Slice} 
 
 const bucket="exam-materials-private";
 export type StagedSource={path:string;board:string;series:string;code:string;qualification:string};
-type SavedReview={version:number;mappingFile:string;items:{number:number;question:Slice;mark:Slice;approved:boolean;notes:string}[]};
+type SavedReview={version:number;mappingFile:string;items:{number:number;question:Slice;mark:Slice;approved:boolean;notes:string;overrides?:{id:string;topic:string;strands:string;skills:string}[]}[]};
 const cleaned=(s:string)=>s.toUpperCase().replace(/[^A-Z0-9]/g,"");
 const safeSlice=(x:Slice|undefined,original:Slice,pageCount:number):Slice=>{
  if(!x||!Number.isFinite(Number(x.page))||!Number.isFinite(Number(x.top))||!Number.isFinite(Number(x.bottom)))return original;
@@ -32,6 +32,7 @@ export default function PaperExtractionReview({source}:{source:StagedSource}){
  const update=(fn:(d:QuestionDraft)=>QuestionDraft)=>{
   setDrafts(current=>current.map((d,i)=>i===selected?fn({...d,approved:false}):d));setConfirmApproval(false);
  };
+ const updatePart=(id:string,key:"topic"|"strands"|"skills",value:string)=>update(d=>({...d,parts:d.parts.map(p=>p.id===id?{...p,[key]:value}:p)}));
  const adjust=(kind:"question"|"mark",key:keyof Slice,value:number)=>{
   update(d=>({...d,[kind]:{...d[kind],[key]:value}}));
  };
@@ -79,6 +80,7 @@ export default function PaperExtractionReview({source}:{source:StagedSource}){
        d.question=safeSlice(prior.question,d.question,qPdf.numPages);
        d.mark=safeSlice(prior.mark,d.mark,mPdf.numPages);
        d.notes=typeof prior.notes==="string"?prior.notes.slice(0,1500):"";
+       if(Array.isArray(prior.overrides))d.parts=d.parts.map(original=>{const edit=prior.overrides?.find(x=>x.id===original.id);return edit?{...original,topic:String(edit.topic||original.topic).slice(0,100),strands:String(edit.strands||original.strands).slice(0,400),skills:String(edit.skills||original.skills).slice(0,600)}:original});
        d.approved=prior.approved===true&&isReviewable(d,qPdf.numPages,mPdf.numPages);
       }
      }
@@ -94,7 +96,7 @@ export default function PaperExtractionReview({source}:{source:StagedSource}){
   try{
    const {data:{user}}=await supabase.auth.getUser();const {data:approved}=await supabase.rpc("is_approved_owner");
    if(!user||approved!==true)throw Error("Approved account required.");
-   const payload:SavedReview={version:1,mappingFile,items:drafts.map(d=>({number:d.number,question:d.question,mark:d.mark,approved:d.approved,notes:d.notes}))};
+   const payload:SavedReview={version:1,mappingFile,items:drafts.map(d=>({number:d.number,question:d.question,mark:d.mark,approved:d.approved,notes:d.notes,overrides:d.parts.map(p=>({id:p.id,topic:p.topic,strands:p.strands,skills:p.skills}))}))};
    const {error}=await supabase.storage.from(bucket).upload(source.path+"/extraction-review.json",new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),{upsert:true,contentType:"application/json"});
    if(error)throw Error(error.message);
    setStatus(`Review progress saved privately: ${drafts.filter(d=>d.approved).length}/${drafts.length} complete questions approved. No live questions were changed.`);
@@ -129,7 +131,7 @@ export default function PaperExtractionReview({source}:{source:StagedSource}){
  </fieldset>)}
  </div>
  <label>Review notes<textarea value={selectedDraft.notes} onChange={e=>update(d=>({...d,notes:e.target.value}))} rows={2} placeholder="Record image, answer or tag corrections needed"/></label>
- <div style={{overflowX:"auto"}}><table><thead><tr><th>Part</th><th>Marks</th><th>AO</th><th>Primary topic</th><th>All topics</th><th>Grade 1–5 success (%)</th><th>Mapping review</th></tr></thead><tbody>{selectedDraft.parts.map(x=><tr key={x.id}><td>{x.question}</td><td>{x.marks}</td><td>{x.ao}</td><td>{x.topic}</td><td>{x.strands}</td><td>{[1,2,3,4,5].map(g=>x.gradePercent[g]??"–").join(" / ")}</td><td>{x.review}</td></tr>)}</tbody></table></div>
+ <p className="hint">Topic and skill fields can be corrected here; the original Pearson spreadsheet remains unchanged. Recheck both images after any edit.</p><div style={{overflowX:"auto"}}><table><thead><tr><th>Part</th><th>Marks</th><th>AO</th><th>Primary topic</th><th>All topics</th><th>Searchable skills</th><th>Grade 1–5 success (%)</th><th>Mapping review</th></tr></thead><tbody>{selectedDraft.parts.map(x=><tr key={x.id}><td>{x.question}</td><td>{x.marks}</td><td>{x.ao}</td><td><input aria-label={x.question+" primary topic"} value={x.topic} onChange={e=>updatePart(x.id,"topic",e.target.value)}/></td><td><input aria-label={x.question+" all topics"} value={x.strands} onChange={e=>updatePart(x.id,"strands",e.target.value)}/></td><td><input aria-label={x.question+" searchable skills"} value={x.skills} onChange={e=>updatePart(x.id,"skills",e.target.value)}/></td><td>{[1,2,3,4,5].map(g=>x.gradePercent[g]??"–").join(" / ")}</td><td>{x.review}</td></tr>)}</tbody></table></div>
  <label><input type="checkbox" checked={confirmApproval} onChange={e=>setConfirmApproval(e.target.checked)}/> I have checked both crops, all parts, the mark scheme and any suggested topic tags.</label>
  <button className="secondary" disabled={!confirmApproval||!isReviewable(selectedDraft,questionPdf.numPages,schemePdf.numPages)} onClick={()=>{setDrafts(current=>current.map((x,i)=>i===selected?{...x,approved:true}:x));setConfirmApproval(false)}}>Approve Q{selectedDraft.number}</button>
  </div>}
