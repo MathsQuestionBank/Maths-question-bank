@@ -91,7 +91,7 @@ test("extracts question paper and mark scheme in the same review without invalid
  await expect(page.getByText("1/2")).toBeVisible();
  await page.getByRole("button",{name:"Approve Q2"}).click();
  await expect(page.getByText("2/2")).toBeVisible();
- await page.getByRole("button",{name:"Q1",exact:true}).click();
+ await page.getByRole("button",{name:/Q1$/}).click();
  await expect(page.getByRole("button",{name:"Next question"})).toBeVisible();
  await page.getByRole("button",{name:"Undo approval"}).click();
  await expect(page.getByText("1/2")).toBeVisible();
