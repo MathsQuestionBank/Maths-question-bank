@@ -7,7 +7,7 @@ import {makeReviewDrafts,findMarkSchemeStartPage,isReviewable,totalMarks,type Qu
 
 const bucket="exam-materials-private";
 export type StagedSource={path:string;board:string;series:string;code:string;qualification:string};
-type SavedReview={version:number;mappingFile:string;markSchemeStartPage?:number;items:{number:number;question:Slice;mark:Slice;approved:boolean;notes:string;overrides?:{id:string;topic:string;strands:string;skills:string}[]}[]};
+type SavedReview={version:number;mappingFile:string;markSchemeStartPage?:number;items:{number:number;question:Slice;mark:Slice;approved:boolean;notes:string;questionManuallyAdjusted?:boolean;markManuallyAdjusted?:boolean;overrides?:{id:string;topic:string;strands:string;skills:string}[]}[]};
 const cleaned=(s:string)=>s.toUpperCase().replace(/[^A-Z0-9]/g,"");
 const safeSlice=(x:Slice|undefined,original:Slice,pageCount:number):Slice=>{
  if(!x||!Number.isFinite(Number(x.page))||!Number.isFinite(Number(x.top))||!Number.isFinite(Number(x.bottom)))return original;
@@ -37,7 +37,7 @@ export default function PaperExtractionReview({source}:{source:StagedSource}){
  };
  const updatePart=(id:string,key:"topic"|"strands"|"skills",value:string)=>update(d=>({...d,parts:d.parts.map(p=>p.id===id?{...p,[key]:value}:p)}));
  const adjust=(kind:"question"|"mark",key:keyof Slice,value:number)=>{
-  update(d=>({...d,[kind]:{...d[kind],[key]:value}}));
+  update(d=>({...d,[kind]:{...d[kind],[key]:value},[kind==="question"?"questionManuallyAdjusted":"markManuallyAdjusted"]:true}));
  };
  const recalculateSchemeCrops=()=>{
   if(!extracted.current||!schemePdf||markSchemeStartPage===null||!Number.isInteger(markSchemeStartPage)||markSchemeStartPage<1||markSchemeStartPage>schemePdf.numPages)return;
@@ -109,20 +109,27 @@ export default function PaperExtractionReview({source}:{source:StagedSource}){
       for(const d of prepared){
        const prior=previous.items.find(x=>x.number===d.number);
        if(!prior)continue;
-       d.question=safeSlice(prior.question,d.question,qPdf.numPages);
+       // Older unreviewed drafts stored the missing-question default (cover, 5–95%).
+       // Prefer the newly detected source location instead of restoring that stale crop.
+       const obsoleteCoverDefault=!d.questionDetected&&d.question.page>1&&
+        prior.question?.page===1&&Math.abs((prior.question.top??0)-.05)<.002&&Math.abs((prior.question.bottom??0)-.95)<.002;
+       if(!obsoleteCoverDefault)d.question=safeSlice(prior.question,d.question,qPdf.numPages);
+       d.questionManuallyAdjusted=!obsoleteCoverDefault&&(prior.questionManuallyAdjusted===true||
+         (prior.question?.page!==d.question.page||Math.abs((prior.question?.top??d.question.top)-d.question.top)>.002));
        // Older drafts could contain a crop from the numbered guidance (eg PDF page 3).
        // Never restore or keep approval for a page before the detected marking table.
        const invalidPreTable=effectiveSchemeStart!==null&&typeof prior.mark?.page==="number"&&prior.mark.page<effectiveSchemeStart;
        if(!invalidPreTable)d.mark=safeSlice(prior.mark,d.mark,mPdf.numPages);
+       d.markManuallyAdjusted=prior.markManuallyAdjusted===true;
        d.notes=typeof prior.notes==="string"?prior.notes.slice(0,1500):"";
        if(Array.isArray(prior.overrides))d.parts=d.parts.map(original=>{const edit=prior.overrides?.find(x=>x.id===original.id);return edit?{...original,topic:String(edit.topic||original.topic).slice(0,100),strands:String(edit.strands||original.strands).slice(0,400),skills:String(edit.skills||original.skills).slice(0,600)}:original});
-       d.approved=prior.approved===true&&!invalidPreTable&&isReviewable(d,qPdf.numPages,mPdf.numPages);
+       d.approved=prior.approved===true&&!invalidPreTable&&!obsoleteCoverDefault&&isReviewable(d,qPdf.numPages,mPdf.numPages);
       }
      }
     }catch{/* Invalid draft must never block extraction. */}
    }
    setDrafts(prepared);
-   setStatus(`Prepared ${prepared.length} complete questions from ${matches.length} mapped parts (${totalMarks(prepared)} marks). Mark-scheme table start: ${effectiveSchemeStart===null?"not automatically identified":`PDF page ${effectiveSchemeStart}`}. Every crop must be visually verified before approval.`);
+   setStatus(`Prepared ${prepared.length} complete questions from ${matches.length} mapped parts (${totalMarks(prepared)} marks). Mark-scheme table start: ${effectiveSchemeStart===null?"not automatically identified":`PDF page ${effectiveSchemeStart}`}. ${prepared.filter(x=>x.questionInferred).length} missing question-number positions inferred from printed total-mark lines. Check each crop before approval.`);
   }catch(e){setStatus(e instanceof Error?e.message:"Preparation failed.");}
   finally{setBusy(false)}
  };
@@ -131,7 +138,7 @@ export default function PaperExtractionReview({source}:{source:StagedSource}){
   try{
    const {data:{user}}=await supabase.auth.getUser();const {data:approved}=await supabase.rpc("is_approved_owner");
    if(!user||approved!==true)throw Error("Approved account required.");
-   const payload:SavedReview={version:1,mappingFile,markSchemeStartPage:markSchemeStartPage??undefined,items:drafts.map(d=>({number:d.number,question:d.question,mark:d.mark,approved:d.approved,notes:d.notes,overrides:d.parts.map(p=>({id:p.id,topic:p.topic,strands:p.strands,skills:p.skills}))}))};
+   const payload:SavedReview={version:1,mappingFile,markSchemeStartPage:markSchemeStartPage??undefined,items:drafts.map(d=>({number:d.number,question:d.question,mark:d.mark,approved:d.approved,notes:d.notes,questionManuallyAdjusted:d.questionManuallyAdjusted,markManuallyAdjusted:d.markManuallyAdjusted,overrides:d.parts.map(p=>({id:p.id,topic:p.topic,strands:p.strands,skills:p.skills}))}))};
    const {error}=await supabase.storage.from(bucket).upload(source.path+"/extraction-review.json",new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),{upsert:true,contentType:"application/json"});
    if(error)throw Error(error.message);
    setStatus(`Review progress saved privately: ${drafts.filter(d=>d.approved).length}/${drafts.length} complete questions approved. No live questions were changed.`);
@@ -169,7 +176,7 @@ export default function PaperExtractionReview({source}:{source:StagedSource}){
  {selectedDraft&&<div>
  <h3>Q{selectedDraft.number} · {selectedDraft.parts.length} part(s) · {selectedDraft.parts.reduce((n,p)=>n+p.marks,0)} marks</h3>
  <p className="hint">Parts: {selectedDraft.parts.map(x=>x.question).join(", ")} · Topics: {[...new Set(selectedDraft.parts.flatMap(x=>x.strands.split(/[;,]/).map(y=>y.trim()).filter(Boolean)))].join(", ")}</p>
- <p className="hint">Question location: {selectedDraft.questionDetected?"Suggested by PDF text":"Not detected — choose page/crop manually"}. Mark scheme location: {selectedDraft.markDetected?"Suggested by PDF text":"Not detected — choose page/crop manually"}.</p>
+ <p className="hint">Question location: {selectedDraft.questionDetected?"Detected from question number":selectedDraft.questionInferred?"Inferred from the printed Total for Question line — check crop":selectedDraft.questionManuallyAdjusted?"Adjusted manually":"Not detected — estimated nearby page, adjust crop manually"}. Mark scheme location: {selectedDraft.markDetected?"Suggested by PDF text":selectedDraft.markManuallyAdjusted?"Adjusted manually":"Not detected — adjust crop manually"}.</p>
  <div style={{display:"flex",gap:14,flexWrap:"wrap"}}>
  {(["question","mark"] as const).map(kind=><fieldset key={kind} style={{flex:"1 1 320px",minWidth:0}}>
  <legend>{kind==="question"?"Question paper crop":"Mark scheme crop"}</legend>
