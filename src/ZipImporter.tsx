@@ -119,7 +119,7 @@ export default function ZipImporter({onComplete}:{onComplete:()=>void}){
    setProgress(`Paused after linking ${linked} images and archiving ${archived} sources. ${e instanceof Error?e.message:String(e)}. Re-select the ZIP to resume; existing images will be skipped.`);
   }finally{setBusy(false);}
  };
- return <><StagedPaperReview/><NewExamPaperImporter/><EnhancedMappingImporter/><details style={{marginTop:24}}><summary style={{cursor:"pointer",fontWeight:700}}>Archive Maintenance — V6.2 recovery tools</summary><div className="panel" style={{padding:22}}>
+ return <><StagedPaperReview onPublished={onComplete}/><NewExamPaperImporter/><EnhancedMappingImporter/><details style={{marginTop:24}}><summary style={{cursor:"pointer",fontWeight:700}}>Archive Maintenance — V6.2 recovery tools</summary><div className="panel" style={{padding:22}}>
  <h2>Complete V6.2 archive import</h2>
  <p>Choose your original V6.2 ZIP to attach the missing question and mark-scheme images, including lettered parts such as Q11a. It will also preserve all 12 original 2020/2021 PDFs and original metadata in <strong>private storage</strong> for future extraction. Nothing already linked is overwritten.</p>
  <label>Original V6.2 archive (.zip)<input type="file" accept=".zip,application/zip" disabled={busy} onChange={e=>{const f=e.target.files?.[0];if(f)void inspect(f)}}/></label>
