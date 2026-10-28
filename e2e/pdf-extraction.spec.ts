@@ -45,6 +45,7 @@ test("extracts question paper and mark scheme in the same review without invalid
  await page.addInitScript(({user,token})=>{
   localStorage.setItem("sb-ljisttslifnyrbuybfud-auth-token",JSON.stringify({access_token:token,refresh_token:"dummy",expires_at:4102444800,expires_in:999999999,token_type:"bearer",user}));
  },{user,token:authToken()});
+ let storedReview:unknown=null;const downloadedMappings:string[]=[];
  await page.route("https://ljisttslifnyrbuybfud.supabase.co/**",async route=>{
   const request=route.request(),url=new URL(request.url()),path=url.pathname;
   const json=(v:unknown,status=200)=>route.fulfill({status,contentType:"application/json",body:JSON.stringify(v)});
@@ -60,14 +61,21 @@ test("extracts question paper and mark scheme in the same review without invalid
    if(prefix===root+"Edexcel/GCSE-Mathematics")return json([{name:"November-2022",id:null}]);
    if(prefix===root+"Edexcel/GCSE-Mathematics/November-2022")return json([{name:"1F",id:null}]);
    if(prefix===base+"/"+uid)return json([{name:"question-paper.pdf",id:"1"},{name:"mark-scheme.pdf",id:"2"},{name:"intake.json",id:"3"}]);
-   if(prefix==="enhanced-mapping-intake/"+uid)return json([{name:"fixture.xlsx",id:"4",created_at:"2026-10-27T20:30:00Z"}]);
+   if(prefix==="enhanced-mapping-intake/"+uid)return json([...(storedReview?[{name:"zzz-newer.xlsx",id:"5"}]:[]),{name:"fixture.xlsx",id:"4",created_at:"2026-10-27T20:30:00Z"}]);
    return json([]);
   }
   if(path.startsWith("/storage/v1/object/")&&!path.includes("/list/")){
    if(path.endsWith("/question-paper.pdf"))return route.fulfill({status:200,contentType:"application/pdf",body:questionPdf});
    if(path.endsWith("/mark-scheme.pdf"))return route.fulfill({status:200,contentType:"application/pdf",body:schemePdf});
-   if(path.endsWith("/fixture.xlsx"))return route.fulfill({status:200,contentType:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",body:mapping});
-   if(path.endsWith("/extraction-review.json"))return json({message:"Not found"},404);
+   if(path.endsWith(".xlsx")){downloadedMappings.push(path.split("/").pop()!);return route.fulfill({status:200,contentType:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",body:mapping})}
+   if(path.endsWith("/extraction-review.json")){
+    if(request.method()!=="GET"){
+     const form=await new Request(request.url(),{method:request.method(),headers:request.headers(),body:request.postDataBuffer()!}).formData();
+     const blob=[...form.values()].find(value=>typeof value!=="string") as File;
+     storedReview=JSON.parse(await blob.text());return json({Key:"saved"});
+    }
+    return storedReview?json(storedReview):json({message:"Not found"},404);
+   }
   }
   if(path.startsWith("/rest/v1/"))return json([]);
   return json({message:"No fixture for "+path},404);
@@ -98,4 +106,15 @@ test("extracts question paper and mark scheme in the same review without invalid
  await expect(page.getByText("1/2").first()).toBeVisible();
  await page.getByRole("button",{name:"Approve Q1 & Next"}).click();
  await expect(page.getByRole("heading",{name:/Q2 · 1 part/})).toBeVisible();
+ await page.getByRole("button",{name:/Q1$/}).click();
+ await page.getByLabel("question top",{exact:true}).fill("8");
+ await page.getByRole("button",{name:"Approve Q1 & Next"}).click();
+ await page.getByRole("button",{name:"Save review progress to account"}).click();
+ await expect(page.getByRole("status").last()).toContainText("Review progress saved privately");
+ await page.getByRole("button",{name:"Reload source and mapping"}).click();
+ await expect(page.getByRole("status").last()).toContainText("Prepared 2 complete questions");
+ await expect(page.getByLabel("question top",{exact:true})).toHaveValue("8");
+ await expect(page.getByText("2/2").first()).toBeVisible();
+ expect(downloadedMappings).toEqual(["fixture.xlsx","fixture.xlsx"]);
+
 });

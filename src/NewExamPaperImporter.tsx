@@ -9,7 +9,7 @@ const isPdf=async(file:File)=>{
  return String.fromCharCode(...header)==="%PDF-";
 };
 const slug=(value:string)=>value.trim().replace(/[^a-zA-Z0-9_-]+/g,"-").replace(/^-+|-+$/g,"").slice(0,80);
-export default function NewExamPaperImporter(){
+export default function NewExamPaperImporter({onArchived}:{onArchived?:()=>void}){
  const [board,setBoard]=useState("Edexcel");
  const [qualification,setQualification]=useState("GCSE Mathematics");
  const [tier,setTier]=useState("Foundation");
@@ -53,14 +53,24 @@ export default function NewExamPaperImporter(){
    if(lookupError)throw Error(lookupError.message);
    if(existing?.length)throw Error("A matching paper now exists. No files were overwritten.");
    const folder=`${base}${user.id}/`;
+   const {data:archived,error:listError}=await supabase.storage.from(bucket).list(folder.replace(/\/$/,""),{limit:100});
+   if(listError)throw Error("Cannot check existing archive: "+listError.message);
    for(const [name,file] of files){
+    if(archived?.some(x=>x.name===name)){
+     const {data:old,error:readError}=await supabase.storage.from(bucket).download(folder+name);
+     if(readError||!old)throw Error("Cannot verify existing "+name+"; nothing was overwritten.");
+     const hash=async(blob:Blob)=>Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",await blob.arrayBuffer()))).join(",");
+     if(await hash(old)!==await hash(file))throw Error("A different "+name+" is already archived. Continue its existing review; original source retained.");
+     continue;
+    }
     setStatus(`Uploading ${name} to private source storage…`);
     const {error}=await supabase.storage.from(bucket).upload(folder+name,file,{contentType:"application/pdf",upsert:false});
     if(error)throw Error(`Could not archive ${name}: ${error.message}. Any earlier uploaded source remains private and can be reviewed; nothing was published.`);
    }
    const manifest={board,qualification,tier,series:series.trim(),paper_code:code,uploaded_at:new Date().toISOString(),state:"awaiting-extraction-and-human-review",question_file:question.name,mark_scheme_file:markScheme.name};
-   const {error}=await supabase.storage.from(bucket).upload(folder+"intake.json",new Blob([JSON.stringify(manifest,null,2)],{type:"application/json"}),{contentType:"application/json",upsert:false});
+   const {error}=archived?.some(x=>x.name==="intake.json")?{error:null}:await supabase.storage.from(bucket).upload(folder+"intake.json",new Blob([JSON.stringify(manifest,null,2)],{type:"application/json"}),{contentType:"application/json",upsert:false});
    if(error)throw Error("PDFs archived, but the intake manifest was not saved: "+error.message);
+   onArchived?.();
    setStatus("Source PDFs archived privately. No exam paper or questions have been added to the searchable bank. Extraction, crop review and Enhanced Skills Mapping are the next stage.");
   }catch(e){setStatus(e instanceof Error?e.message:"Upload failed.");}
   finally{setBusy(false)}

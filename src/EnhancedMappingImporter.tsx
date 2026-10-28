@@ -2,9 +2,9 @@ import {useState} from "react";
 import JSZip from "jszip";
 import {supabase} from "./supabase";
 
-export type MappingRow={id:string;board:string;tier:string;series:string;paper:string;question:string;topic:string;strands:string;skills:string;review:string;excelRow:number;marks:number;ao:string;spec:string;gradePercent:Record<number,number|null>};
+export type MappingRow={id:string;board:string;tier:string;series:string;paper:string;question:string;topic:string;strands:string;skills:string;review:string;excelRow:number;marks:number;ao:string;spec:string;gradePercent:Record<number,number|null>;originalSkill?:string;mappingBasis?:string;additionalTags?:string};
 type Audit={rows:MappingRow[];duplicates:string[];reviewCount:number;issues:string[]};
-const MAX_SIZE=8*1024*1024;
+const MAX_SIZE=64*1024*1024;
 function parseSheet(xml:string,shared:string[]):string[][]{
  const doc=new DOMParser().parseFromString(xml,"application/xml");
  if(doc.querySelector("parsererror"))throw Error("The spreadsheet XML is damaged.");
@@ -26,7 +26,7 @@ function parseSheet(xml:string,shared:string[]):string[][]{
  return output;
 }
 export async function inspectFoundationMap(file:File):Promise<Audit>{
- if(file.size>MAX_SIZE||!file.name.toLowerCase().endsWith(".xlsx"))throw Error("Choose an .xlsx file no larger than 8 MB.");
+ if(file.size>MAX_SIZE||!file.name.toLowerCase().endsWith(".xlsx"))throw Error("Choose an .xlsx file no larger than 64 MB.");
  const zip=await JSZip.loadAsync(file);
  const stringsXml=await zip.file("xl/sharedStrings.xml")?.async("string");
  let shared:string[]=[];
@@ -40,7 +40,7 @@ export async function inspectFoundationMap(file:File):Promise<Audit>{
  const workbook=new DOMParser().parseFromString(workbookXml,"application/xml");
  const rels=new DOMParser().parseFromString(relationshipsXml,"application/xml");
  const sheets=Array.from(workbook.getElementsByTagNameNS("*","sheet"));
- const sheet=sheets.find(s=>/foundation enhanced mapping/i.test(s.getAttribute("name")||""))||sheets[0];
+ const sheet=sheets.find(s=>/(?:foundation|higher) enhanced mapping/i.test(s.getAttribute("name")||""))||sheets[0];
  if(!sheet)throw Error("No mapping worksheet found.");
  const relId=sheet.getAttribute("r:id")||sheet.getAttributeNS("http://schemas.openxmlformats.org/officeDocument/2006/relationships","id");
  const relationship=Array.from(rels.getElementsByTagNameNS("*","Relationship")).find(x=>x.getAttribute("Id")===relId);
@@ -56,8 +56,9 @@ export async function inspectFoundationMap(file:File):Promise<Audit>{
  if(missing.length)throw Error("Missing required columns: "+missing.join(", "));
  const col=(row:string[],label:string)=>row[headers.indexOf(label)]?.trim()||"";
  const rows:MappingRow[]=cells.slice(1).filter(row=>col(row,"question id")).map((row,i)=>({
+  originalSkill:col(row,"original skill")||col(row,"skill"),mappingBasis:col(row,"mapping basis"),additionalTags:col(row,"additional topic tags"),
   marks:Number(col(row,"maximum marks"))||0,ao:"AO"+col(row,"assessment objective").replace(/^AO/i,""),spec:col(row,"specification refs"),
-  gradePercent:Object.fromEntries([1,2,3,4,5].map(g=>{const val=col(row,"grade "+g+" success percent");return [g,val!==""&&Number.isFinite(Number(val))?Number(val):null]})),
+  gradePercent:Object.fromEntries([1,2,3,4,5,6,7,8,9].map(g=>{const val=col(row,"grade "+g+" success percent");return [g,val!==""&&Number.isFinite(Number(val))?Number(val):null]})),
   id:col(row,"question id"),board:col(row,"exam board"),tier:col(row,"tier"),series:col(row,"series"),paper:col(row,"paper"),question:col(row,"question"),topic:col(row,"primary strand"),strands:col(row,"all strands"),skills:col(row,"searchable skills"),review:col(row,"review recommendation"),excelRow:Number(col(row,"source excel row"))||i+2
  }));
  const seen=new Set<string>(),duplicates:string[]=[];

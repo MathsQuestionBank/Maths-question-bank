@@ -59,7 +59,7 @@ describe("staged question extraction proposals",()=>{
   expect(q5.questionDetected).toBe(false);
   expect(q5.questionInferred).toBe(true);
   expect(q5.question.page).toBe(3);
-  expect(q5.question.top).toBeGreaterThan(.09);
+  expect(q5.question.top).toBeGreaterThanOrEqual(.035);
   expect(q5.question.bottom).toBeLessThan(.42);
   expect(q5.markDetected).toBe(true);
   expect(isReviewable(q5,24,20)).toBe(true);
@@ -89,5 +89,34 @@ describe("staged question extraction proposals",()=>{
   expect(isReviewable(d,10,10)).toBe(false);
   expect(isReviewable({...d,markManuallyAdjusted:true},10,10)).toBe(true);
   expect(isReviewable({...d,question:{page:30,top:0,bottom:1}},10,10)).toBe(false);
+ });
+});
+
+describe('multi-page question preservation',()=>{
+ it('keeps every page through the printed total and next question boundary',()=>{
+  const lines:TextLine[]=[{page:2,top:.12,left:.1,text:'1 Solve the problem'},{page:3,top:.7,left:.2,text:'(Total for Question 1 is 5 marks)'},{page:4,top:.12,left:.1,text:'2 Next question'}];
+  const [draft]=makeReviewDrafts([row('Q01a',2),row('Q01b',3),row('Q02',1)],lines,[]);
+  expect(draft.question).toEqual({page:2,endPage:3,top:.102,bottom:.735});
+  expect(draft.parts).toHaveLength(2);
+  expect(draft.approved).toBe(false);
+ });
+ it('rejects fractional pages, reversed page ranges and invalid crop coordinates',()=>{
+  const d=makeReviewDrafts([row('Q01',2)],[{page:2,top:.1,left:.1,text:'1 Question'}],[])[0];
+  for(const question of [{page:1.5,top:0,bottom:1},{page:2,endPage:1,top:0,bottom:1},{page:2,endPage:11,top:0,bottom:1},{page:2,top:NaN,bottom:1}])expect(isReviewable({...d,question,markManuallyAdjusted:true},10,10)).toBe(false);
+ });
+});
+
+
+describe('real Pearson layout regressions',()=>{
+ it('finds questions printed near the top edge and rejects footer page numbers',()=>{
+  const lines:TextLine[]=[{page:14,top:.0503,left:.119,text:'18 The scatter graph shows information'},{page:14,top:.9264,left:.04,text:'14'},{page:15,top:.8,left:.15,text:'(Total for Question 18 is 4 marks)'},{page:16,top:.0503,left:.119,text:'19 Calculate the value'}];
+  const draft=makeReviewDrafts([row('Q18a',2),row('Q18b',2),row('Q19',3)],lines,[])[0];
+  expect(draft.question).toMatchObject({page:14,endPage:15});
+  expect(draft.question.top).toBeLessThan(.0503);expect(draft.questionDetected).toBe(true);
+  expect(findQuestionAnchors(lines,[14]).has(14)).toBe(false);
+ });
+ it('rejects an apparent question anchor after its printed total',()=>{
+  const lines:TextLine[]=[{page:6,top:.8,left:.2,text:'(Total for Question 10 is 4 marks)'},{page:10,top:.926,left:.04,text:'10'}];
+  expect(findQuestionAnchors(lines,[10]).size).toBe(0);
  });
 });

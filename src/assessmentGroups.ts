@@ -9,34 +9,28 @@ export type AssessmentGroup = {
 };
 
 /** Parent IDs are shared by each lettered part of the same complete exam question. */
-export function getAssessmentGroupKey(q:Pick<BankQuestion,"id"|"sourceId">):string {
- return q.sourceId?.match(/^(20\d{2}_[123][HF]_Q\d{2})([a-z][a-z0-9]*)$/i)?.[1]||q.id;
+export function getAssessmentGroupKey(q:Pick<BankQuestion,"id"|"sourceId"|"wholeKey">):string {
+ return q.wholeKey||q.sourceId?.match(/^(.*[-_]Q\d{1,2})(?:[a-z][a-z0-9]*)?$/i)?.[1]||q.id;
 }
 
-/** Selecting any lettered part includes the complete original question exactly once. */
+/** Selecting a mapped part includes its complete question once, retaining legacy IDs. */
 export function buildAssessmentGroups(all:BankQuestion[], selectedIds:string[]):AssessmentGroup[]{
  const byId=new Map(all.map(q=>[q.id,q]));
  const parents=new Map<string,BankQuestion[]>();
  for(const q of all){
-  const match=q.sourceId?.match(/^(20\d{2}_[123][HF]_Q\d{2})([a-z][a-z0-9]*)$/i);
-  if(!match)continue;
-  const key=match[1];
-  const entries=parents.get(key)||[];
-  entries.push(q);parents.set(key,entries);
+  const key=getAssessmentGroupKey(q);
+  const entries=parents.get(key)||[];entries.push(q);parents.set(key,entries);
  }
- const output:AssessmentGroup[]=[];
- const seen=new Set<string>();
+ const output:AssessmentGroup[]=[],seen=new Set<string>();
  for(const id of selectedIds){
   const q=byId.get(id);if(!q)continue;
-  const match=q.sourceId?.match(/^(20\d{2}_[123][HF]_Q\d{2})([a-z][a-z0-9]*)$/i);
-  const key=getAssessmentGroupKey(q);
-  if(seen.has(key))continue;
-  seen.add(key);
-  if(!match){output.push({key,question:q,parts:[q],marks:q.marks,label:q.sourceId||q.id});continue}
-  const parts=(parents.get(key)||[]).slice().sort((a,b)=>(a.sourceId||"").localeCompare(b.sourceId||"",undefined,{numeric:true}));
-  const representative=parts.find(p=>p.questionUrl)||q;
-  const marks=parts.reduce((sum,p)=>sum+p.marks,0);
-  output.push({key,question:representative,parts,marks,label:`${key} (${parts.map(p=>(p.sourceId||"").slice(key.length)).join(", ")})`});
+  const key=getAssessmentGroupKey(q);if(seen.has(key))continue;seen.add(key);
+  const parts=(parents.get(key)||[q]).slice().sort((a,b)=>(a.sourceId||"").localeCompare(b.sourceId||"",undefined,{numeric:true}));
+  // An explicit whole-question record supersedes its part allocations.
+  const whole=parts.find(p=>p.sourceId===key||/[-_]Q\d{1,2}$/i.test(p.sourceId||""));
+  const representative=whole||parts.find(p=>p.questionUrl)||q;
+  const marks=whole?.marks??q.wholeMarks??parts.reduce((sum,p)=>sum+p.marks,0);
+  output.push({key,question:representative,parts,marks,label:parts.length===1?q.sourceId||q.id:key});
  }
  return output;
 }

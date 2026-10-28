@@ -37,3 +37,31 @@ describe("publish a completed Edexcel Foundation paper",()=>{
   });
  });
 });
+
+describe('publication integrity regressions',()=>{
+ const full=()=>Array.from({length:26},(_,i)=>reviewed(i+1,i<24?3:4));
+ it('preserves the 26 complete questions / 44 mapped parts / 80 marks structure',()=>{
+  const drafts=full();
+  for(let i=0;i<18;i++){
+   const original=drafts[i].parts[0];
+   drafts[i].parts=[{...original,id:original.id+'a',question:original.question+'a',marks:1},{...original,id:original.id+'b',question:original.question+'b',marks:2}];
+  }
+  expect(preparePublication(drafts)).toEqual({questions:26,parts:44,marks:80});
+ });
+ it('rejects mismatched and repeated part references before upload',()=>{
+  const drafts=full();drafts[1].parts[0].question='Q01';
+  expect(()=>preparePublication(drafts)).toThrow(/Mismatched/);
+ });
+ it('preserves all available grade percentages and original mapping provenance',()=>{
+  const draft=reviewed(1,2);Object.assign(draft.parts[0],{originalSkill:'Pearson skill',mappingBasis:'Teacher suggestion',gradePercent:{4:12,5:34,6:56,7:78,8:90,9:99}});
+  expect(exportMappedParts(draft)[0]).toMatchObject({original_skill:'Pearson skill',mapping_basis:'Teacher suggestion',grade_percent:{'1':null,'6':56,'9':99}});
+ });
+ it('rejects invalid crops, missing complete question numbers and fabricated percentages',()=>{
+  const drafts=full();drafts[0].question.page=0;
+  expect(()=>preparePublication(drafts)).toThrow(/Invalid crop/);
+  drafts[0].question.page=2;drafts[0].parts[0].gradePercent[1]=101;
+  expect(()=>preparePublication(drafts)).toThrow(/grade percentage/);
+  drafts[0].parts[0].gradePercent[1]=20;drafts.shift();
+  expect(()=>preparePublication(drafts)).toThrow(/numbering/);
+ });
+});

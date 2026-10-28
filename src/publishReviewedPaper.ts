@@ -2,7 +2,7 @@ import type {PDFDocumentProxy} from "pdfjs-dist";
 import {supabase} from "./supabase";
 import {drawSlice} from "./pdfExtraction";
 import {preparePublication,exportMappedParts} from "./paperPublication";
-import type {QuestionDraft,Slice} from "./paperExtraction";
+import {isReviewable,type QuestionDraft,type Slice} from "./paperExtraction";
 
 const bucket="exam-materials-private";
 type Source={path:string;board:string;series:string;code:string;qualification:string};
@@ -12,7 +12,7 @@ type StoredReview={version:number;mappingFile:string;items:{
 }[]};
 
 function equalSlice(a:Slice,b:Slice){
- return a?.page===b?.page&&Math.abs(a.top-b.top)<.00001&&Math.abs(a.bottom-b.bottom)<.00001;
+ return a?.page===b?.page&&(a.endPage??a.page)===(b.endPage??b.page)&&Math.abs(a.top-b.top)<.00001&&Math.abs(a.bottom-b.bottom)<.00001;
 }
 function reviewMatchesStored(saved:StoredReview,drafts:QuestionDraft[],mappingFile:string){
  if(saved.version!==1||saved.mappingFile!==mappingFile||saved.items?.length!==drafts.length)return false;
@@ -51,6 +51,7 @@ export async function publishReviewedPaper(args:{
  mappingFile:string;progress:(message:string)=>void;
 }):Promise<string>{
  const {source,drafts,questionPdf,schemePdf,mappingFile,progress}=args;
+ if(drafts.some(d=>!isReviewable(d,questionPdf.numPages,schemePdf.numPages)))throw Error("Every crop must be located and valid in its source PDF before publishing.");
  const summary=preparePublication(drafts);
  const {data:{user},error:authError}=await supabase.auth.getUser();
  if(authError||!user)throw Error("Please sign in before publishing.");

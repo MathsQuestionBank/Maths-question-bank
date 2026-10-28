@@ -1,6 +1,6 @@
 import {getDocument,GlobalWorkerOptions,type PDFDocumentProxy} from "pdfjs-dist";
 import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
-import type {TextLine,Slice} from "./paperExtraction";
+import {validSlice,type TextLine,type Slice} from "./paperExtraction";
 GlobalWorkerOptions.workerSrc=workerUrl;
 export async function loadSourcePdf(blob:Blob):Promise<PDFDocumentProxy>{
  const data=new Uint8Array(await blob.arrayBuffer());
@@ -33,16 +33,24 @@ export async function readPdfLines(pdf:PDFDocumentProxy,onProgress?:(page:number
  return lines;
 }
 export async function drawSlice(pdf:PDFDocumentProxy,selection:Slice,canvas:HTMLCanvasElement):Promise<void>{
- const page=await pdf.getPage(selection.page);
- const viewport=page.getViewport({scale:1.4});
- const source=document.createElement("canvas");
- source.width=Math.round(viewport.width);source.height=Math.round(viewport.height);
- const context=source.getContext("2d");if(!context)throw Error("Canvas unavailable");
- await page.render({canvas:source,canvasContext:context,viewport}).promise;
- const start=Math.max(0,Math.floor(source.height*selection.top));
- const height=Math.max(1,Math.floor(source.height*(selection.bottom-selection.top)));
- canvas.width=source.width;canvas.height=height;
+ if(!validSlice(selection,pdf.numPages))throw Error("Invalid crop page range or boundaries.");
+ const fragments:HTMLCanvasElement[]=[];
+ for(let p=selection.page;p<=(selection.endPage??selection.page);p++){
+  const page=await pdf.getPage(p);
+  const viewport=page.getViewport({scale:1.4});
+  const source=document.createElement("canvas");
+  source.width=Math.round(viewport.width);source.height=Math.round(viewport.height);
+  const context=source.getContext("2d");if(!context)throw Error("Canvas unavailable");
+  await page.render({canvas:source,canvasContext:context,viewport}).promise;
+  const top=p===selection.page?selection.top:.05;
+  const bottom=p===(selection.endPage??selection.page)?selection.bottom:.96;
+  const fragment=document.createElement("canvas");fragment.width=source.width;fragment.height=Math.max(1,Math.floor(source.height*(bottom-top)));
+  const output=fragment.getContext("2d");if(!output)throw Error("Canvas unavailable");
+  output.drawImage(source,0,Math.floor(source.height*top),source.width,fragment.height,0,0,fragment.width,fragment.height);
+  fragments.push(fragment);source.width=0;source.height=0;
+ }
+ canvas.width=Math.max(...fragments.map(f=>f.width));canvas.height=fragments.reduce((n,f)=>n+f.height,0);
  const output=canvas.getContext("2d");if(!output)throw Error("Canvas unavailable");
  output.fillStyle="#fff";output.fillRect(0,0,canvas.width,canvas.height);
- output.drawImage(source,0,start,source.width,Math.min(height,source.height-start),0,0,source.width,height);
+ let y=0;for(const fragment of fragments){output.drawImage(fragment,0,y);y+=fragment.height;fragment.width=0;fragment.height=0}
 }

@@ -33,7 +33,7 @@ describe("V6.2 whole-question grouping",()=>{
  });
  it("keeps question groups in selection order and totals all distinct marks",()=>{
   const groups=buildAssessmentGroups(all,["d","b","c"]);
-  expect(groups.map(g=>g.key)).toEqual(["d","2022_1H_Q02","c"]);
+  expect(groups.map(g=>g.key)).toEqual(["2020_3H_Q07","2022_1H_Q02","2021_2H_Q11"]);
   expect(calculateAssessmentMarks(groups)).toBe(13);
  });
  it("groups use the full exam paper reference, avoiding collisions across papers",()=>{
@@ -45,7 +45,7 @@ describe("V6.2 whole-question grouping",()=>{
 describe("assessment ordering and removal",()=>{
  it("moves a whole multipart group rather than swapping two distant questions",()=>{
   const order=moveAssessmentGroupIds(all,["a","c","d"],0,2);
-  expect(buildAssessmentGroups(all,order).map(g=>g.key)).toEqual(["c","d","2022_1H_Q02"]);
+  expect(buildAssessmentGroups(all,order).map(g=>g.key)).toEqual(["2021_2H_Q11","2020_3H_Q07","2022_1H_Q02"]);
  });
  it("moving the second group to the first preserves the originally selected part ID",()=>{
   const order=moveAssessmentGroupIds(all,["d","b","c"],1,0);
@@ -55,7 +55,7 @@ describe("assessment ordering and removal",()=>{
  it("direct position change shifts intervening groups and preserves all selected multipart parts",()=>{
   const selected=["a","b","c","d"];
   const result=moveAssessmentGroupIds(all,selected,0,2);
-  expect(buildAssessmentGroups(all,result).map(g=>g.key)).toEqual(["c","d","2022_1H_Q02"]);
+  expect(buildAssessmentGroups(all,result).map(g=>g.key)).toEqual(["2021_2H_Q11","2020_3H_Q07","2022_1H_Q02"]);
   expect(result).toEqual(["c","d","a","b"]);
   expect(calculateAssessmentMarks(buildAssessmentGroups(all,result))).toBe(13);
  });
@@ -95,4 +95,32 @@ describe("assessment PDF export readiness",()=>{
  it("cannot print an empty assessment in any export mode",()=>{
   for(const mode of ["questions","marks","both"] as const)expect(checkAssessmentExport([],mode).ready).toBe(false);
  });
+});
+
+describe('enhanced mapping complete questions',()=>{
+ it('groups Foundation mapping IDs and counts a shared whole image once',()=>{
+  const a=make('fa','EDX-F-NOVEMBER2022-1F-Q12a',2,true),b=make('fb','EDX-F-NOVEMBER2022-1F-Q12b',3,true);
+  const groups=buildAssessmentGroups([a,b],['fa','fb']);
+  expect(groups).toHaveLength(1);expect(groups[0].marks).toBe(5);
+  expect(removeAssessmentGroupIds([a,b],['fa','fb'],groups[0].key)).toEqual([]);
+ });
+ it('uses published whole keys and marks even if a bank page omits siblings',()=>{
+  const part={...make('fa','EDX-F-NOVEMBER2022-1F-Q12a',2,true),wholeKey:'November 2022_1F_Q12',wholeMarks:5};
+  expect(buildAssessmentGroups([part],['fa'])[0].marks).toBe(5);
+ });
+ it('does not add both a whole record and its parts',()=>{
+  const key='November 2022_1F_Q12';
+  const whole={...make('whole',key,5,true),wholeKey:key};
+  const a={...make('a','EDX-F-NOVEMBER2022-1F-Q12a',2,true),wholeKey:key};
+  const b={...make('b','EDX-F-NOVEMBER2022-1F-Q12b',3,true),wholeKey:key};
+  expect(calculateAssessmentMarks(buildAssessmentGroups([whole,a,b],['whole','a','b']))).toBe(5);
+ });
+});
+
+
+it('groups an older whole-question record and lettered parts without double-counting',()=>{
+ const whole=make('whole','2022_1H_Q02',4,true);
+ const groups=buildAssessmentGroups([...all,whole],['a','whole','b']);
+ expect(groups).toHaveLength(1);expect(groups[0].marks).toBe(4);
+ expect(removeAssessmentGroupIds([...all,whole],['a','whole','b'],groups[0].key)).toEqual([]);
 });

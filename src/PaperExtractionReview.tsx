@@ -5,16 +5,15 @@ import type {PDFDocumentProxy} from "pdfjs-dist";
 import {supabase} from "./supabase";
 import {inspectFoundationMap,type MappingRow} from "./EnhancedMappingImporter";
 import {loadSourcePdf,readPdfLines,drawSlice} from "./pdfExtraction";
-import {makeReviewDrafts,findMarkSchemeStartPage,isReviewable,totalMarks,type QuestionDraft,type Slice,type TextLine} from "./paperExtraction";
+import {validSlice,makeReviewDrafts,findMarkSchemeStartPage,isReviewable,totalMarks,type QuestionDraft,type Slice,type TextLine} from "./paperExtraction";
 
 const bucket="exam-materials-private";
 export type StagedSource={path:string;board:string;series:string;code:string;qualification:string};
 type SavedReview={version:number;mappingFile:string;markSchemeStartPage?:number;items:{number:number;question:Slice;mark:Slice;approved:boolean;notes:string;questionManuallyAdjusted?:boolean;markManuallyAdjusted?:boolean;overrides?:{id:string;topic:string;strands:string;skills:string}[]}[]};
 const cleaned=(s:string)=>s.toUpperCase().replace(/[^A-Z0-9]/g,"");
 const safeSlice=(x:Slice|undefined,original:Slice,pageCount:number):Slice=>{
- if(!x||!Number.isFinite(Number(x.page))||!Number.isFinite(Number(x.top))||!Number.isFinite(Number(x.bottom)))return original;
- const page=Math.trunc(Number(x.page)),top=Number(x.top),bottom=Number(x.bottom);
- return page>=1&&page<=pageCount&&top>=0&&bottom<=1&&bottom-top>=.025?{page,top,bottom}:original;
+ if(!x||!validSlice(x,pageCount))return original;
+ return {...x};
 };
 function CropPreview({pdf,slice,title}:{pdf:PDFDocumentProxy;slice:Slice;title:string}){
  const ref=useRef<HTMLCanvasElement>(null);const [error,setError]=useState("");
@@ -22,7 +21,7 @@ function CropPreview({pdf,slice,title}:{pdf:PDFDocumentProxy;slice:Slice;title:s
   let active=true;
   const render=async()=>{if(!ref.current)return;try{await drawSlice(pdf,slice,ref.current);if(active)setError("")}catch(e){if(active)setError(e instanceof Error?e.message:"Cannot render crop")}};
   void render();return()=>{active=false};
- },[pdf,slice.page,slice.top,slice.bottom]);
+ },[pdf,slice.page,slice.endPage,slice.top,slice.bottom]);
  return <div style={{flex:"1 1 320px",minWidth:0}}><strong>{title}</strong>{error&&<p role="alert">{error}</p>}<div style={{maxHeight:500,overflow:"auto",border:"1px solid #aaa",borderRadius:6,marginTop:8}}><canvas aria-label={title} ref={ref} style={{width:"100%",display:"block"}}/></div></div>;
 }
 export default function PaperExtractionReview({source,onPublished}:{source:StagedSource;onPublished?:()=>void}){
@@ -83,10 +82,18 @@ export default function PaperExtractionReview({source,onPublished}:{source:Stage
    const markLines=await readPdfLines(mPdf,undefined,"Mark scheme");
    setQuestionPdf(qPdf);setSchemePdf(mPdf);
    setStatus("Finding the Enhanced Skills Mapping uploaded to your account…");
-   const {data:allFiles,error:fileError}=await supabase.storage.from(bucket).list("enhanced-mapping-intake/"+user.id,{limit:200,sortBy:{column:"created_at",order:"desc"}});
-   if(fileError)throw new Error(fileError.message);
+   const allFiles:{name:string}[]=[];
+   for(let offset=0;;offset+=100){
+    const {data,error}=await supabase.storage.from(bucket).list("enhanced-mapping-intake/"+user.id,{limit:100,offset,sortBy:{column:"name",order:"desc"}});
+    if(error)throw new Error(error.message);
+    allFiles.push(...(data||[]));if(!data||data.length<100)break;
+   }
+   const {data:old,error:reviewError}=await supabase.storage.from(bucket).download(source.path+"/extraction-review.json");
+   if(reviewError&&!/not found|not exist/i.test(reviewError.message))throw Error("Cannot check saved review; preparation stopped to protect existing corrections: "+reviewError.message);
+   let previous:SavedReview|undefined;
+   if(old){try{previous=JSON.parse(await old.text()) as SavedReview;if(previous.version!==1||!previous.mappingFile||!Array.isArray(previous.items))throw Error("Invalid review")}catch{throw Error("Saved review cannot be read. Original file retained; do not overwrite it.")}}
    let matches:MappingRow[]=[];let sourceName="";
-   const xlsx=(allFiles||[]).filter(x=>x.name.toLowerCase().endsWith(".xlsx"));
+   const xlsx=(allFiles||[]).filter(x=>x.name.toLowerCase().endsWith(".xlsx")&&(!previous||x.name===previous.mappingFile));
    for(const file of xlsx){
     const {data,error}=await supabase.storage.from(bucket).download("enhanced-mapping-intake/"+user.id+"/"+file.name);
     if(error||!data)continue;
@@ -106,11 +113,7 @@ export default function PaperExtractionReview({source,onPublished}:{source:Stage
    extracted.current={matches,questionLines,markLines};
    let effectiveSchemeStart=detectedStart;
    let prepared=makeReviewDrafts(matches,questionLines,markLines,effectiveSchemeStart);
-   const {data:old}=await supabase.storage.from(bucket).download(source.path+"/extraction-review.json");
-   if(old){
-    try{
-     const previous=JSON.parse(await old.text()) as SavedReview;
-     if(previous.version===1&&previous.mappingFile===sourceName&&Array.isArray(previous.items)){
+   if(previous){
       if(typeof previous.markSchemeStartPage==="number"&&Number.isInteger(previous.markSchemeStartPage)&&previous.markSchemeStartPage>=1&&previous.markSchemeStartPage<=mPdf.numPages){
        effectiveSchemeStart=previous.markSchemeStartPage;
        setMarkSchemeStartPage(effectiveSchemeStart);
@@ -123,23 +126,25 @@ export default function PaperExtractionReview({source,onPublished}:{source:Stage
        // Prefer the newly detected source location instead of restoring that stale crop.
        const obsoleteCoverDefault=!d.questionDetected&&d.question.page>1&&
         prior.question?.page===1&&Math.abs((prior.question.top??0)-.05)<.002&&Math.abs((prior.question.bottom??0)-.95)<.002;
-       if(!obsoleteCoverDefault)d.question=safeSlice(prior.question,d.question,qPdf.numPages);
+       const proposedQuestion={...d.question};
+       const restoredQuestion=safeSlice(prior.question,d.question,qPdf.numPages);
+       const restoredMark=safeSlice(prior.mark,d.mark,mPdf.numPages);
+       const invalidSavedCrop=!prior.question||!validSlice(prior.question,qPdf.numPages)||!prior.mark||!validSlice(prior.mark,mPdf.numPages);
+       if(!obsoleteCoverDefault)d.question=restoredQuestion;
        d.questionManuallyAdjusted=!obsoleteCoverDefault&&(prior.questionManuallyAdjusted===true||
-         (prior.question?.page!==d.question.page||Math.abs((prior.question?.top??d.question.top)-d.question.top)>.002));
+         (prior.question?.page!==proposedQuestion.page||Math.abs((prior.question?.top??proposedQuestion.top)-proposedQuestion.top)>.002||prior.question?.bottom!==proposedQuestion.bottom||prior.question?.endPage!==proposedQuestion.endPage));
        // Older drafts could contain a crop from the numbered guidance (eg PDF page 3).
        // Never restore or keep approval for a page before the detected marking table.
        const invalidPreTable=effectiveSchemeStart!==null&&typeof prior.mark?.page==="number"&&prior.mark.page<effectiveSchemeStart;
-       if(!invalidPreTable)d.mark=safeSlice(prior.mark,d.mark,mPdf.numPages);
+       if(!invalidPreTable)d.mark=restoredMark;
        d.markManuallyAdjusted=prior.markManuallyAdjusted===true;
-       d.notes=typeof prior.notes==="string"?prior.notes.slice(0,1500):"";
-       if(Array.isArray(prior.overrides))d.parts=d.parts.map(original=>{const edit=prior.overrides?.find(x=>x.id===original.id);return edit?{...original,topic:String(edit.topic||original.topic).slice(0,100),strands:String(edit.strands||original.strands).slice(0,400),skills:String(edit.skills||original.skills).slice(0,600)}:original});
-       d.approved=prior.approved===true&&!invalidPreTable&&!obsoleteCoverDefault&&isReviewable(d,qPdf.numPages,mPdf.numPages);
+       d.notes=typeof prior.notes==="string"?prior.notes:"";
+       if(Array.isArray(prior.overrides))d.parts=d.parts.map(original=>{const edit=prior.overrides?.find(x=>x.id===original.id);return edit?{...original,topic:typeof edit.topic==="string"?edit.topic:original.topic,strands:typeof edit.strands==="string"?edit.strands:original.strands,skills:typeof edit.skills==="string"?edit.skills:original.skills}:original});
+       d.approved=prior.approved===true&&!invalidSavedCrop&&!invalidPreTable&&!obsoleteCoverDefault&&isReviewable(d,qPdf.numPages,mPdf.numPages);
       }
       setReviewSaved(true);
-     }
-    }catch{/* Invalid draft must never block extraction. */}
    }
-   setDrafts(prepared);
+   setDrafts(prepared);setSelected(Math.max(0,prepared.findIndex(d=>!d.approved)));
    setStatus(`Prepared ${prepared.length} complete questions from ${matches.length} mapped parts (${totalMarks(prepared)} marks). Mark-scheme table start: ${effectiveSchemeStart===null?"not automatically identified":`PDF page ${effectiveSchemeStart}`}. ${prepared.filter(x=>x.questionInferred).length} missing question-number positions inferred from printed total-mark lines. Check each crop before approval.`);
   }catch(e){setStatus(e instanceof Error?e.message:"Preparation failed.");}
   finally{setBusy(false)}
@@ -215,18 +220,21 @@ export default function PaperExtractionReview({source,onPublished}:{source:Stage
  <legend>{kind==="question"?"Question paper crop":"Mark scheme crop"}</legend>
  <div className="library-toolbar" style={{flexWrap:"wrap"}}>
  <label>Page<input aria-label={kind+" page"} type="number" min="1" max={kind==="question"?questionPdf.numPages:schemePdf.numPages} value={selectedDraft[kind].page} onChange={e=>adjust(kind,"page",Number(e.target.value))}/></label>
+ <label>End page<input aria-label={kind+" end page"} type="number" min={selectedDraft[kind].page} max={kind==="question"?questionPdf.numPages:schemePdf.numPages} value={selectedDraft[kind].endPage??selectedDraft[kind].page} onChange={e=>adjust(kind,"endPage",Number(e.target.value))}/></label>
  <label>Top %<input aria-label={kind+" top"} type="number" min="0" max="100" step=".5" value={Math.round(selectedDraft[kind].top*1000)/10} onChange={e=>adjust(kind,"top",Number(e.target.value)/100)}/></label>
  <label>Bottom %<input aria-label={kind+" bottom"} type="number" min="0" max="100" step=".5" value={Math.round(selectedDraft[kind].bottom*1000)/10} onChange={e=>adjust(kind,"bottom",Number(e.target.value)/100)}/></label>
  </div>
- {selectedDraft[kind].page>=1&&selectedDraft[kind].page<=(kind==="question"?questionPdf.numPages:schemePdf.numPages)&&selectedDraft[kind].bottom>selectedDraft[kind].top
+ {validSlice(selectedDraft[kind],kind==="question"?questionPdf.numPages:schemePdf.numPages)
  &&<CropPreview pdf={kind==="question"?questionPdf:schemePdf} slice={selectedDraft[kind]} title={kind==="question"?"Question image":"Mark-scheme image"}/>}
  </fieldset>)}
  </div>
  <label>Review notes<textarea value={selectedDraft.notes} onChange={e=>update(d=>({...d,notes:e.target.value}))} rows={2} placeholder="Record image, answer or tag corrections needed"/></label>
- <p className="hint">Topic and skill fields can be corrected here; the original Pearson spreadsheet remains unchanged. Recheck both images after any edit.</p><div style={{overflowX:"auto"}}><table><thead><tr><th>Part</th><th>Marks</th><th>AO</th><th>Primary topic</th><th>All topics</th><th>Searchable skills</th><th>Grade 1–5 success (%)</th><th>Mapping review</th></tr></thead><tbody>{selectedDraft.parts.map(x=><tr key={x.id}><td>{x.question}</td><td>{x.marks}</td><td>{x.ao}</td><td><input aria-label={x.question+" primary topic"} value={x.topic} onChange={e=>updatePart(x.id,"topic",e.target.value)}/></td><td><input aria-label={x.question+" all topics"} value={x.strands} onChange={e=>updatePart(x.id,"strands",e.target.value)}/></td><td><input aria-label={x.question+" searchable skills"} value={x.skills} onChange={e=>updatePart(x.id,"skills",e.target.value)}/></td><td>{[1,2,3,4,5].map(g=>x.gradePercent[g]??"–").join(" / ")}</td><td>{x.review}</td></tr>)}</tbody></table></div>
+ <p className="hint">Topic and skill fields can be corrected here; the original Pearson spreadsheet remains unchanged. Recheck both images after any edit.</p><div style={{overflowX:"auto"}}><table><thead><tr><th>Part</th><th>Marks</th><th>AO</th><th>Primary topic</th><th>All topics</th><th>Searchable skills</th><th>Grade 1–9 success (%)</th><th>Mapping review</th></tr></thead><tbody>{selectedDraft.parts.map(x=><tr key={x.id}><td>{x.question}</td><td>{x.marks}</td><td>{x.ao}</td><td><input aria-label={x.question+" primary topic"} value={x.topic} onChange={e=>updatePart(x.id,"topic",e.target.value)}/></td><td><input aria-label={x.question+" all topics"} value={x.strands} onChange={e=>updatePart(x.id,"strands",e.target.value)}/></td><td><input aria-label={x.question+" searchable skills"} value={x.skills} onChange={e=>updatePart(x.id,"skills",e.target.value)}/></td><td>{[1,2,3,4,5,6,7,8,9].map(g=>x.gradePercent[g]??"–").join(" / ")}</td><td>{x.review}</td></tr>)}</tbody></table></div>
  <p className="hint">Approve each complete question only after checking the question crop, mark scheme, parts and topic tags. One tap approves it and opens the next question. Any later edit removes its approval.</p>
  <div className="row" style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap"}}>
- <button className="primary" disabled={busy||!isReviewable(selectedDraft,questionPdf.numPages,schemePdf.numPages)} onClick={approveAndNext}>
+ <button className="secondary" disabled={busy||selected===0} onClick={()=>select(selected-1)}>Previous question</button>
+ <button className="secondary" disabled={busy||selected===drafts.length-1} onClick={()=>select(selected+1)}>Next without approval</button>
+ <button className="primary" disabled={busy||!!publishedPaperId||!isReviewable(selectedDraft,questionPdf.numPages,schemePdf.numPages)} onClick={approveAndNext}>
  {selectedDraft.approved?(selected<drafts.length-1?"Next question":"Q"+selectedDraft.number+" approved"):(selected<drafts.length-1?"Approve Q"+selectedDraft.number+" & Next":"Approve Q"+selectedDraft.number)}
  </button>
  {selectedDraft.approved&&<button className="secondary" disabled={busy} onClick={revokeApproval}>Undo approval</button>}
