@@ -8,11 +8,12 @@ const authToken=()=>{
  const b64=(v:object)=>Buffer.from(JSON.stringify(v)).toString("base64url");
  return b64({alg:"HS256",typ:"JWT"})+"."+b64({exp:4102444800,sub:uid,role:"authenticated",aud:"authenticated"})+".signature";
 };
-async function workbookFixture(){
+async function workbookFixture(format:string){
  const zip=new JSZip();
  const headers=["Question ID","Tier","Exam board","Series","Paper","Question","Primary strand","All strands","Searchable skills","Review recommendation","Maximum marks","Assessment objective","Specification refs","Grade 1 success percent","Grade 2 success percent","Grade 3 success percent","Grade 4 success percent","Grade 5 success percent"];
  const values=["EDX-F-NOVEMBER2022-1F-Q01","Foundation","Edexcel","November 2022","1F","Q01","Number","Number; Ratio","Addition","Mapped","2","1","N2","66","77","83","89","94"];
  const nextValues=values.map((v,i)=>i===0?"EDX-F-NOVEMBER2022-1F-Q02":i===5?"Q02":v);
+ if(format==="csv")return Buffer.from([headers,values,nextValues].map(row=>row.map(v=>JSON.stringify(v)).join(",")).join("\r\n"));
  const cell=(text:string,index:number,row:number)=>{
   const col=String.fromCharCode(65+index);
   return '<c r="'+col+row+'" t="inlineStr"><is><t>'+text.replace(/&/g,"&amp;").replace(/</g,"&lt;")+'</t></is></c>';
@@ -26,7 +27,8 @@ async function workbookFixture(){
  zip.file("xl/worksheets/sheet1.xml",sheet);
  return await zip.generateAsync({type:"nodebuffer"});
 }
-test("extracts question paper and mark scheme in the same review without invalid page request",async({page},testInfo)=>{
+for(const format of ["xlsx","csv"]){
+test(`extracts ${format} mapping and preserves its saved review without invalid page requests`,async({page},testInfo)=>{
  test.skip(testInfo.project.name!=="chromium","Real PDF test runs once on desktop Chromium");
  test.setTimeout(90000);
  await page.setContent("<html><body><p style='margin:80px;font-size:24px'>1 Work out 3 + 4.</p><p style='margin:80px;font-size:24px'>2 Work out 5 + 6.</p></body></html>");
@@ -41,7 +43,7 @@ test("extracts question paper and mark scheme in the same review without invalid
   '<section style="padding:75px;font-size:18px"><p>Paper: 1MA1/1F</p><p>Question Answer Mark Mark scheme Additional guidance</p><p>1 7 B1 for 7</p><p>2 11 B1 for 11</p></section>'
  ].join("")+'</body></html>');
  const schemePdf=await page.pdf({format:"A4"});
- const mapping=await workbookFixture();
+ const mapping=await workbookFixture(format);
  await page.addInitScript(({user,token})=>{
   localStorage.setItem("sb-ljisttslifnyrbuybfud-auth-token",JSON.stringify({access_token:token,refresh_token:"dummy",expires_at:4102444800,expires_in:999999999,token_type:"bearer",user}));
  },{user,token:authToken()});
@@ -61,13 +63,13 @@ test("extracts question paper and mark scheme in the same review without invalid
    if(prefix===root+"Edexcel/GCSE-Mathematics")return json([{name:"November-2022",id:null}]);
    if(prefix===root+"Edexcel/GCSE-Mathematics/November-2022")return json([{name:"1F",id:null}]);
    if(prefix===base+"/"+uid)return json([{name:"question-paper.pdf",id:"1"},{name:"mark-scheme.pdf",id:"2"},{name:"intake.json",id:"3"}]);
-   if(prefix==="enhanced-mapping-intake/"+uid)return json([...(storedReview?[{name:"zzz-newer.xlsx",id:"5"}]:[]),{name:"fixture.xlsx",id:"4",created_at:"2026-10-27T20:30:00Z"}]);
+   if(prefix==="enhanced-mapping-intake/"+uid)return json([...(storedReview?[{name:format==="xlsx"?"zzz-newer.csv":"zzz-newer.xlsx",id:"5"}]:format==="csv"?[{name:"zzz-older.xlsx",id:"5"}]:[]),{name:"fixture."+format,id:"4",created_at:"2026-10-27T20:30:00Z"}]);
    return json([]);
   }
   if(path.startsWith("/storage/v1/object/")&&!path.includes("/list/")){
    if(path.endsWith("/question-paper.pdf"))return route.fulfill({status:200,contentType:"application/pdf",body:questionPdf});
    if(path.endsWith("/mark-scheme.pdf"))return route.fulfill({status:200,contentType:"application/pdf",body:schemePdf});
-   if(path.endsWith(".xlsx")){downloadedMappings.push(path.split("/").pop()!);return route.fulfill({status:200,contentType:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",body:mapping})}
+   if(/\.(xlsx|csv)$/.test(path)){downloadedMappings.push(path.split("/").pop()!);return route.fulfill({status:200,contentType:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",body:mapping})}
    if(path.endsWith("/extraction-review.json")){
     if(request.method()!=="GET"){
      const form=await new Request(request.url(),{method:request.method(),headers:request.headers(),body:request.postDataBuffer()!}).formData();
@@ -115,6 +117,8 @@ test("extracts question paper and mark scheme in the same review without invalid
  await expect(page.getByRole("status").last()).toContainText("Prepared 2 complete questions");
  await expect(page.getByLabel("question top",{exact:true})).toHaveValue("8");
  await expect(page.getByText("2/2").first()).toBeVisible();
- expect(downloadedMappings).toEqual(["fixture.xlsx","fixture.xlsx"]);
+ expect(downloadedMappings).toEqual(["fixture."+format,"fixture."+format]);
 
 });
+
+}

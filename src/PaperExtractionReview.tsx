@@ -93,11 +93,12 @@ export default function PaperExtractionReview({source,onPublished}:{source:Stage
    let previous:SavedReview|undefined;
    if(old){try{previous=JSON.parse(await old.text()) as SavedReview;if(previous.version!==1||!previous.mappingFile||!Array.isArray(previous.items))throw Error("Invalid review")}catch{throw Error("Saved review cannot be read. Original file retained; do not overwrite it.")}}
    let matches:MappingRow[]=[];let sourceName="";
-   const xlsx=(allFiles||[]).filter(x=>x.name.toLowerCase().endsWith(".xlsx")&&(!previous||x.name===previous.mappingFile));
-   for(const file of xlsx){
+   const mappingFiles=(allFiles||[]).filter(x=>/\.(xlsx|csv)$/i.test(x.name)&&(!previous||x.name===previous.mappingFile))
+    .sort((a,b)=>Number(/\.csv$/i.test(b.name))-Number(/\.csv$/i.test(a.name)));
+   for(const file of mappingFiles){
     const {data,error}=await supabase.storage.from(bucket).download("enhanced-mapping-intake/"+user.id+"/"+file.name);
     if(error||!data)continue;
-    const sheet=await inspectFoundationMap(new File([data],file.name,{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}));
+    const sheet=await inspectFoundationMap(new File([data],file.name,{type:/\.csv$/i.test(file.name)?"text/csv":"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}));
     const filtered=sheet.rows.filter(r=>cleaned(r.board)===cleaned(source.board)&&cleaned(r.tier)===(source.code.endsWith("F")?"FOUNDATION":"HIGHER")&&cleaned(r.series)===cleaned(source.series)&&cleaned(r.paper)===cleaned(source.code));
     if(filtered.length){matches=filtered;sourceName=file.name;break}
    }

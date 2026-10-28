@@ -44,3 +44,24 @@ The 26 groups / 44 parts / 80 marks unit regression is a synthetic structural fi
 - No PDFs for November 2020/2021 Foundation or June 2022 were supplied. Obtain the authorised matching question-paper and mark-scheme PDFs for 1F, 2F and 3F before claiming those imports. Check available mapping series before requesting further workbooks.
 - SQL was not run against the live schema. Validate the additive function in a Maths Question Bank staging database, retaining existing RLS and unique constraints. Failed-publication unit tests mock the RPC; they cannot establish live transaction rollback or cross-browser account permissions.
 - No exam paper has been imported, approved, or published by this development batch. Deployment and live verification remain separate steps after review and access.
+
+
+## Follow-up: replacement CSV mappings
+
+The user replaced the earlier XLSX inputs with `Foundation_Enhanced_Multi_Topic_Mapping.csv` and `Higher_Enhanced_Multi_Topic_Mapping.csv`. These are the sources for new work. The importer now accepts UTF-8 CSV (including BOM, CRLF, quoted commas/newlines and escaped quotes), rejects malformed quoting/column counts, and retains Pearson skill and secondary-strand columns. New preparations prefer archived CSV mappings; saved reviews still require their original mapping source to protect manual work.
+
+Local source inspection: Foundation has 2,057 records and Higher has 1,552. Foundation contains one duplicate identifier, `EDX-F-June2017-2F-Q05a` (case-insensitive), requiring review before that historical paper is imported. No duplicate was found in November 2022 1F/2F/3F. Their mapped part counts are 44/38/47, each totalling 80 marks.
+
+The real-paper validator accepts optional CSV and paper-code arguments after the two PDF paths. It checks the November 2022 selected paper, its unique mapped IDs, per-question and full-paper marks, and renders every proposed question/mark-scheme crop. Do not commit the private source files.
+
+Actual November 2022 checks using the replacement Foundation CSV:
+
+- 2F: 38 mapped parts, 26 complete question groups, 80 marks; actual mark table begins on PDF page 6.
+- 3F: 47 mapped parts, 30 complete question groups, 80 marks; actual mark table begins on PDF page 6.
+- All proposals remain unapproved. Crop renderability and text anchors do not establish complete visual correctness.
+
+Supabase connectivity is now available. With the existing public key, `is_approved_owner` returns false and `exam_papers` returns zero visible records. This does **not** establish that no papers exist: an approved-owner session is still required for live publication status, private review inspection and Higher duplicate checks. No database migrations, storage uploads, content approvals or publications were performed.
+
+GitHub HTTPS Git access works, but the API currently returns Forbidden. `api.github.com` was added to the environment configuration draft while preserving the existing Supabase domain and package-manager preset. This draft change does not grant runtime access until applied through environment settings. PR creation, CI review, merge and deployment remain outstanding.
+
+Follow-up validation completed: production build passed (existing large-chunk warning); 79 unit tests passed across 11 files; 12 desktop/mobile browser tests passed with 2 intentional mobile PDF skips. Browser regressions exercise both XLSX restoration despite a newer CSV and CSV preference over XLSX for new extraction, including saved crop/approval restoration. Both real PDF/CSV checks also passed per-question part-mark totals against the printed totals. These are local checks, not deployed or owner-authenticated checks.
