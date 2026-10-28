@@ -59,3 +59,9 @@ it('blocks legacy V15 servers before writing images or dropping new mapping fiel
  await expect(publishReviewedPaper(args())).rejects.toThrow(/V16 database update/);
  expect(mock.upload).not.toHaveBeenCalled();expect(mock.publish).not.toHaveBeenCalled();
 });
+
+it('requires horizontal crop and border-trimming changes to be saved before publication',async()=>{
+ const items=drafts();items[0].question.left=.06;items[0].question.trimBorder=true;
+ await expect(publishReviewedPaper(args(items))).rejects.toThrow(/not saved/);
+ expect(mock.upload).not.toHaveBeenCalled();
+});

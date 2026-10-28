@@ -31,7 +31,7 @@ for(const format of ["xlsx","csv"]){
 test(`extracts ${format} mapping and preserves its saved review without invalid page requests`,async({page,browser},testInfo)=>{
  test.skip(testInfo.project.name!=="chromium","Real PDF test runs once on desktop Chromium");
  test.setTimeout(90000);
- await page.setContent("<html><body><p style='margin:80px;font-size:24px'>1 Work out 3 + 4.</p><p style='margin:80px;font-size:24px'>2 Work out 5 + 6.</p></body></html>");
+ await page.setContent("<html><body><div style='position:fixed;left:35pt;right:35pt;top:36pt;bottom:48pt;border:2pt solid #aaa;border-radius:8pt'></div><p style='margin:80px;font-size:24px'>1 Work out 3 + 4.</p><p style='margin:80px;font-size:24px'>2 Work out 5 + 6.</p></body></html>");
  const questionPdf=await page.pdf({format:"A4"});
  const intro=(text:string)=>'<section style="break-after:page;page-break-after:always;padding:75px;font-size:18px">'+text+'</section>';
  await page.setContent('<html><body>'+[
@@ -94,9 +94,12 @@ test(`extracts ${format} mapping and preserves its saved review without invalid 
  await expect(page.getByLabel("mark page")).toHaveValue("6");
  await expect(page.getByText(/Marking-table header detected on PDF page 6/)).toBeVisible();
  await expect(page.getByLabel("Question image")).toBeVisible();
+ await expect.poll(()=>page.getByLabel("Question image").evaluate((canvas:HTMLCanvasElement)=>canvas.width)).toBeGreaterThan(700);
+ await expect.poll(()=>page.getByLabel("Question image").evaluate((canvas:HTMLCanvasElement)=>canvas.width)).toBeLessThan(800);
  await expect(page.getByLabel("Mark-scheme image")).toBeVisible();
  await expect(page.getByText("Invalid page request.",{exact:true})).toHaveCount(0);
- await expect(page.getByRole("checkbox")).toHaveCount(0);
+ await expect(page.getByLabel("Remove question paper border")).toBeChecked();
+ await expect(page.getByLabel("question left",{exact:true})).toHaveValue("0");
  await expect(page.getByRole("button",{name:"Publish Approved Paper"})).toBeDisabled();
  await page.getByRole("button",{name:"Approve Q1 & Next"}).click();
  await expect(page.getByRole("heading",{name:/Q2 · 1 part/})).toBeVisible();
@@ -111,12 +114,14 @@ test(`extracts ${format} mapping and preserves its saved review without invalid 
  await expect(page.getByRole("heading",{name:/Q2 · 1 part/})).toBeVisible();
  await page.getByRole("button",{name:/Q1$/}).click();
  await page.getByLabel("question top",{exact:true}).fill("8");
+ await page.getByLabel("question left",{exact:true}).fill("5");
  await page.getByRole("button",{name:"Approve Q1 & Next"}).click();
  await page.getByRole("button",{name:"Save review progress to account"}).click();
  await expect(page.getByRole("status").last()).toContainText("Review progress saved privately");
  await page.getByRole("button",{name:"Reload source and mapping"}).click();
  await expect(page.getByRole("status").last()).toContainText("Prepared 2 complete questions");
  await expect(page.getByLabel("question top",{exact:true})).toHaveValue("8");
+ await expect(page.getByLabel("question left",{exact:true})).toHaveValue("5");
  await expect(page.getByText("2/2").first()).toBeVisible();
  expect(downloadedMappings).toEqual(["fixture."+format,"fixture."+format]);
  // A new browser context has no review state; only mocked account Storage persists.
@@ -129,6 +134,8 @@ test(`extracts ${format} mapping and preserves its saved review without invalid 
  await other.getByRole("button",{name:"Extract & review"}).click();
  await other.getByRole("button",{name:"Prepare question review"}).click();
  await expect(other.getByLabel("question top",{exact:true})).toHaveValue("8");
+ await expect(other.getByLabel("question left",{exact:true})).toHaveValue("5");
+ await expect(other.getByLabel("Remove question paper border")).toBeChecked();
  await expect(other.getByText("2/2").first()).toBeVisible();
  await other.getByLabel("question top",{exact:true}).fill("9");
  await other.getByRole("button",{name:"Save review progress to account"}).click();

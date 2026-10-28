@@ -41,3 +41,8 @@ it('retains legacy approvals even when metadata needs completing before publicat
  expect(restored.approved).toBe(true);expect(restored.parts[0].skills).toBe('');
  expect(restored.question).toEqual(review.items[0].question);
 });
+
+it('keeps old approved crops full width until the teacher explicitly trims the border',()=>{
+ const restored=restoreSavedReview(saved(),[{...draft(),question:{...draft().question,trimBorder:true}}],24,18)[0];
+ expect(restored.question.trimBorder).toBeUndefined();expect(restored.question.left).toBeUndefined();expect(restored.approved).toBe(true);
+});

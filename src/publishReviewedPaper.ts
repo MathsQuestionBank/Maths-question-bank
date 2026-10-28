@@ -12,7 +12,7 @@ type StoredReview={version:number;mappingFile:string;items:{
 }[]};
 
 function equalSlice(a:Slice,b:Slice){
- return a?.page===b?.page&&(a.endPage??a.page)===(b.endPage??b.page)&&Math.abs(a.top-b.top)<.00001&&Math.abs(a.bottom-b.bottom)<.00001;
+ return a?.page===b?.page&&(a.endPage??a.page)===(b.endPage??b.page)&&Math.abs(a.top-b.top)<.00001&&Math.abs(a.bottom-b.bottom)<.00001&&(a.left??0)===(b.left??0)&&(a.right??1)===(b.right??1)&&!!a.trimBorder===!!b.trimBorder;
 }
 function reviewMatchesStored(saved:StoredReview,drafts:QuestionDraft[],mappingFile:string){
  if(saved.version!==1||saved.mappingFile!==mappingFile||saved.items?.length!==drafts.length)return false;

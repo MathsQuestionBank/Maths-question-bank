@@ -96,7 +96,7 @@ describe('multi-page question preservation',()=>{
  it('keeps every page through the printed total and next question boundary',()=>{
   const lines:TextLine[]=[{page:2,top:.12,left:.1,text:'1 Solve the problem'},{page:3,top:.7,left:.2,text:'(Total for Question 1 is 5 marks)'},{page:4,top:.12,left:.1,text:'2 Next question'}];
   const [draft]=makeReviewDrafts([row('Q01a',2),row('Q01b',3),row('Q02',1)],lines,[]);
-  expect(draft.question).toEqual({page:2,endPage:3,top:.102,bottom:.735});
+  expect(draft.question).toEqual({page:2,endPage:3,top:.102,bottom:.735,trimBorder:true});
   expect(draft.parts).toHaveLength(2);
   expect(draft.approved).toBe(false);
  });

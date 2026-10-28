@@ -1,7 +1,7 @@
 import type {MappingRow} from "./EnhancedMappingImporter";
 
 export type TextLine={page:number;top:number;left:number;text:string};
-export type Slice={page:number;top:number;bottom:number;endPage?:number};
+export type Slice={page:number;top:number;bottom:number;endPage?:number;left?:number;right?:number;trimBorder?:boolean};
 export type QuestionDraft={number:number;parts:MappingRow[];question:Slice;mark:Slice;questionDetected:boolean;questionInferred:boolean;questionManuallyAdjusted?:boolean;markDetected:boolean;markManuallyAdjusted?:boolean;approved:boolean;notes:string};
 export const questionNumber=(row:Pick<MappingRow,"question"|"id">):number|null=>{
  const match=(row.question||row.id).trim().match(/^Q0*(\d{1,2})(?:[a-z](?:i{1,3}|iv|v|vi{0,3}|ix|x)?)?$/i);
@@ -110,15 +110,17 @@ export function makeReviewDrafts(rows:MappingRow[],questionLines:TextLine[],mark
   const segment=(a:TextLine|undefined,b:TextLine|undefined,fallbackPage=1,sourceLines:TextLine[]=[],question?:number):Slice=>{
    if(!a)return {page:fallbackPage,top:.05,bottom:.95};
    const end=question===undefined?undefined:sourceLines.find(l=>l.page>=a.page&&new RegExp(`\\btotal\\s+for\\s+question\\s+0*${question}\\b`,"i").test(l.text));
-   const endPage=end?.page??(b?(b.page>a.page&&b.top-.022<=.05?b.page-1:b.page):Math.max(a.page,...sourceLines.map(l=>l.page)));
+   const endPage=end?.page??(b?(b.page>a.page&&b.top-.022<=.075?b.page-1:b.page):Math.max(a.page,...sourceLines.map(l=>l.page)));
    return {page:a.page,top:bounded(a.top-.018),bottom:end?bounded(end.top+.035):b&&b.page===endPage?bounded(b.top-.022):.96,...(endPage>a.page?{endPage}:{})};
   };
-  return {number,parts:groups.get(number)||[],question:q?segment(q,nextQ,1,questionLines,number):questionFallback,mark:segment(m,nextM,markSchemeStartPage??1,standardMarkLines),
+  return {number,parts:groups.get(number)||[],question:{...(q?segment(q,nextQ,1,questionLines,number):questionFallback),trimBorder:true},mark:segment(m,nextM,markSchemeStartPage??1,standardMarkLines),
    questionDetected:!!q,questionInferred:!!inferred,markDetected:!!m,approved:false,notes:""};
  });
 }
 export const validSlice=(s:Slice,pages:number)=>Number.isInteger(s.page)&&s.page>=1&&
  Number.isInteger(s.endPage??s.page)&&(s.endPage??s.page)>=s.page&&(s.endPage??s.page)<=pages&&
+ Number.isFinite(s.left??0)&&Number.isFinite(s.right??1)&&(s.left??0)>=0&&(s.right??1)<=1&&(s.right??1)-(s.left??0)>=.025&&
+ (s.trimBorder===undefined||typeof s.trimBorder==="boolean")&&
  Number.isFinite(s.top)&&Number.isFinite(s.bottom)&&s.top>=0&&s.top<=.975&&s.bottom>=.025&&s.bottom<=1&&
  ((s.endPage??s.page)>s.page||s.bottom-s.top>=.025);
 export const isReviewable=(d:QuestionDraft,questionPages:number,markPages:number)=>

@@ -1,3 +1,4 @@
+import {detectPaperFrame} from "./paperFrame";
 import {getDocument,GlobalWorkerOptions,type PDFDocumentProxy} from "pdfjs-dist";
 import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import {validSlice,type TextLine,type Slice} from "./paperExtraction";
@@ -42,11 +43,21 @@ export async function drawSlice(pdf:PDFDocumentProxy,selection:Slice,canvas:HTML
   source.width=Math.round(viewport.width);source.height=Math.round(viewport.height);
   const context=source.getContext("2d");if(!context)throw Error("Canvas unavailable");
   await page.render({canvas:source,canvasContext:context,viewport}).promise;
-  const top=p===selection.page?selection.top:.05;
-  const bottom=p===(selection.endPage??selection.page)?selection.bottom:.96;
-  const fragment=document.createElement("canvas");fragment.width=source.width;fragment.height=Math.max(1,Math.floor(source.height*(bottom-top)));
+  const frame=selection.trimBorder?detectPaperFrame(context.getImageData(0,0,source.width,source.height).data,source.width,source.height):null;
+  if(frame){
+   // Clip the small rounded frame corners as well as its straight edges.
+   context.fillStyle="#fff";context.beginPath();context.rect(0,0,source.width,source.height);
+   context.roundRect(frame.left*source.width,frame.top*source.height,
+    (frame.right-frame.left)*source.width,(frame.bottom-frame.top)*source.height,Math.min(source.width,source.height)*.014);
+   context.fill("evenodd");
+  }
+  const top=Math.max(p===selection.page?selection.top:.05,frame?.top??0);
+  const bottom=Math.min(p===(selection.endPage??selection.page)?selection.bottom:.96,frame?.bottom??1);
+  const left=Math.max(selection.left??0,frame?.left??0),right=Math.min(selection.right??1,frame?.right??1);
+  if(right-left<.025||bottom-top<.025)throw Error("Crop lies outside the detected paper border. Adjust the crop or turn off border trimming.");
+  const fragment=document.createElement("canvas");fragment.width=Math.max(1,Math.floor(source.width*(right-left)));fragment.height=Math.max(1,Math.floor(source.height*(bottom-top)));
   const output=fragment.getContext("2d");if(!output)throw Error("Canvas unavailable");
-  output.drawImage(source,0,Math.floor(source.height*top),source.width,fragment.height,0,0,fragment.width,fragment.height);
+  output.drawImage(source,Math.floor(source.width*left),Math.floor(source.height*top),fragment.width,fragment.height,0,0,fragment.width,fragment.height);
   fragments.push(fragment);source.width=0;source.height=0;
  }
  canvas.width=Math.max(...fragments.map(f=>f.width));canvas.height=fragments.reduce((n,f)=>n+f.height,0);

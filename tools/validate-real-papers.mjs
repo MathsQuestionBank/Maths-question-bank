@@ -41,12 +41,13 @@ try{
   if(mapping){const {validateMappedPart}=await import('/src/paperPublication.ts');rows.forEach(validateMappedPart)}
   const start=findMarkSchemeStartPage(markLines);
   const drafts=makeReviewDrafts(rows,questionLines,markLines);
-  const canvas=document.createElement('canvas'),crops=[];
+  const canvas=document.createElement('canvas'),crops=[],questionWidths=[];
   for(const d of drafts){for(const kind of ['question','mark']){
    await drawSlice(kind==='question'?q:m,d[kind],canvas);
+   if(kind==='question')questionWidths.push(canvas.width);
    if(includeCrops)crops.push({number:d.number,kind,data:canvas.toDataURL('image/png')});
   }}
-  return {crops,mappedParts:rows.length,mappedMarks:rows.reduce((n,r)=>n+r.marks,0),questionPages:q.numPages,schemePages:m.numPages,start,questions:totals.length,marks:totals.reduce((n,t)=>n+t.marks,0),drafts:drafts.map(d=>({number:d.number,partMarks:d.parts.reduce((n,r)=>n+r.marks,0),printedMarks:totals.find(t=>t.number===d.number)?.marks,question:d.question,mark:d.mark,questionDetected:d.questionDetected,questionInferred:d.questionInferred,markDetected:d.markDetected,approved:d.approved,valid:validSlice(d.question,q.numPages)&&validSlice(d.mark,m.numPages),endsAtPrintedTotal:(d.question.endPage??d.question.page)===totals.find(t=>t.number===d.number)?.page}))};
+  return {crops,questionWidths,sourceWidth:(await q.getPage(1)).getViewport({scale:1.4}).width,mappedParts:rows.length,mappedMarks:rows.reduce((n,r)=>n+r.marks,0),questionPages:q.numPages,schemePages:m.numPages,start,questions:totals.length,marks:totals.reduce((n,t)=>n+t.marks,0),drafts:drafts.map(d=>({number:d.number,partMarks:d.parts.reduce((n,r)=>n+r.marks,0),printedMarks:totals.find(t=>t.number===d.number)?.marks,question:d.question,mark:d.mark,questionDetected:d.questionDetected,questionInferred:d.questionInferred,markDetected:d.markDetected,approved:d.approved,valid:validSlice(d.question,q.numPages)&&validSlice(d.mark,m.numPages),endsAtPrintedTotal:(d.question.endPage??d.question.page)===totals.find(t=>t.number===d.number)?.page}))};
  },{mapping,paperCode,includeCrops:!!process.env.REVIEW_CROP_DIR});
  if(process.env.REVIEW_CROP_DIR){
   await mkdir(process.env.REVIEW_CROP_DIR,{recursive:true});
@@ -54,6 +55,7 @@ try{
  }
  delete result.crops;
  console.log(JSON.stringify(result,null,2));
+ if(mapping)assert.ok(result.questionWidths.every(width=>width<result.sourceWidth*.95),"Real question images should exclude the detected paper border");
  assert.equal(result.marks,80);assert.equal(result.mappedMarks,80);assert.ok(result.start>1);
  assert.equal(new Set(result.drafts.map(d=>d.number)).size,result.questions);
  assert.ok(result.drafts.every(d=>d.partMarks===d.printedMarks&&d.valid&&!d.approved&&(d.questionDetected||d.questionInferred)&&d.markDetected&&d.endsAtPrintedTotal));

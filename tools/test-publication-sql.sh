@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Isolated synthetic database only. No production URL, credentials or ports.
-set -euo pipefail
+set -Eeuo pipefail
+trap 'echo "::error file=tools/test-publication-sql.sh,line=$LINENO::Publication SQL test command failed: $BASH_COMMAND"' ERR
 cd "$(dirname "$0")/.."
+for dependency in docker grep mktemp; do command -v "$dependency" >/dev/null || { echo "Missing test dependency: $dependency" >&2;exit 1; };done
 local_docker() { env -u DOCKER_HOST -u DOCKER_CONTEXT -u DOCKER_TLS -u DOCKER_TLS_VERIFY -u DOCKER_CERT_PATH docker --host=unix:///var/run/docker.sock "$@"; }
 container="maths-qb-sql-test-$$"
 logs="$(mktemp -d)"
@@ -9,7 +11,7 @@ cleanup() { local_docker rm -f "$container" >/dev/null 2>&1 || true; rm -rf "$lo
 trap cleanup EXIT
 local_docker run --network none -d --name "$container" -e POSTGRES_HOST_AUTH_METHOD=trust postgres:17@sha256:31ba9c94a03ada9988f2bb493a22a75eef3a185884533e5cdbcd498ea835b08f >/dev/null
 for attempt in {1..100}; do
- if local_docker logs "$container" 2>&1 | rg -q 'PostgreSQL init process complete' && local_docker exec "$container" pg_isready -U postgres >/dev/null 2>&1; then break; fi
+ if local_docker logs "$container" 2>&1 | grep -q 'PostgreSQL init process complete' && local_docker exec "$container" pg_isready -U postgres >/dev/null 2>&1; then break; fi
  sleep .2
 done
 sql() { local_docker exec -i "$container" psql -U postgres -v ON_ERROR_STOP=1 -q "$@"; }
@@ -17,7 +19,7 @@ sql < tools/sql/publication-fixture.sql
 if sql < docs/v16-preserve-enhanced-publication-metadata.sql >"$logs/preflight" 2>&1; then
  echo 'FAIL: V16 accepted missing V15 prerequisites' >&2; exit 1
 fi
-rg -q 'Apply and verify V1.5' "$logs/preflight"
+grep -q 'Apply and verify V1.5' "$logs/preflight"
 sql < docs/v15-atomic-reviewed-paper-publication.sql
 sql < tools/sql/v15-publication.sql
 sql < docs/v16-preserve-enhanced-publication-metadata.sql
@@ -38,8 +40,8 @@ sql <<<"$request" >"$logs/two" 2>&1 & second=$!
 one=0;two=0
 wait "$first" || one=$?
 wait "$second" || two=$?
-if [[ "$one" -eq 0 && "$two" -ne 0 ]]; then rg -q 'duplicate key|already published' "$logs/two"
-elif [[ "$two" -eq 0 && "$one" -ne 0 ]]; then rg -q 'duplicate key|already published' "$logs/one"
+if [[ "$one" -eq 0 && "$two" -ne 0 ]]; then grep -q 'duplicate key|already published' "$logs/two"
+elif [[ "$two" -eq 0 && "$one" -ne 0 ]]; then grep -q 'duplicate key|already published' "$logs/one"
 else cat "$logs/one" "$logs/two";echo 'FAIL: expected exactly one concurrent publication';exit 1;fi
 sql <<'SQL'
 do $$begin
