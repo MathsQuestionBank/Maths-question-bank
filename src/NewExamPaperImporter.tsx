@@ -1,4 +1,5 @@
 import {useState} from "react";
+import {inspectIntakeBatch,archiveIntakeBatch,type IntakeBatch} from "./batchIntake";
 import {supabase} from "./supabase";
 
 const bucket="exam-materials-private";
@@ -10,6 +11,7 @@ const isPdf=async(file:File)=>{
 };
 const slug=(value:string)=>value.trim().replace(/[^a-zA-Z0-9_-]+/g,"-").replace(/^-+|-+$/g,"").slice(0,80);
 export default function NewExamPaperImporter({onArchived}:{onArchived?:()=>void}){
+ const [batch,setBatch]=useState<IntakeBatch|null>(null),[batchResults,setBatchResults]=useState<string[]>([]);
  const [board,setBoard]=useState("Edexcel");
  const [qualification,setQualification]=useState("GCSE Mathematics");
  const [tier,setTier]=useState("Foundation");
@@ -80,6 +82,14 @@ export default function NewExamPaperImporter({onArchived}:{onArchived?:()=>void}
  };
  return <section className="panel" style={{padding:22}}>
  <h2>Import New Exam Paper</h2>
+ <section className="panel" style={{padding:16,marginBottom:20}}>
+ <h3>Prepare a batch for review</h3>
+ <p>Upload one prepared review ZIP containing matched PDFs, mapping and unapproved crop proposals. Existing published papers and saved reviews are skipped. Nothing is approved or published.</p>
+ <label>Prepared review batch ZIP<input aria-label="Prepared review batch ZIP" type="file" accept=".zip" disabled={busy} onChange={e=>{const file=e.target.files?.[0];setBatch(null);setBatchResults([]);if(!file)return;setBusy(true);void inspectIntakeBatch(file).then(value=>{setBatch(value);setStatus(`${value.papers.length} papers checked and ready for batch preparation.`)}).catch(error=>setStatus(error instanceof Error?error.message:"Cannot inspect batch")).finally(()=>setBusy(false))}}/></label>
+ {batch&&<><ul>{batch.papers.map(p=><li key={p.series+p.code}>{p.board} · {p.series} · {p.code} — {p.review.items.length} complete questions{p.provenance&&<p className="hint">{p.provenance}</p>}</li>)}</ul>
+ <button className="primary" disabled={busy} onClick={()=>{setBusy(true);setBatchResults([]);void archiveIntakeBatch(batch,setStatus).then(results=>setBatchResults(results)).catch(error=>setStatus(error instanceof Error?error.message:"Batch preparation failed")).finally(()=>{setBusy(false);onArchived?.()})}}>Prepare all papers for review</button></>}
+ {batchResults.length>0&&<ul aria-label="Batch preparation results">{batchResults.map((text,i)=><li key={i}>{text}</li>)}</ul>}
+ </section>
  <p className="hint">Stage a new paper and mark scheme in private storage. Check the details and files before uploading. Questions will only be available to teachers after separate extraction and review.</p>
  <div className="library-toolbar" style={{alignItems:"end",flexWrap:"wrap"}}>
  <label>Exam board<select aria-label="New paper exam board" value={board} onChange={e=>{setBoard(e.target.value);setReady(false)}}><option>Edexcel</option><option>AQA</option></select></label>

@@ -76,3 +76,15 @@ The 2021 mark schemes have `/Rotate 90` page metadata. This exposed a bug in tex
 The supplied `A20` question-paper covers print May/June 2020 dates, while their matching supplied mark schemes say November 2020. Opening questions/answers match, as do all per-question mark totals and November 2020 mapping allocations. Preserve this provenance discrepancy for owner confirmation; do not silently rewrite the source PDFs or claim official archive identification from filenames alone. The 2021 scheme filenames contain the release date January 2022, but their covers explicitly identify November 2021.
 
 All new papers remain local validation inputs: none was uploaded, approved or published, and original saved reviews were not modified. Use the same website workflow above, selecting the confirmed series and paper code after full-size source review.
+
+## Single-batch preparation and dedicated import identity
+
+The new **Prepare a batch for review** section is part of the existing paper importer. It accepts a private ZIP with matched PDFs, the replacement mapping and precomputed unapproved crop proposals. **Prepare all papers for review** stages the whole batch in the signed-in owner's private account. It skips published papers and existing saved reviews, retains different source files, and uses non-overwriting writes. Per-paper failures remain visible; reselecting the same ZIP safely resumes missing work. It neither approves nor publishes content.
+
+A private eight-paper package was generated outside Git: November 2022 2F/3F and November 2021/2020 1F/2F/3F. It excludes the already-approved November 2022 1F. The 2020 source-date note is shown during batch inspection and retained in intake metadata. No copyrighted source PDFs or mappings are committed or put on a public preview.
+
+`tools/stage-review-batch.mjs /private/batch.zip` validates the same package locally without remote access. With `--stage`, it uses `MQB_IMPORT_EMAIL` and the proxy-bound `MQB_IMPORT_PASSWORD`, requires `NODE_USE_ENV_PROXY=1`, signs in normally and checks approved-owner access. The credentials are never logged; session storage stays in memory and that login is signed out locally on completion. The runner blocks publication RPCs and question-table writes. It reuses the exact browser batch code instead of maintaining another importer.
+
+A dedicated user's intake reviews belong to that user's account. The teacher must sign into the website using the same import account to review them. The original owner's 1F review remains unchanged and belongs to the original account. Shared draft-review access across owners would require a separately reviewed access-control change; this feature does not change RLS.
+
+The environment draft contains requirements for `MQB_IMPORT_EMAIL` and `MQB_IMPORT_PASSWORD`, restricted to ljisttslifnyrbuybfud.supabase.co. Values must be supplied securely in environment settings and applied/published by the user before live automation can be verified. No credentials are stored in code or chat, and no service-role key is required.
