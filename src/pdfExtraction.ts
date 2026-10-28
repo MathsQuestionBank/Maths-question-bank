@@ -17,7 +17,7 @@ export async function readPdfLines(pdf:PDFDocumentProxy,onProgress?:(page:number
   let content:Awaited<ReturnType<typeof page.getTextContent>>;
   try{content=await page.getTextContent()}catch(error){throw new Error(`${label}: could not extract text from page ${p}/${pdf.numPages}. ${error instanceof Error?error.message:String(error)}`)}
   const raw=content.items.filter((i):i is typeof i & {str:string;transform:number[]}=>"str" in i&&"transform" in i)
-   .map(i=>({text:i.str.trim(),left:i.transform[4]/view.width,top:1-i.transform[5]/view.height}));
+   .map(i=>{const [x,y]=view.convertToViewportPoint(i.transform[4],i.transform[5]);return {text:i.str.trim(),left:x/view.width,top:y/view.height}});
   const grouped:{top:number;left:number;parts:{x:number;text:string}[]}[]=[];
   for(const item of raw){
    if(!item.text)continue;

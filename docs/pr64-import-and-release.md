@@ -55,3 +55,24 @@ After the reviewed frontend is deployed, sign in with the approved owner account
 ## Source corrections for later
 
 Do not modify the source CSVs as part of this PR. Foundation contains duplicate `EDX-F-June2017-2F-Q05a` (case-insensitive). Higher contains AO `0` for `EDX-H-JUNE2025-1H-Q02B` and `EDX-H-JUNE2025-1H-Q03A`; those parts need a source-backed correction before their paper can be published. Neither issue affects November 2022 2F/3F.
+
+## Supplied 2020/2021 Foundation papers
+
+The additional private PDFs were checked locally against the replacement Foundation CSV. The validator now accepts an explicit series after its paper-code argument, e.g. `node tools/validate-real-papers.mjs question.pdf scheme.pdf mapping.csv 1F "November 2021"`.
+
+| Mapping series | Paper | Complete questions | Mapped parts | Marks |
+|---|---|---:|---:|---:|
+| November 2021 | 1F | 28 | 37 | 80 |
+| November 2021 | 2F | 28 | 41 | 80 |
+| November 2021 | 3F | 28 | 40 | 80 |
+| November 2020 | 1F | 30 | 40 | 80 |
+| November 2020 | 2F | 29 | 39 | 80 |
+| November 2020 | 3F | 29 | 46 | 80 |
+
+All six pairs passed per-question mapped marks versus printed totals, unique selected-paper IDs, mapping-field validation, detected question/mark anchors and rendered crop validity. Mark tables begin on PDF page 6. Every question crop detected and trimmed a paper border. No question-number inference was needed. These checks are structural; no complete visual approval or live import/publication is claimed.
+
+The 2021 mark schemes have `/Rotate 90` page metadata. This exposed a bug in text coordinates: reading raw PDF positions without the page viewport transform prevented table detection. Coordinates now use PDF.js `convertToViewportPoint`, matching rendering for rotated and ordinary pages. The CSV browser regression now uses a valid rotated-landscape scheme fixture and verifies preparation, marking-table detection, save and cross-device restoration. Local unit/build/browser checks passed after the fix.
+
+The supplied `A20` question-paper covers print May/June 2020 dates, while their matching supplied mark schemes say November 2020. Opening questions/answers match, as do all per-question mark totals and November 2020 mapping allocations. Preserve this provenance discrepancy for owner confirmation; do not silently rewrite the source PDFs or claim official archive identification from filenames alone. The 2021 scheme filenames contain the release date January 2022, but their covers explicitly identify November 2021.
+
+All new papers remain local validation inputs: none was uploaded, approved or published, and original saved reviews were not modified. Use the same website workflow above, selecting the confirmed series and paper code after full-size source review.

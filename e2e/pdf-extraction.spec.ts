@@ -27,6 +27,25 @@ async function workbookFixture(format:string){
  zip.file("xl/worksheets/sheet1.xml",sheet);
  return await zip.generateAsync({type:"nodebuffer"});
 }
+// Rotated page metadata with upright landscape text, matching the 2021 schemes.
+function rotatedSchemeFixture(){
+ const objects=["<< /Type /Catalog /Pages 2 0 R >>","", "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"];
+ const pages:number[]=[];
+ for(let n=1;n<=6;n++){
+  const id=objects.length+1;pages.push(id);
+  const lines=n===6?[['Question Answer Mark Mark scheme',80],['1 7 B1',110],['2 11 B1',160]]:[['General marking guidance',80]];
+  const stream=lines.map(([text,y])=>`BT /F1 12 Tf 0 1 -1 0 ${y} 60 Tm (${text}) Tj ET`).join('\n');
+  objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Rotate 90 /Resources << /Font << /F1 3 0 R >> >> /Contents ${id+1} 0 R >>`);
+  objects.push(`<< /Length ${Buffer.byteLength(stream)} >>\nstream\n${stream}\nendstream`);
+ }
+ objects[1]=`<< /Type /Pages /Count 6 /Kids [${pages.map(n=>n+' 0 R').join(' ')}] >>`;
+ let pdf='%PDF-1.4\n';const offsets=[0];
+ objects.forEach((object,i)=>{offsets.push(Buffer.byteLength(pdf));pdf+=`${i+1} 0 obj\n${object}\nendobj\n`});
+ const xref=Buffer.byteLength(pdf);
+ pdf+=`xref\n0 ${objects.length+1}\n0000000000 65535 f \n`+offsets.slice(1).map(n=>String(n).padStart(10,'0')+' 00000 n \n').join('');
+ pdf+=`trailer\n<< /Size ${objects.length+1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
+ return Buffer.from(pdf);
+}
 for(const format of ["xlsx","csv"]){
 test(`extracts ${format} mapping and preserves its saved review without invalid page requests`,async({page,browser},testInfo)=>{
  test.skip(testInfo.project.name!=="chromium","Real PDF test runs once on desktop Chromium");
@@ -42,7 +61,7 @@ test(`extracts ${format} mapping and preserves its saved review without invalid 
   intro("Guidance on the use of abbreviations"),
   '<section style="padding:75px;font-size:18px"><p>Paper: 1MA1/1F</p><p>Question Answer Mark Mark scheme Additional guidance</p><p>1 7 B1 for 7</p><p>2 11 B1 for 11</p></section>'
  ].join("")+'</body></html>');
- const schemePdf=await page.pdf({format:"A4"});
+ const schemePdf=format==="csv"?rotatedSchemeFixture():await page.pdf({format:"A4"});
  const mapping=await workbookFixture(format);
  await page.addInitScript(({user,token})=>{
   localStorage.setItem("sb-ljisttslifnyrbuybfud-auth-token",JSON.stringify({access_token:token,refresh_token:"dummy",expires_at:4102444800,expires_in:999999999,token_type:"bearer",user}));
