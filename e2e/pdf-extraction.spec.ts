@@ -28,7 +28,7 @@ async function workbookFixture(format:string){
  return await zip.generateAsync({type:"nodebuffer"});
 }
 for(const format of ["xlsx","csv"]){
-test(`extracts ${format} mapping and preserves its saved review without invalid page requests`,async({page},testInfo)=>{
+test(`extracts ${format} mapping and preserves its saved review without invalid page requests`,async({page,browser},testInfo)=>{
  test.skip(testInfo.project.name!=="chromium","Real PDF test runs once on desktop Chromium");
  test.setTimeout(90000);
  await page.setContent("<html><body><p style='margin:80px;font-size:24px'>1 Work out 3 + 4.</p><p style='margin:80px;font-size:24px'>2 Work out 5 + 6.</p></body></html>");
@@ -48,7 +48,7 @@ test(`extracts ${format} mapping and preserves its saved review without invalid 
   localStorage.setItem("sb-ljisttslifnyrbuybfud-auth-token",JSON.stringify({access_token:token,refresh_token:"dummy",expires_at:4102444800,expires_in:999999999,token_type:"bearer",user}));
  },{user,token:authToken()});
  let storedReview:unknown=null;const downloadedMappings:string[]=[];
- await page.route("https://ljisttslifnyrbuybfud.supabase.co/**",async route=>{
+ const storageRoute:Parameters<typeof page.route>[1]=async route=>{
   const request=route.request(),url=new URL(request.url()),path=url.pathname;
   const json=(v:unknown,status=200)=>route.fulfill({status,contentType:"application/json",body:JSON.stringify(v)});
   if(path==="/auth/v1/user")return json(user);
@@ -62,7 +62,7 @@ test(`extracts ${format} mapping and preserves its saved review without invalid 
    if(prefix===root+"Edexcel")return json([{name:"GCSE-Mathematics",id:null}]);
    if(prefix===root+"Edexcel/GCSE-Mathematics")return json([{name:"November-2022",id:null}]);
    if(prefix===root+"Edexcel/GCSE-Mathematics/November-2022")return json([{name:"1F",id:null}]);
-   if(prefix===base+"/"+uid)return json([{name:"question-paper.pdf",id:"1"},{name:"mark-scheme.pdf",id:"2"},{name:"intake.json",id:"3"}]);
+   if(prefix===base+"/"+uid)return json([{name:"question-paper.pdf",id:"1"},{name:"mark-scheme.pdf",id:"2"},{name:"intake.json",id:"3"},...(storedReview?[{name:"extraction-review.json",id:"6"}]:[])]);
    if(prefix==="enhanced-mapping-intake/"+uid)return json([...(storedReview?[{name:format==="xlsx"?"zzz-newer.csv":"zzz-newer.xlsx",id:"5"}]:format==="csv"?[{name:"zzz-older.xlsx",id:"5"}]:[]),{name:"fixture."+format,id:"4",created_at:"2026-10-27T20:30:00Z"}]);
    return json([]);
   }
@@ -81,7 +81,8 @@ test(`extracts ${format} mapping and preserves its saved review without invalid 
   }
   if(path.startsWith("/rest/v1/"))return json([]);
   return json({message:"No fixture for "+path},404);
- });
+ };
+ await page.route("https://ljisttslifnyrbuybfud.supabase.co/**",storageRoute);
  await page.goto("/");
  await page.getByRole("button",{name:/Import Exam Papers/}).click();
  await expect(page.getByText("Edexcel · November-2022 · 1F")).toBeVisible();
@@ -118,6 +119,26 @@ test(`extracts ${format} mapping and preserves its saved review without invalid 
  await expect(page.getByLabel("question top",{exact:true})).toHaveValue("8");
  await expect(page.getByText("2/2").first()).toBeVisible();
  expect(downloadedMappings).toEqual(["fixture."+format,"fixture."+format]);
+ // A new browser context has no review state; only mocked account Storage persists.
+ const device=await browser.newContext({baseURL:"http://127.0.0.1:4173"});
+ await device.addInitScript(({user,token})=>localStorage.setItem("sb-ljisttslifnyrbuybfud-auth-token",JSON.stringify({access_token:token,refresh_token:"dummy",expires_at:4102444800,expires_in:999999999,token_type:"bearer",user})),{user,token:authToken()});
+ const other=await device.newPage();
+ await other.route("https://ljisttslifnyrbuybfud.supabase.co/**",storageRoute);
+ await other.goto("/");
+ await other.getByRole("button",{name:/Import Exam Papers/}).click();
+ await other.getByRole("button",{name:"Extract & review"}).click();
+ await other.getByRole("button",{name:"Prepare question review"}).click();
+ await expect(other.getByLabel("question top",{exact:true})).toHaveValue("8");
+ await expect(other.getByText("2/2").first()).toBeVisible();
+ await other.getByLabel("question top",{exact:true}).fill("9");
+ await other.getByRole("button",{name:"Save review progress to account"}).click();
+ await expect(other.getByRole("status").last()).toContainText("Review progress saved privately");
+ // The first device cannot overwrite a later save made by the second device.
+ await page.getByLabel("question top",{exact:true}).fill("10");
+ await page.getByRole("button",{name:"Save review progress to account"}).click();
+ await expect(page.getByRole("status").last()).toContainText("changed in another tab or device");
+ expect((storedReview as {items:{question:{top:number}}[]} | null)?.items[0].question.top).toBe(.09);
+ await device.close();
 
 });
 

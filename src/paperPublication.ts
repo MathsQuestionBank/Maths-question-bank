@@ -1,4 +1,15 @@
+import type {MappingRow} from "./EnhancedMappingImporter";
 import {validSlice,questionNumber,type QuestionDraft} from "./paperExtraction";
+
+export function validateMappedPart(part:MappingRow){
+ if(!part.id||!part.question||!Number.isInteger(part.marks)||part.marks<1||part.marks>20||
+     !part.topic?.trim()||!part.skills?.trim()||!["AO1","AO2","AO3"].includes(part.ao)){
+    throw new Error("Incomplete Enhanced Skills Mapping for "+part.question);
+ }
+ for(const percent of Object.values(part.gradePercent))if(percent!==null&&(!Number.isFinite(percent)||percent<0||percent>100))throw Error("Invalid grade percentage for "+part.question);
+ if(questionNumber(part)===null)throw Error("Invalid question reference "+part.question);
+ if(Object.keys(part.gradePercent).some(key=>!/^[1-9]$/.test(key)))throw Error("Invalid grade key for "+part.question);
+}
 
 export const preparePublication=(drafts:QuestionDraft[])=>{
  if(!drafts.length||drafts.length>50)throw new Error("A complete reviewed paper is required.");
@@ -14,15 +25,11 @@ export const preparePublication=(drafts:QuestionDraft[])=>{
   if(draft.parts.length>1&&draft.parts.some(p=>new RegExp(`^Q0*${draft.number}$`,"i").test(p.question.trim())))throw Error("Do not combine whole-question and part allocations for Q"+draft.number);
   if(!draft.parts.length)throw new Error("Question "+draft.number+" has no mapped parts.");
   for(const part of draft.parts){
-   if(!part.id||!part.question||!Number.isInteger(part.marks)||part.marks<1||part.marks>20||
-     !part.topic?.trim()||!part.skills?.trim()||!["AO1","AO2","AO3"].includes(part.ao)){
-    throw new Error("Incomplete Enhanced Skills Mapping for "+part.question);
-   }
+   validateMappedPart(part);
    if(questionNumber(part)!==draft.number)throw Error("Mismatched question part "+part.question);
-   const partRef=part.question.trim().toLowerCase();
+   const partRef=part.question.trim().toLowerCase().replace(/^q0*/,"q");
    if(partRefs.has(partRef))throw Error("Repeated question reference "+part.question);
    partRefs.add(partRef);
-   for(const percent of Object.values(part.gradePercent))if(percent!==null&&(!Number.isFinite(percent)||percent<0||percent>100))throw Error("Invalid grade percentage for "+part.question);
    const ref=part.id.trim().toLowerCase();
    if(refs.has(ref))throw new Error("Repeated mapping identifier "+part.id);
    refs.add(ref);parts++;total+=part.marks;

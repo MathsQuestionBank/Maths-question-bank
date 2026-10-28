@@ -1,5 +1,7 @@
 # Foundation import development batch
 
+For the current release decision, reviewed fixes and exact website steps, see [PR #64 import and release guide](pr64-import-and-release.md). The notes below record earlier validation snapshots.
+
 Repository: MathsQuestionBank/Maths-question-bank. Supabase target: ljisttslifnyrbuybfud.
 No other project is used. No production writes, publications, or migrations were performed.
 

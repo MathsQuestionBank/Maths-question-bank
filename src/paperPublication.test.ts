@@ -65,3 +65,8 @@ describe('publication integrity regressions',()=>{
   expect(()=>preparePublication(drafts)).toThrow(/numbering/);
  });
 });
+
+it('rejects the same part written with different zero padding',()=>{
+ const first=reviewed(1,20);first.parts=[{...part(1,10),id:'first',question:'Q1a'},{...part(1,10),id:'alias',question:'Q01a'}];
+ expect(()=>preparePublication([first,...[2,3,4].map(n=>reviewed(n,20))])).toThrow(/Repeated question reference/);
+});

@@ -75,6 +75,8 @@ export async function publishReviewedPaper(args:{
   .eq("series",series).eq("paper_code",source.code).eq("tier",tier).limit(1);
  if(lookupError)throw Error("Duplicate-paper check failed: "+lookupError.message);
  if(existing?.length)throw Error("This paper is already published; no changes were made.");
+ const {data:version,error:versionError}=await supabase.rpc("reviewed_publication_version");
+ if(versionError||version!==16)throw Error("Publication requires the V16 database update to preserve all mapping metadata. Your saved review is retained; no images or question records were written.");
  progress("Creating "+(summary.questions*2)+" reviewed images…");
  const items=[];
  for(let i=0;i<drafts.length;i++){

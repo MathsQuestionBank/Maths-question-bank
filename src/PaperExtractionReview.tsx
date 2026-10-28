@@ -7,24 +7,21 @@ import {inspectFoundationMap,type MappingRow} from "./EnhancedMappingImporter";
 import {loadSourcePdf,readPdfLines,drawSlice} from "./pdfExtraction";
 import {validSlice,makeReviewDrafts,findMarkSchemeStartPage,isReviewable,totalMarks,type QuestionDraft,type Slice,type TextLine} from "./paperExtraction";
 
+import {restoreSavedReview,type SavedReview} from "./savedPaperReview";
+
 const bucket="exam-materials-private";
 export type StagedSource={path:string;board:string;series:string;code:string;qualification:string};
-type SavedReview={version:number;mappingFile:string;markSchemeStartPage?:number;items:{number:number;question:Slice;mark:Slice;approved:boolean;notes:string;questionManuallyAdjusted?:boolean;markManuallyAdjusted?:boolean;overrides?:{id:string;topic:string;strands:string;skills:string}[]}[]};
 const cleaned=(s:string)=>s.toUpperCase().replace(/[^A-Z0-9]/g,"");
-const safeSlice=(x:Slice|undefined,original:Slice,pageCount:number):Slice=>{
- if(!x||!validSlice(x,pageCount))return original;
- return {...x};
-};
 function CropPreview({pdf,slice,title}:{pdf:PDFDocumentProxy;slice:Slice;title:string}){
  const ref=useRef<HTMLCanvasElement>(null);const [error,setError]=useState("");
  useEffect(()=>{
   let active=true;
-  const render=async()=>{if(!ref.current)return;try{await drawSlice(pdf,slice,ref.current);if(active)setError("")}catch(e){if(active)setError(e instanceof Error?e.message:"Cannot render crop")}};
+  const render=async()=>{if(!ref.current)return;const buffer=document.createElement("canvas");try{await drawSlice(pdf,slice,buffer);if(active&&ref.current){ref.current.width=buffer.width;ref.current.height=buffer.height;ref.current.getContext("2d")?.drawImage(buffer,0,0);setError("")}buffer.width=0;buffer.height=0}catch(e){if(active)setError(e instanceof Error?e.message:"Cannot render crop")}};
   void render();return()=>{active=false};
  },[pdf,slice.page,slice.endPage,slice.top,slice.bottom]);
  return <div style={{flex:"1 1 320px",minWidth:0}}><strong>{title}</strong>{error&&<p role="alert">{error}</p>}<div style={{maxHeight:500,overflow:"auto",border:"1px solid #aaa",borderRadius:6,marginTop:8}}><canvas aria-label={title} ref={ref} style={{width:"100%",display:"block"}}/></div></div>;
 }
-export default function PaperExtractionReview({source,onPublished}:{source:StagedSource;onPublished?:()=>void}){
+export default function PaperExtractionReview({source,onPublished,onReviewSaved}:{source:StagedSource;onPublished?:()=>void;onReviewSaved?:()=>void}){
  const [busy,setBusy]=useState(false),[status,setStatus]=useState("");
  const [questionPdf,setQuestionPdf]=useState<PDFDocumentProxy|null>(null),[schemePdf,setSchemePdf]=useState<PDFDocumentProxy|null>(null);
  const [drafts,setDrafts]=useState<QuestionDraft[]>([]),[selected,setSelected]=useState(0);
@@ -34,6 +31,7 @@ export default function PaperExtractionReview({source,onPublished}:{source:Stage
  const [publishProgress,setPublishProgress]=useState("");
  const [markSchemeStartPage,setMarkSchemeStartPage]=useState<number|null>(null);
  const [autoSchemeStartPage,setAutoSchemeStartPage]=useState<number|null>(null);
+ const savedText=useRef<string|null>(null);
  const extracted=useRef<{matches:MappingRow[];questionLines:TextLine[];markLines:TextLine[]}|null>(null);
  const selectedDraft=drafts[selected];
  const update=(fn:(d:QuestionDraft)=>QuestionDraft)=>{
@@ -54,13 +52,14 @@ export default function PaperExtractionReview({source,onPublished}:{source:Stage
   setDrafts(existing=>existing.map(d=>{
    const fresh=proposed.find(p=>p.number===d.number);
    if(!fresh)return d;
-   // Keep individually verified work unless it points before the real table starts.
-   if(d.approved&&d.mark.page>=markSchemeStartPage)return d;
+   // Teacher approval takes precedence over new extraction guesses.
+   if(d.approved)return d;
    return {...d,mark:fresh.mark,markDetected:fresh.markDetected,approved:false};
   }));
   setStatus("Mark-scheme proposals recalculated from PDF page "+markSchemeStartPage+". Check each crop and approve it before publishing.");
  };
  const process=async()=>{
+  if(drafts.length&&!reviewSaved&&!window.confirm("Reloading will discard unsaved review changes. Continue?"))return;
   setReviewSaved(false);setPublishedPaperId("");setPublishProgress("");
   setBusy(true);setStatus("Downloading private PDFs…");setQuestionPdf(null);setSchemePdf(null);setDrafts([]);setSelected(0);setAutoSchemeStartPage(null);setMarkSchemeStartPage(null);extracted.current=null;
   try{
@@ -91,7 +90,8 @@ export default function PaperExtractionReview({source,onPublished}:{source:Stage
    const {data:old,error:reviewError}=await supabase.storage.from(bucket).download(source.path+"/extraction-review.json");
    if(reviewError&&!/not found|not exist/i.test(reviewError.message))throw Error("Cannot check saved review; preparation stopped to protect existing corrections: "+reviewError.message);
    let previous:SavedReview|undefined;
-   if(old){try{previous=JSON.parse(await old.text()) as SavedReview;if(previous.version!==1||!previous.mappingFile||!Array.isArray(previous.items))throw Error("Invalid review")}catch{throw Error("Saved review cannot be read. Original file retained; do not overwrite it.")}}
+   savedText.current=old?await old.text():null;
+   if(old){try{previous=JSON.parse(savedText.current!) as SavedReview;if(previous.version!==1||!previous.mappingFile||!Array.isArray(previous.items))throw Error("Invalid review")}catch{throw Error("Saved review cannot be read. Original file retained; do not overwrite it.")}}
    let matches:MappingRow[]=[];let sourceName="";
    const mappingFiles=(allFiles||[]).filter(x=>/\.(xlsx|csv)$/i.test(x.name)&&(!previous||x.name===previous.mappingFile))
     .sort((a,b)=>Number(/\.csv$/i.test(b.name))-Number(/\.csv$/i.test(a.name)));
@@ -120,29 +120,7 @@ export default function PaperExtractionReview({source,onPublished}:{source:Stage
        setMarkSchemeStartPage(effectiveSchemeStart);
        prepared=makeReviewDrafts(matches,questionLines,markLines,effectiveSchemeStart);
       }
-      for(const d of prepared){
-       const prior=previous.items.find(x=>x.number===d.number);
-       if(!prior)continue;
-       // Older unreviewed drafts stored the missing-question default (cover, 5–95%).
-       // Prefer the newly detected source location instead of restoring that stale crop.
-       const obsoleteCoverDefault=!d.questionDetected&&d.question.page>1&&
-        prior.question?.page===1&&Math.abs((prior.question.top??0)-.05)<.002&&Math.abs((prior.question.bottom??0)-.95)<.002;
-       const proposedQuestion={...d.question};
-       const restoredQuestion=safeSlice(prior.question,d.question,qPdf.numPages);
-       const restoredMark=safeSlice(prior.mark,d.mark,mPdf.numPages);
-       const invalidSavedCrop=!prior.question||!validSlice(prior.question,qPdf.numPages)||!prior.mark||!validSlice(prior.mark,mPdf.numPages);
-       if(!obsoleteCoverDefault)d.question=restoredQuestion;
-       d.questionManuallyAdjusted=!obsoleteCoverDefault&&(prior.questionManuallyAdjusted===true||
-         (prior.question?.page!==proposedQuestion.page||Math.abs((prior.question?.top??proposedQuestion.top)-proposedQuestion.top)>.002||prior.question?.bottom!==proposedQuestion.bottom||prior.question?.endPage!==proposedQuestion.endPage));
-       // Older drafts could contain a crop from the numbered guidance (eg PDF page 3).
-       // Never restore or keep approval for a page before the detected marking table.
-       const invalidPreTable=effectiveSchemeStart!==null&&typeof prior.mark?.page==="number"&&prior.mark.page<effectiveSchemeStart;
-       if(!invalidPreTable)d.mark=restoredMark;
-       d.markManuallyAdjusted=prior.markManuallyAdjusted===true;
-       d.notes=typeof prior.notes==="string"?prior.notes:"";
-       if(Array.isArray(prior.overrides))d.parts=d.parts.map(original=>{const edit=prior.overrides?.find(x=>x.id===original.id);return edit?{...original,topic:typeof edit.topic==="string"?edit.topic:original.topic,strands:typeof edit.strands==="string"?edit.strands:original.strands,skills:typeof edit.skills==="string"?edit.skills:original.skills}:original});
-       d.approved=prior.approved===true&&!invalidSavedCrop&&!invalidPreTable&&!obsoleteCoverDefault&&isReviewable(d,qPdf.numPages,mPdf.numPages);
-      }
+      prepared=restoreSavedReview(previous,prepared,qPdf.numPages,mPdf.numPages);
       setReviewSaved(true);
    }
    setDrafts(prepared);setSelected(Math.max(0,prepared.findIndex(d=>!d.approved)));
@@ -155,10 +133,16 @@ export default function PaperExtractionReview({source,onPublished}:{source:Stage
   try{
    const {data:{user}}=await supabase.auth.getUser();const {data:approved}=await supabase.rpc("is_approved_owner");
    if(!user||approved!==true)throw Error("Approved account required.");
+   const {data:latest,error:latestError}=await supabase.storage.from(bucket).download(source.path+"/extraction-review.json");
+   if(latestError&&!/not found|not exist/i.test(latestError.message))throw Error("Cannot check saved review; nothing was overwritten.");
+   if((latest?await latest.text():null)!==savedText.current)throw Error("Review changed in another tab or device. Reload source and mapping before saving; the existing review was retained.");
    const payload:SavedReview={version:1,mappingFile,markSchemeStartPage:markSchemeStartPage??undefined,items:drafts.map(d=>({number:d.number,question:d.question,mark:d.mark,approved:d.approved,notes:d.notes,questionManuallyAdjusted:d.questionManuallyAdjusted,markManuallyAdjusted:d.markManuallyAdjusted,overrides:d.parts.map(p=>({id:p.id,topic:p.topic,strands:p.strands,skills:p.skills}))}))};
-   const {error}=await supabase.storage.from(bucket).upload(source.path+"/extraction-review.json",new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),{upsert:true,contentType:"application/json"});
+   const text=JSON.stringify(payload,null,2);
+   const {error}=await supabase.storage.from(bucket).upload(source.path+"/extraction-review.json",new Blob([text],{type:"application/json"}),{upsert:true,contentType:"application/json"});
    if(error)throw Error(error.message);
+   savedText.current=text;
    setReviewSaved(true);
+   onReviewSaved?.();
    setStatus(`Review progress saved privately: ${drafts.filter(d=>d.approved).length}/${drafts.length} complete questions approved. No live questions were changed.`);
   }catch(e){setStatus(e instanceof Error?e.message:"Could not save review progress.")}
   finally{setBusy(false)}
@@ -230,7 +214,7 @@ export default function PaperExtractionReview({source,onPublished}:{source:Stage
  </fieldset>)}
  </div>
  <label>Review notes<textarea value={selectedDraft.notes} onChange={e=>update(d=>({...d,notes:e.target.value}))} rows={2} placeholder="Record image, answer or tag corrections needed"/></label>
- <p className="hint">Topic and skill fields can be corrected here; the original Pearson spreadsheet remains unchanged. Recheck both images after any edit.</p><div style={{overflowX:"auto"}}><table><thead><tr><th>Part</th><th>Marks</th><th>AO</th><th>Primary topic</th><th>All topics</th><th>Searchable skills</th><th>Grade 1–9 success (%)</th><th>Mapping review</th></tr></thead><tbody>{selectedDraft.parts.map(x=><tr key={x.id}><td>{x.question}</td><td>{x.marks}</td><td>{x.ao}</td><td><input aria-label={x.question+" primary topic"} value={x.topic} onChange={e=>updatePart(x.id,"topic",e.target.value)}/></td><td><input aria-label={x.question+" all topics"} value={x.strands} onChange={e=>updatePart(x.id,"strands",e.target.value)}/></td><td><input aria-label={x.question+" searchable skills"} value={x.skills} onChange={e=>updatePart(x.id,"skills",e.target.value)}/></td><td>{[1,2,3,4,5,6,7,8,9].map(g=>x.gradePercent[g]??"–").join(" / ")}</td><td>{x.review}</td></tr>)}</tbody></table></div>
+ <p className="hint">Blank enhanced skills use the original Pearson skill. Topic and skill fields can be corrected here; the original Pearson spreadsheet remains unchanged. Recheck both images after any edit.</p><div style={{overflowX:"auto"}}><table><thead><tr><th>Part</th><th>Marks</th><th>AO</th><th>Primary topic</th><th>All topics</th><th>Searchable skills</th><th>Original Pearson skill</th><th>Grade 1–9 success (%)</th><th>Mapping review</th></tr></thead><tbody>{selectedDraft.parts.map(x=><tr key={x.id}><td>{x.question}</td><td>{x.marks}</td><td>{x.ao}</td><td><input aria-label={x.question+" primary topic"} value={x.topic} onChange={e=>updatePart(x.id,"topic",e.target.value)}/></td><td><input aria-label={x.question+" all topics"} value={x.strands} onChange={e=>updatePart(x.id,"strands",e.target.value)}/></td><td><input aria-label={x.question+" searchable skills"} value={x.skills} onChange={e=>updatePart(x.id,"skills",e.target.value)}/></td><td>{x.originalSkill||"–"}</td><td>{[1,2,3,4,5,6,7,8,9].map(g=>x.gradePercent[g]??"–").join(" / ")}</td><td>{x.review}</td></tr>)}</tbody></table></div>
  <p className="hint">Approve each complete question only after checking the question crop, mark scheme, parts and topic tags. One tap approves it and opens the next question. Any later edit removes its approval.</p>
  <div className="row" style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap"}}>
  <button className="secondary" disabled={busy||selected===0} onClick={()=>select(selected-1)}>Previous question</button>

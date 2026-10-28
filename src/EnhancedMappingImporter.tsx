@@ -81,11 +81,11 @@ export async function inspectFoundationMap(file:File):Promise<Audit>{
   originalSkill:col(row,"skill tested (pearson)")||col(row,"original skill")||col(row,"skill"),mappingBasis:col(row,"mapping basis"),additionalTags:col(row,"additional topic tags")||col(row,"secondary strands"),
   marks:Number(col(row,"maximum marks"))||0,ao:"AO"+col(row,"assessment objective").replace(/^AO/i,""),spec:col(row,"specification refs"),
   gradePercent:Object.fromEntries([1,2,3,4,5,6,7,8,9].map(g=>{const val=col(row,"grade "+g+" success percent");return [g,val!==""&&Number.isFinite(Number(val))?Number(val):null]})),
-  id:col(row,"question id"),board:col(row,"exam board"),tier:col(row,"tier"),series:col(row,"series"),paper:col(row,"paper"),question:col(row,"question"),topic:col(row,"primary strand"),strands:col(row,"all strands"),skills:col(row,"searchable skills"),review:col(row,"review recommendation"),excelRow:Number(col(row,"source excel row"))||i+2
+  id:col(row,"question id"),board:col(row,"exam board"),tier:col(row,"tier"),series:col(row,"series"),paper:col(row,"paper"),question:col(row,"question"),topic:col(row,"primary strand"),strands:col(row,"all strands"),skills:col(row,"searchable skills")||col(row,"skill tested (pearson)")||col(row,"original skill")||col(row,"skill"),review:col(row,"review recommendation"),excelRow:Number(col(row,"source excel row"))||i+2
  }));
  const seen=new Set<string>(),duplicates:string[]=[];
  for(const row of rows){const key=row.id.toLowerCase();if(seen.has(key))duplicates.push(row.id);seen.add(key)}
- const issues=rows.filter(x=>!x.board||!x.tier||!x.series||!x.paper||!x.question||!x.topic).slice(0,50).map(x=>x.id+": missing matching details");
+ const issues=rows.filter(x=>!x.board||!x.tier||!x.series||!x.paper||!x.question||!x.topic||!x.skills||!/^AO[123]$/.test(x.ao)||!Number.isInteger(x.marks)||x.marks<1||x.marks>20).slice(0,50).map(x=>x.id+": missing or invalid matching details, marks, skills or AO");
  return {rows,duplicates:[...new Set(duplicates)],reviewCount:rows.filter(x=>/review|check|suggest/i.test(x.review)).length,issues};
 }
 export default function EnhancedMappingImporter(){
@@ -119,7 +119,7 @@ export default function EnhancedMappingImporter(){
  const visible=audit?.rows.filter(x=>!filter||[x.series,x.paper,x.id].join(" ").toLowerCase().includes(filter.toLowerCase())).slice(0,30)||[];
  return <section className="panel" style={{padding:22}}>
  <h2>Import Enhanced Skills Mapping</h2>
- <p className="hint">Upload a .csv or .xlsx spreadsheet containing Pearson mappings and enhanced topic tags. Review identifiers and suggested classifications before storing the source privately. This stage does not overwrite published question data.</p>
+ <p className="hint">Upload a .csv or .xlsx spreadsheet containing Pearson mappings and enhanced topic tags. Blank enhanced skills use the original Pearson skill for review. Review identifiers and suggested classifications before storing the source privately. This stage does not overwrite published question data.</p>
  <label>Enhanced Skills Mapping (.csv or .xlsx)<input aria-label="Enhanced Skills Mapping spreadsheet" type="file" accept=".csv,text/csv,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" disabled={busy} onChange={e=>{setFile(e.target.files?.[0]||null);setAudit(null);setStatus("");}}/></label>
  <div className="row" style={{display:"flex",gap:12,flexWrap:"wrap"}}>
  <button className="secondary" disabled={busy||!file} onClick={()=>void inspect()}>Inspect spreadsheet</button>

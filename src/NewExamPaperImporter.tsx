@@ -24,14 +24,17 @@ export default function NewExamPaperImporter({onArchived}:{onArchived?:()=>void}
  const inspect=async()=>{
   setReady(false);setStatus("");
   if(!question||!markScheme||!(await isPdf(question))||!(await isPdf(markScheme))){setStatus("Select a valid question paper and mark scheme PDF, each no larger than 30 MB.");return}
-  if(!/^(January|June|November|May|March|October|Summer|Autumn)\s+20\d{2}$/i.test(series.trim())){setStatus("Enter a recognised series and year, for example November 2022.");return}
+  const seriesMatch=series.trim().match(/^(January|June|November|May|March|October|Summer|Autumn)\s+(20\d{2})$/i);
+  if(!seriesMatch){setStatus("Enter a recognised series and year, for example November 2022.");return}
   if(!/^[123]$/.test(paper)){setStatus("Choose paper 1, 2 or 3.");return}
+  const canonicalSeries=seriesMatch[1][0].toUpperCase()+seriesMatch[1].slice(1).toLowerCase()+" "+seriesMatch[2];
+  setSeries(canonicalSeries);
   setBusy(true);
   try{
    const {data:{user},error:authError}=await supabase.auth.getUser();
    const {data:approved,error:roleError}=await supabase.rpc("is_approved_owner");
    if(authError||!user||roleError||approved!==true)throw Error("An approved account is required.");
-   const {data:found,error}=await supabase.from("exam_papers").select("id").eq("exam_board",board).eq("qualification",qualification).eq("tier",tier).eq("paper_code",code).ilike("series",series.trim()).limit(1);
+   const {data:found,error}=await supabase.from("exam_papers").select("id").eq("exam_board",board).eq("qualification",qualification).eq("tier",tier).eq("paper_code",code).ilike("series",canonicalSeries).limit(1);
    if(error)throw Error(error.message);
    if(found?.length)throw Error("This paper is already registered. Nothing was uploaded; review the existing paper rather than importing it twice.");
    setReady(true);

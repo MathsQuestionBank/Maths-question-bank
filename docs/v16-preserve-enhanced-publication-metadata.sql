@@ -3,6 +3,24 @@
 -- Replaces the existing atomic RPC; no rows, policies or images are altered.
 -- Not automatically applied by the frontend. Verify with an approved owner in staging.
 
+begin;
+-- Require the V1.5 transaction's concurrency protection before replacing its RPC.
+do $$
+begin
+  if to_regprocedure('public.publish_reviewed_exam_paper(text,text,text,text,text,text,jsonb)') is null
+    or not exists (
+      select 1 from pg_index i join pg_class c on c.oid=i.indexrelid
+      where c.oid=to_regclass('public.exam_papers_unique_board_series_tier_code')
+        and i.indrelid='public.exam_papers'::regclass and i.indisunique and i.indisvalid
+        and i.indpred is null and i.indnkeyatts=5
+        and pg_get_expr(i.indexprs,i.indrelid) =
+          $index$lower(btrim(exam_board)), lower(btrim(qualification)), lower(btrim(series)), lower(btrim(paper_code)), lower(btrim(COALESCE(tier, ''::text)))$index$
+    ) then
+    raise exception 'Apply and verify V1.5, including its unique paper index, before V1.6';
+  end if;
+end;
+$$;
+
 create or replace function public.publish_reviewed_exam_paper(
   p_board text,
   p_qualification text,
@@ -38,10 +56,11 @@ declare
   v_prefix text;
   v_whole_marks integer;
 begin
-  if auth.uid() is null or not public.is_approved_owner() then
+  if auth.uid() is null or public.is_approved_owner() is distinct from true then
     raise exception 'An approved owner session is required' using errcode='42501';
   end if;
-  if p_board not in ('Edexcel','AQA') or p_qualification <> 'GCSE Mathematics'
+  if p_board is null or p_qualification is null or p_series is null or p_code is null or p_tier is null or p_review_path is null
+    or p_board not in ('Edexcel','AQA') or p_qualification <> 'GCSE Mathematics'
     or p_tier not in ('Foundation','Higher')
     or p_code !~ '^[123][FH]$'
     or (p_tier='Foundation' and right(p_code,1)<>'F')
@@ -63,7 +82,7 @@ begin
 
   -- Storage is owned by the same approved user. Check all images before inserting anything.
   for v_item in select value from jsonb_array_elements(p_items) loop
-    if coalesce(v_item->>'approved','') <> 'true' then
+    if v_item->'approved' is distinct from 'true'::jsonb then
       raise exception 'All questions must be approved and saved first'; end if;
     v_number := (v_item->>'number')::integer;
     if v_number is null or v_number < 1 or v_number > 50 or v_number=any(v_numbers_seen) then
@@ -90,10 +109,10 @@ begin
       where allocation.value->>'question' ~* ('^Q0*'||v_number::text||'$')
     ) then raise exception 'Do not combine whole-question and part allocations'; end if;
     for v_part in select value from jsonb_array_elements(v_parts) loop
-      v_part_number := btrim(v_part->>'question');
+      v_part_number := regexp_replace(btrim(v_part->>'question'), '^Q0*', 'Q', 'i');
       v_part_id := btrim(v_part->>'id');
       if v_part_id is null or v_part_id='' or v_part_number is null
-        or v_part_number !~* ('^Q0*'||v_number::text||'([a-z]|[ivx]|$)')
+        or v_part_number !~* ('^Q0*'||v_number::text||'([a-z](i{1,3}|iv|v|vi{0,3}|ix|x)?)?$')
         or lower(v_part_id)=any(v_parts_seen)
         or lower(v_part_number)=any(v_part_numbers_seen) then
         raise exception 'Duplicate or mismatched question part'; end if;
@@ -110,8 +129,8 @@ begin
       if exists (
         select 1 from jsonb_each(v_part->'grade_percent') as g
         where g.key !~ '^[1-9]$' or (g.value <> 'null'::jsonb and
-          (jsonb_typeof(g.value) <> 'number' or
-           (g.value #>> '{}')::numeric < 0 or (g.value #>> '{}')::numeric > 100))
+          case when jsonb_typeof(g.value) <> 'number' then true
+           else (g.value #>> '{}')::numeric < 0 or (g.value #>> '{}')::numeric > 100 end)
       ) then raise exception 'Invalid grade-performance percentage'; end if;
       v_total := v_total+v_marks;
       v_count := v_count+1;
@@ -201,3 +220,19 @@ end;
 $$;
 revoke all on function public.publish_reviewed_exam_paper(text,text,text,text,text,text,jsonb) from public, anon;
 grant execute on function public.publish_reviewed_exam_paper(text,text,text,text,text,text,jsonb) to authenticated;
+
+-- New clients must not silently send Higher grade/provenance fields to the older RPC.
+create or replace function public.reviewed_publication_version()
+returns integer language plpgsql security invoker set search_path=public,pg_temp
+as $$
+begin
+  if auth.uid() is null or public.is_approved_owner() is distinct from true then
+    raise exception 'An approved owner session is required' using errcode='42501';
+  end if;
+  return 16;
+end;
+$$;
+revoke all on function public.reviewed_publication_version() from public,anon;
+grant execute on function public.reviewed_publication_version() to authenticated;
+
+commit;

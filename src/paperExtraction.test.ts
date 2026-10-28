@@ -120,3 +120,17 @@ describe('real Pearson layout regressions',()=>{
   expect(findQuestionAnchors(lines,[10]).size).toBe(0);
  });
 });
+
+it('keeps mark-scheme continuation content before the next question on a later page',()=>{
+ const rows=[1,2].map(n=>({id:'Q'+n,question:'Q'+n,marks:2,ao:'AO1',topic:'Number',strands:'Number',skills:'Counting',board:'Edexcel',tier:'Foundation',series:'November 2022',paper:'1F',review:'',excelRow:n,spec:'',gradePercent:{}}));
+ const lines=[{page:6,top:.2,left:.1,text:'1 Answer'},{page:7,top:.2,left:.1,text:'continued solution'},{page:7,top:.6,left:.1,text:'2 Answer'},{page:8,top:.7,left:.2,text:'final diagram'}];
+ const drafts=makeReviewDrafts(rows,[],lines,6);
+ expect(drafts[0].mark).toMatchObject({page:6,endPage:7,bottom:.578});
+ expect(drafts[1].mark).toMatchObject({page:7,endPage:8});
+});
+
+it('excludes Pearson modified-large-print appendices from standard mark-scheme crops',()=>{
+ const lines=[{page:16,top:.3,left:.1,text:'30 Answer'},{page:17,top:.1,left:.1,text:'Modifications to the mark scheme for Modified Large Print (MLP) papers: 1MA1 3F'},{page:18,top:.3,left:.1,text:'30 Different modified paper answer'}];
+ const d=makeReviewDrafts([row('Q30',4)],[],lines,6)[0];
+ expect(d.mark.page).toBe(16);expect(d.mark.endPage).toBeUndefined();
+});

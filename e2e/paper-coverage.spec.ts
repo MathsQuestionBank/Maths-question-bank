@@ -69,6 +69,7 @@ test('interrupted intake retries only missing files and rejects different archiv
  await page.goto('/');await page.getByRole('button',{name:/Import Exam Papers/}).click();
  await page.getByLabel('New question paper PDF').setInputFiles({name:'question.pdf',mimeType:'application/pdf',buffer:question});
  await page.getByLabel('New mark scheme PDF').setInputFiles({name:'mark.pdf',mimeType:'application/pdf',buffer:Buffer.from('%PDF- mark source')});
+ await page.getByLabel('New paper exam series').fill(' november   2022 ');
  await page.getByRole('button',{name:'Check paper',exact:true}).click();await page.getByRole('button',{name:'Archive PDFs for review'}).click();
  await expect(page.getByText(/Could not archive mark-scheme.pdf/)).toBeVisible();
  await page.getByRole('button',{name:'Check paper',exact:true}).click();await page.getByRole('button',{name:'Archive PDFs for review'}).click();

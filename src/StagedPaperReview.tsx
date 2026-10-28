@@ -84,6 +84,6 @@ export default function StagedPaperReview({onPublished,refreshKey=0}:{onPublishe
  <button className="secondary small" disabled={!p.mark||!!opening} onClick={()=>void open(p.path,"mark-scheme.pdf")}>View mark scheme</button><button className="primary small" disabled={!p.question||!p.mark} onClick={()=>setSelectedPath(current=>current===p.path?"":p.path)}>{selectedPath===p.path?"Close review":"Extract & review"}</button>
  </div>
  </div>
- {selectedPath===p.path&&<Suspense fallback={<p role="status">Loading PDF review tools…</p>}><PaperExtractionReview source={{path:p.path,board:p.board,qualification:p.qualification,series:p.series,code:p.code}} onPublished={()=>{onPublished?.();void refresh()}}/></Suspense>}</div>)}
+ {selectedPath===p.path&&<Suspense fallback={<p role="status">Loading PDF review tools…</p>}><PaperExtractionReview source={{path:p.path,board:p.board,qualification:p.qualification,series:p.series,code:p.code}} onReviewSaved={()=>void refresh()} onPublished={()=>{onPublished?.();void refresh()}}/></Suspense>}</div>)}
  </section>;
 }

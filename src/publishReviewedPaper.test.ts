@@ -1,11 +1,11 @@
 import {beforeEach,describe,it,expect,vi} from 'vitest';
 import type {PDFDocumentProxy} from 'pdfjs-dist';
 import type {QuestionDraft} from './paperExtraction';
-const mock=vi.hoisted(()=>({getUser:vi.fn(),owner:vi.fn(),publish:vi.fn(),download:vi.fn(),upload:vi.fn(),lookup:vi.fn(),draw:vi.fn()}));
+const mock=vi.hoisted(()=>({getUser:vi.fn(),owner:vi.fn(),version:vi.fn(),publish:vi.fn(),download:vi.fn(),upload:vi.fn(),lookup:vi.fn(),draw:vi.fn()}));
 vi.mock('./pdfExtraction',()=>({drawSlice:mock.draw}));
 vi.mock('./supabase',()=>{
  const query={select:()=>query,eq:()=>query,limit:mock.lookup};
- return {supabase:{auth:{getUser:mock.getUser},rpc:(name:string,...args:unknown[])=>name==='is_approved_owner'?mock.owner(...args):mock.publish(...args),from:()=>query,storage:{from:()=>({download:mock.download,upload:mock.upload})}}};
+ return {supabase:{auth:{getUser:mock.getUser},rpc:(name:string,...args:unknown[])=>name==='is_approved_owner'?mock.owner(...args):name==='reviewed_publication_version'?mock.version(...args):mock.publish(...args),from:()=>query,storage:{from:()=>({download:mock.download,upload:mock.upload})}}};
 });
 import {publishReviewedPaper} from './publishReviewedPaper';
 const source={path:'new-paper-intake/Edexcel/GCSE-Mathematics/November-2022/1F/owner',board:'Edexcel',qualification:'GCSE-Mathematics',series:'November-2022',code:'1F'};
@@ -16,6 +16,7 @@ const args=(items=drafts())=>({source,drafts:items,questionPdf:pdf,schemePdf:pdf
 beforeEach(()=>{
  vi.resetAllMocks();
  mock.getUser.mockResolvedValue({data:{user:{id:'owner'}},error:null});mock.owner.mockResolvedValue({data:true,error:null});
+ mock.version.mockResolvedValue({data:16,error:null});
  mock.lookup.mockResolvedValue({data:[],error:null});mock.upload.mockResolvedValue({error:null});mock.publish.mockResolvedValue({data:'published-paper',error:null});
  mock.download.mockResolvedValue({data:new Blob([JSON.stringify(saved(drafts()))]),error:null});
  vi.stubGlobal('document',{createElement:()=>({width:1,height:1,toBlob:(fn:(b:Blob)=>void)=>fn(new Blob(['png']))})});
@@ -51,4 +52,10 @@ describe('reviewed publication orchestration (mock database)',()=>{
   items[0].approved=true;items[0].questionDetected=false;
   await expect(publishReviewedPaper(args(items))).rejects.toThrow(/located/);expect(mock.upload).not.toHaveBeenCalled();
  });
+});
+
+it('blocks legacy V15 servers before writing images or dropping new mapping fields',async()=>{
+ mock.version.mockResolvedValue({data:null,error:{message:'function missing'}});
+ await expect(publishReviewedPaper(args())).rejects.toThrow(/V16 database update/);
+ expect(mock.upload).not.toHaveBeenCalled();expect(mock.publish).not.toHaveBeenCalled();
 });

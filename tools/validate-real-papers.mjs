@@ -1,6 +1,7 @@
 // Private, local source files only; no upload, publication, or copyrighted fixtures in Git.
 // Usage: node tools/validate-real-papers.mjs question.pdf scheme.pdf [enhanced-mapping.csv paper-code]
-import {readFile} from 'node:fs/promises';
+import {readFile,writeFile,mkdir} from 'node:fs/promises';
+import {join} from 'node:path';
 import {createServer} from 'vite';
 import {chromium} from '@playwright/test';
 import assert from 'node:assert/strict';
@@ -19,7 +20,7 @@ try{
  await page.route('**/private-source-*.pdf',r=>r.fulfill({contentType:'application/pdf',body:files[r.request().url().includes('question')?0:1]}));
  await page.route('**/src/main.tsx',r=>r.fulfill({contentType:'text/javascript',body:''}));
  await page.goto('http://127.0.0.1:5174');
- const result=await page.evaluate(async({mapping,paperCode})=>{
+ const result=await page.evaluate(async({mapping,paperCode,includeCrops})=>{
   const {loadSourcePdf,readPdfLines,drawSlice}=await import('/src/pdfExtraction.ts');
   const {makeReviewDrafts,findMarkSchemeStartPage,validSlice}=await import('/src/paperExtraction.ts');
   const q=await loadSourcePdf(await (await fetch('/private-source-question.pdf')).blob());
@@ -37,12 +38,21 @@ try{
    if(new Set(rows.map(r=>r.id.toLowerCase())).size!==rows.length)throw Error('Duplicate mapping IDs in selected paper');
    if(rows.some(r=>!r.board||!r.tier||!r.question||!r.topic))throw Error('Incomplete mapping in selected paper');
   }
+  if(mapping){const {validateMappedPart}=await import('/src/paperPublication.ts');rows.forEach(validateMappedPart)}
   const start=findMarkSchemeStartPage(markLines);
   const drafts=makeReviewDrafts(rows,questionLines,markLines);
-  const canvas=document.createElement('canvas');
-  for(const d of drafts){await drawSlice(q,d.question,canvas);await drawSlice(m,d.mark,canvas)}
-  return {mappedParts:rows.length,mappedMarks:rows.reduce((n,r)=>n+r.marks,0),questionPages:q.numPages,schemePages:m.numPages,start,questions:totals.length,marks:totals.reduce((n,t)=>n+t.marks,0),drafts:drafts.map(d=>({number:d.number,partMarks:d.parts.reduce((n,r)=>n+r.marks,0),printedMarks:totals.find(t=>t.number===d.number)?.marks,question:d.question,mark:d.mark,questionDetected:d.questionDetected,questionInferred:d.questionInferred,markDetected:d.markDetected,approved:d.approved,valid:validSlice(d.question,q.numPages)&&validSlice(d.mark,m.numPages),endsAtPrintedTotal:(d.question.endPage??d.question.page)===totals.find(t=>t.number===d.number)?.page}))};
- },{mapping,paperCode});
+  const canvas=document.createElement('canvas'),crops=[];
+  for(const d of drafts){for(const kind of ['question','mark']){
+   await drawSlice(kind==='question'?q:m,d[kind],canvas);
+   if(includeCrops)crops.push({number:d.number,kind,data:canvas.toDataURL('image/png')});
+  }}
+  return {crops,mappedParts:rows.length,mappedMarks:rows.reduce((n,r)=>n+r.marks,0),questionPages:q.numPages,schemePages:m.numPages,start,questions:totals.length,marks:totals.reduce((n,t)=>n+t.marks,0),drafts:drafts.map(d=>({number:d.number,partMarks:d.parts.reduce((n,r)=>n+r.marks,0),printedMarks:totals.find(t=>t.number===d.number)?.marks,question:d.question,mark:d.mark,questionDetected:d.questionDetected,questionInferred:d.questionInferred,markDetected:d.markDetected,approved:d.approved,valid:validSlice(d.question,q.numPages)&&validSlice(d.mark,m.numPages),endsAtPrintedTotal:(d.question.endPage??d.question.page)===totals.find(t=>t.number===d.number)?.page}))};
+ },{mapping,paperCode,includeCrops:!!process.env.REVIEW_CROP_DIR});
+ if(process.env.REVIEW_CROP_DIR){
+  await mkdir(process.env.REVIEW_CROP_DIR,{recursive:true});
+  for(const c of result.crops)await writeFile(join(process.env.REVIEW_CROP_DIR,`Q${c.number}-${c.kind}.png`),Buffer.from(c.data.split(",")[1],"base64"));
+ }
+ delete result.crops;
  console.log(JSON.stringify(result,null,2));
  assert.equal(result.marks,80);assert.equal(result.mappedMarks,80);assert.ok(result.start>1);
  assert.equal(new Set(result.drafts.map(d=>d.number)).size,result.questions);

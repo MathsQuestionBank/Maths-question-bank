@@ -21,3 +21,11 @@ describe('enhanced CSV mapping',()=>{
   expect(audit.rows[0].gradePercent[9]).toBe(72.5);expect(audit.duplicates).toEqual([record[0]]);
  });
 });
+
+it('uses the original Pearson skill when enhanced searchable skills are blank',async()=>{
+ const row=[...record];row[8]='';
+ const text=csv(header)+'\n'+csv(row);
+ const audit=await inspectFoundationMap({name:'Foundation.csv',size:text.length,text:async()=>text} as File);
+ expect(audit.rows[0].skills).toBe('Original Pearson skill');expect(audit.rows[0].originalSkill).toBe('Original Pearson skill');
+ expect(audit.issues).toEqual([]);
+});
