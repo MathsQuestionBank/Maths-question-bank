@@ -12,6 +12,7 @@ test('coverage derives published counts and saved approvals, resumes reviews and
   if(path==='/auth/v1/user')return json(user);
   if(path.startsWith('/rest/v1/profiles'))return json([{role:'owner',approved:true}]);
   if(path==='/rest/v1/rpc/is_approved_owner')return json(true);
+  if(path==='/rest/v1/rpc/list_owner_exam_intake')return json(['1F','2F'].map(code=>({path:'new-paper-intake/Edexcel/GCSE-Mathematics/November-2022/'+code+'/'+uid,board:'Edexcel',qualification:'GCSE-Mathematics',series:'November-2022',code,question:true,mark:true,manifest:true,review_saved:true})));
   if(path==='/rest/v1/exam_papers')return fail?json({message:'Coverage read denied'},403):json(['h1','h2'].map(id=>({id,exam_board:'Edexcel',qualification:'GCSE Mathematics',series:'November 2022',paper_code:'1H',tier:'Higher'})));
   if(path==='/rest/v1/questions')return json(url.searchParams.get('select')==='paper_id,marks'?[{paper_id:'h1',marks:2},{paper_id:'h2',marks:3}]:[]);
   if(path.startsWith('/storage/v1/object/list/')){
@@ -28,7 +29,10 @@ test('coverage derives published counts and saved approvals, resumes reviews and
  });
  await page.goto('/');await page.getByRole('button',{name:/Import Exam Papers/}).click();
  const coverage=page.locator('section').filter({has:page.getByRole('heading',{name:'Paper coverage',exact:true})}).last();
+ await expect(coverage.getByRole('cell',{name:'Review saved — open to check',exact:true})).toHaveCount(2);
+ await page.getByRole('button',{name:'Check approvals'}).first().click();
  await expect(coverage.getByRole('cell',{name:'Fully approved',exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'Check approvals'}).last().click();
  await expect(coverage.getByRole('cell',{name:'Partially approved',exact:true})).toBeVisible();
  await expect(coverage.getByText(/Duplicate published paper identity/)).toBeVisible();
  const higher=coverage.getByRole('row').filter({has:page.getByRole('cell',{name:'1H',exact:true})}).filter({hasText:'November 2022'});
@@ -38,7 +42,7 @@ test('coverage derives published counts and saved approvals, resumes reviews and
  await expect(page.getByRole('button',{name:'Prepare question review'})).toBeVisible();
  expect(mutations).toEqual([]);
  fail=true;await page.getByRole('button',{name:'Refresh list'}).click();
- await expect(coverage.getByRole('alert')).toContainText('Missing papers cannot be confirmed');
+ await expect(coverage.getByRole('alert')).toContainText('Showing the last verified database snapshot');
 });
 
 test('interrupted intake retries only missing files and rejects different archived PDFs',async({page})=>{
