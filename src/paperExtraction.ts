@@ -169,6 +169,11 @@ export const validSlice=(s:Slice,pages:number):boolean=>Number.isInteger(s.page)
    Number.isFinite(f.top)&&Number.isFinite(f.bottom)&&f.top>=0&&f.bottom<=1&&f.bottom-f.top>=.025&&validWidth(f.left??s.left??0,f.right??s.right??1))&&
   s.fragments[0].page===s.page&&s.fragments[s.fragments.length-1].page===(s.endPage??s.page)&&
   s.fragments[0].top===s.top&&s.fragments[s.fragments.length-1].bottom===s.bottom);
+/** Teacher-controlled fix for a suggested crop that erroneously includes a later page. */
+export function endSliceAtFirstPage(slice:Slice):Slice{
+ const {endPage:unusedEnd,fragments:unusedFragments,selectedPagesOnly:unusedSelected,...rest}=slice;
+ return {...rest,bottom:.96};
+}
 export function adjustSlice(slice:Slice,key:"page"|"endPage"|"top"|"bottom"|"left"|"right",value:number):Slice{
  const next={...slice,[key]:value};
  if(key==="page"||key==="endPage"){delete next.fragments;delete next.selectedPagesOnly}
