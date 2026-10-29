@@ -65,3 +65,8 @@ it('requires horizontal crop and border-trimming changes to be saved before publ
  await expect(publishReviewedPaper(args(items))).rejects.toThrow(/not saved/);
  expect(mock.upload).not.toHaveBeenCalled();
 });
+
+it('requires a changed border-rendering version to be saved before publication',async()=>{
+ const items=drafts();items[0].question.borderVersion=2;
+ await expect(publishReviewedPaper(args(items))).rejects.toThrow(/not saved/);expect(mock.upload).not.toHaveBeenCalled();
+});

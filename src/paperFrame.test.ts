@@ -13,3 +13,9 @@ describe('outer exam-paper border detection',()=>{
   expect(detectPaperFrame(data,100,100)).toBeNull();
  });
 });
+
+it('uses the outer bottom frame for new crops without treating the total underline as the frame; legacy crops retain their rendering',()=>{
+ const data=blank();for(let n=4;n<=96;n++){pixel(data,5,n);pixel(data,95,n)}for(let x=5;x<=95;x++){pixel(data,x,4);pixel(data,x,96);pixel(data,x,92)}
+ expect(detectPaperFrame(data,100,100)?.bottom).toBe(.90);
+ expect(detectPaperFrame(data,100,100,true)?.bottom).toBe(.94);
+});

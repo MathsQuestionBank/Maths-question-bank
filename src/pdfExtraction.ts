@@ -43,7 +43,7 @@ export async function drawSlice(pdf:PDFDocumentProxy,selection:Slice,canvas:HTML
   source.width=Math.round(viewport.width);source.height=Math.round(viewport.height);
   const context=source.getContext("2d");if(!context)throw Error("Canvas unavailable");
   await page.render({canvas:source,canvasContext:context,viewport}).promise;
-  const frame=selection.trimBorder?detectPaperFrame(context.getImageData(0,0,source.width,source.height).data,source.width,source.height):null;
+  const frame=selection.trimBorder?detectPaperFrame(context.getImageData(0,0,source.width,source.height).data,source.width,source.height,selection.borderVersion===2):null;
   if(frame){
    // Clip the small rounded frame corners as well as its straight edges.
    context.fillStyle="#fff";context.beginPath();context.rect(0,0,source.width,source.height);

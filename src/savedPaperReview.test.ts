@@ -46,3 +46,9 @@ it('keeps old approved crops full width until the teacher explicitly trims the b
  const restored=restoreSavedReview(saved(),[{...draft(),question:{...draft().question,trimBorder:true}}],24,18)[0];
  expect(restored.question.trimBorder).toBeUndefined();expect(restored.question.left).toBeUndefined();expect(restored.approved).toBe(true);
 });
+
+it('preserves an approved legacy border rendering when new proposals use the outer-frame detector',()=>{
+ const original=saved();original.items[0].question.trimBorder=true;
+ const [restored]=restoreSavedReview(original,[{...draft(),question:{...draft().question,trimBorder:true,borderVersion:2}}],24,18);
+ expect(restored.question).toEqual(original.items[0].question);expect(restored.question.borderVersion).toBeUndefined();expect(restored.approved).toBe(true);
+});

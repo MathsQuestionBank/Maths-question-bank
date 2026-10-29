@@ -96,7 +96,7 @@ describe('multi-page question preservation',()=>{
  it('keeps every page through the printed total and next question boundary',()=>{
   const lines:TextLine[]=[{page:2,top:.12,left:.1,text:'1 Solve the problem'},{page:3,top:.7,left:.2,text:'(Total for Question 1 is 5 marks)'},{page:4,top:.12,left:.1,text:'2 Next question'}];
   const [draft]=makeReviewDrafts([row('Q01a',2),row('Q01b',3),row('Q02',1)],lines,[]);
-  expect(draft.question).toEqual({page:2,endPage:3,top:.102,bottom:.735,trimBorder:true});
+  expect(draft.question).toEqual({page:2,endPage:3,top:.102,bottom:.714,trimBorder:true,borderVersion:2});
   expect(draft.parts).toHaveLength(2);
   expect(draft.approved).toBe(false);
  });
@@ -159,5 +159,11 @@ it('recognises a question number with an attached combining stroke without alter
 it('handles the printed extra-is typo in November 2024 2F Q17 without including the following page',()=>{
  const lines:TextLine[]=[{page:11,top:.11,left:.08,text:'17 Car insurance'},{page:11,top:.8,left:.45,text:'(Total for Question is 17 is 6 marks)'},{page:12,top:.11,left:.08,text:'18 Describe the transformation'}];
  const [draft]=makeReviewDrafts([row('Q17a',3),row('Q17b',3),row('Q18',2)],lines,[]);
- expect(draft.question.page).toBe(11);expect(draft.question.endPage).toBeUndefined();expect(draft.question.bottom).toBeCloseTo(.835);expect(draft.approved).toBe(false);
+ expect(draft.question.page).toBe(11);expect(draft.question.endPage).toBeUndefined();expect(draft.question.bottom).toBeCloseTo(.814);expect(draft.approved).toBe(false);
+});
+
+it('ends the June 2019 2F Q1 crop just below its total without the next question text',()=>{
+ const lines:TextLine[]=[{page:2,top:.179171,left:.071,text:'1 Write 0.75 as a fraction.'},{page:2,top:.291405,left:.58,text:'(Total for Question 1 is 1 mark)'},{page:2,top:.335,left:.071,text:'2 Write the following numbers in order of size.'}];
+ const [draft]=makeReviewDrafts([row('Q01',1),row('Q02',1)],lines,[]);
+ expect(draft.question.bottom).toBeCloseTo(.305405);expect(draft.question.bottom).toBeGreaterThan(.291405);expect(draft.question.bottom).toBeLessThan(.335-.022);expect(draft.approved).toBe(false);
 });

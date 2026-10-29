@@ -14,7 +14,7 @@ export function restoreSavedReview(saved:SavedReview,drafts:QuestionDraft[],ques
      new Set(prior.overrides.map(x=>x.id)).size!==d.parts.length||prior.overrides.some(x=>!d.parts.some(p=>p.id===x.id)||
       typeof x.topic!=='string'||typeof x.strands!=='string'||typeof x.skills!=='string')))
    throw Error('Saved mapping edits do not match Q'+d.number+'. Original review retained; preparation stopped.');
-  const adjusted=(a:Slice,b:Slice)=>a.page!==b.page||(a.endPage??a.page)!==(b.endPage??b.page)||a.top!==b.top||a.bottom!==b.bottom||(a.left??0)!==(b.left??0)||(a.right??1)!==(b.right??1)||!!a.trimBorder!==!!b.trimBorder;
+  const adjusted=(a:Slice,b:Slice)=>a.page!==b.page||(a.endPage??a.page)!==(b.endPage??b.page)||a.top!==b.top||a.bottom!==b.bottom||(a.left??0)!==(b.left??0)||(a.right??1)!==(b.right??1)||!!a.trimBorder!==!!b.trimBorder||a.borderVersion!==b.borderVersion;
   const restored={...d,question:{...prior.question},mark:{...prior.mark},notes:typeof prior.notes==='string'?prior.notes:'',
    questionManuallyAdjusted:prior.approved||prior.questionManuallyAdjusted===true||adjusted(prior.question,d.question),
    markManuallyAdjusted:prior.approved||prior.markManuallyAdjusted===true||adjusted(prior.mark,d.mark),
