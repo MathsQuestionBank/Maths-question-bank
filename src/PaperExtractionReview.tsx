@@ -5,7 +5,7 @@ import type {PDFDocumentProxy} from "pdfjs-dist";
 import {supabase} from "./supabase";
 import {inspectFoundationMap,type MappingRow} from "./EnhancedMappingImporter";
 import {loadSourcePdf,readPdfLines,drawSlice} from "./pdfExtraction";
-import {validSlice,adjustSlice,adjustFragment,makeReviewDrafts,findMarkSchemeStartPage,isReviewable,totalMarks,type QuestionDraft,type Slice,type TextLine} from "./paperExtraction";
+import {validSlice,adjustSlice,adjustFragment,endSliceAtFirstPage,makeReviewDrafts,findMarkSchemeStartPage,isReviewable,totalMarks,type QuestionDraft,type Slice,type TextLine} from "./paperExtraction";
 
 import {restoreSavedReview,type SavedReview} from "./savedPaperReview";
 
@@ -245,6 +245,11 @@ export default function PaperExtractionReview({source,onPublished,onReviewSaved}
  <label>Left %<input aria-label={kind+" left"} type="number" min="0" max="100" step=".5" value={Math.round((selectedDraft[kind].left??0)*1000)/10} onChange={e=>adjust(kind,"left",Number(e.target.value)/100)}/></label>
  <label>Right %<input aria-label={kind+" right"} type="number" min="0" max="100" step=".5" value={Math.round((selectedDraft[kind].right??1)*1000)/10} onChange={e=>adjust(kind,"right",Number(e.target.value)/100)}/></label>
  </div>
+ {(selectedDraft[kind].endPage??selectedDraft[kind].page)>selectedDraft[kind].page&&<p className="hint">Top % is measured on PDF page {selectedDraft[kind].page}; Bottom % is measured on PDF page {selectedDraft[kind].endPage}. Check that the answer really continues onto the later page.</p>}
+ {kind==="mark"&&(selectedDraft.mark.endPage??selectedDraft.mark.page)>selectedDraft.mark.page&&<div style={{margin:"8px 0"}}>
+  <button className="secondary small" type="button" disabled={busy} onClick={()=>update(d=>({...d,mark:endSliceAtFirstPage(d.mark),markManuallyAdjusted:true}))}>Use mark-scheme page {selectedDraft.mark.page} only</button>
+  <p className="hint">Use this if the answer finishes on the first page and the preview includes the next page's heading. Recheck the crop, approve this question again, and save your review.</p>
+ </div>}
  {selectedDraft[kind].fragments&&<details>
  <summary>Page sections ({selectedDraft[kind].fragments!.map(f=>f.page).join(", ")})</summary>
  <p className="hint">Each section keeps its own crop bounds. Only enable selected pages when an answer diagram is printed separately from its marking table.</p>
