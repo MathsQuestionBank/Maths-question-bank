@@ -255,7 +255,7 @@ export default function PaperExtractionReview({source,onPublished,onReviewSaved}
  </div>)}
  </details>}
  {!validSlice(selectedDraft[kind],kind==="question"?questionPdf.numPages:schemePdf.numPages)&&<p role="alert">Correct the crop bounds and page sections before saving.</p>}
- {kind==="question"&&<label><input aria-label="Remove question paper border" type="checkbox" checked={selectedDraft.question.trimBorder===true} onChange={e=>update(d=>({...d,question:{...d.question,trimBorder:e.target.checked,borderVersion:2},questionManuallyAdjusted:true}))}/> Remove detected paper border and side margins</label>}
+ <label><input aria-label={kind==="question"?"Remove question paper border":"Remove mark scheme border"} type="checkbox" checked={selectedDraft[kind].trimBorder===true} onChange={e=>update(d=>({...d,[kind]:{...d[kind],trimBorder:e.target.checked,borderVersion:2},[kind==="question"?"questionManuallyAdjusted":"markManuallyAdjusted"]:true}))}/> Remove detected {kind==="question"?"question-paper":"mark-scheme"} border and side margins</label>
  {validSlice(selectedDraft[kind],kind==="question"?questionPdf.numPages:schemePdf.numPages)
  &&<CropPreview key={selectedDraft.number+"-"+kind} pdf={kind==="question"?questionPdf:schemePdf} slice={selectedDraft[kind]} title={kind==="question"?"Question image":"Mark-scheme image"}/>}
  </fieldset>)}
