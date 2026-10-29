@@ -59,7 +59,7 @@ export async function publishReviewedPaper(args:{
  if(roleError||owner!==true)throw Error("Only an approved owner can publish exam papers.");
  if(!source.path.endsWith("/"+user.id))throw Error("This paper is not in your account archive.");
  const reviewPath=source.path+"/extraction-review.json";
- const {data:stored,error:storedError}=await supabase.storage.from(bucket).download(reviewPath);
+ const {data:stored,error:storedError}=await supabase.storage.from(bucket).download(reviewPath,{cacheNonce:crypto.randomUUID()},{cache:"no-store"});
  if(storedError||!stored)throw Error("First save your full review progress to your account.");
  let review:StoredReview;
  try{review=JSON.parse(await stored.text()) as StoredReview}catch{throw Error("Saved review record is invalid.");}

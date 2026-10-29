@@ -87,7 +87,7 @@ export default function PaperExtractionReview({source,onPublished,onReviewSaved}
     if(error)throw new Error(error.message);
     allFiles.push(...(data||[]));if(!data||data.length<100)break;
    }
-   const {data:old,error:reviewError}=await supabase.storage.from(bucket).download(source.path+"/extraction-review.json");
+   const {data:old,error:reviewError}=await supabase.storage.from(bucket).download(source.path+"/extraction-review.json",{cacheNonce:crypto.randomUUID()},{cache:"no-store"});
    if(reviewError&&!/not found|not exist/i.test(reviewError.message))throw Error("Cannot check saved review; preparation stopped to protect existing corrections: "+reviewError.message);
    let previous:SavedReview|undefined;
    savedText.current=old?await old.text():null;
@@ -133,7 +133,7 @@ export default function PaperExtractionReview({source,onPublished,onReviewSaved}
   try{
    const {data:{user}}=await supabase.auth.getUser();const {data:approved}=await supabase.rpc("is_approved_owner");
    if(!user||approved!==true)throw Error("Approved account required.");
-   const {data:latest,error:latestError}=await supabase.storage.from(bucket).download(source.path+"/extraction-review.json");
+   const {data:latest,error:latestError}=await supabase.storage.from(bucket).download(source.path+"/extraction-review.json",{cacheNonce:crypto.randomUUID()},{cache:"no-store"});
    if(latestError&&!/not found|not exist/i.test(latestError.message))throw Error("Cannot check saved review; nothing was overwritten.");
    if((latest?await latest.text():null)!==savedText.current)throw Error("Review changed in another tab or device. Reload source and mapping before saving; the existing review was retained.");
    const payload:SavedReview={version:1,mappingFile,markSchemeStartPage:markSchemeStartPage??undefined,items:drafts.map(d=>({number:d.number,question:d.question,mark:d.mark,approved:d.approved,notes:d.notes,questionManuallyAdjusted:d.questionManuallyAdjusted,markManuallyAdjusted:d.markManuallyAdjusted,overrides:d.parts.map(p=>({id:p.id,topic:p.topic,strands:p.strands,skills:p.skills}))}))};

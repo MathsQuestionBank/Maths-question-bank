@@ -49,7 +49,7 @@ export default function StagedPaperReview({onPublished,refreshKey=0}:{onPublishe
    for(const paper of found){
     if(!paper.reviewSaved)continue;
     try{
-     const {data,error}=await supabase.storage.from(BUCKET).download(paper.path+"/extraction-review.json");
+     const {data,error}=await supabase.storage.from(BUCKET).download(paper.path+"/extraction-review.json",{cacheNonce:crypto.randomUUID()},{cache:"no-store"});
      if(error||!data)throw Error(error?.message||"Saved review unavailable");
      const saved=JSON.parse(await data.text());
      if(saved.version!==1||!Array.isArray(saved.items)||!saved.items.length||new Set(saved.items.map((x:{number:number})=>x.number)).size!==saved.items.length)throw Error("Saved review is invalid; original file retained");

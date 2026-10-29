@@ -66,9 +66,10 @@ test(`extracts ${format} mapping and preserves its saved review without invalid 
  await page.addInitScript(({user,token})=>{
   localStorage.setItem("sb-ljisttslifnyrbuybfud-auth-token",JSON.stringify({access_token:token,refresh_token:"dummy",expires_at:4102444800,expires_in:999999999,token_type:"bearer",user}));
  },{user,token:authToken()});
- let storedReview:unknown=null;const downloadedMappings:string[]=[];
+ let storedReview:unknown=null;const downloadedMappings:string[]=[];const reviewReadNonces:string[]=[];
  const storageRoute:Parameters<typeof page.route>[1]=async route=>{
   const request=route.request(),url=new URL(request.url()),path=url.pathname;
+  if(request.method()==="GET"&&path.endsWith("/extraction-review.json"))reviewReadNonces.push(url.searchParams.get("cacheNonce")||"");
   const json=(v:unknown,status=200)=>route.fulfill({status,contentType:"application/json",body:JSON.stringify(v)});
   if(path==="/auth/v1/user")return json(user);
   if(path.startsWith("/rest/v1/profiles"))return json([{role:"owner",approved:true}]);
@@ -184,6 +185,7 @@ test(`extracts ${format} mapping and preserves its saved review without invalid 
   const mark=(storedReview as {items:{mark:{fragments:{page:number;top:number;bottom:number}[]}}[]}).items[0].mark;
   expect(mark.fragments).toHaveLength(2);expect(mark.fragments[0].top).toBe(.16);expect(mark.fragments[1].page).toBe(7);expect(mark.fragments[1].top).toBe(.16);
  }
+ expect(reviewReadNonces.length).toBeGreaterThan(3);expect(reviewReadNonces.every(Boolean)).toBe(true);expect(new Set(reviewReadNonces).size).toBe(reviewReadNonces.length);
  await device.close();
 
 });
