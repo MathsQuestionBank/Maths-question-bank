@@ -75,6 +75,7 @@ test(`extracts ${format} mapping and preserves its saved review without invalid 
   if(path.startsWith("/rest/v1/profiles"))return json([{role:"owner",approved:true}]);
   if(path.startsWith("/rest/v1/questions"))return json([]);
   if(path.startsWith("/rest/v1/rpc/is_approved_owner"))return json(true);
+  if(path==="/rest/v1/rpc/list_owner_exam_intake")return json([{path:base+"/"+uid,board:"Edexcel",qualification:"GCSE-Mathematics",series:"November-2022",code:"1F",question:true,mark:true,manifest:true,review_saved:!!storedReview}]);
   if(path.startsWith("/storage/v1/object/list/")){
    const prefix=(request.postDataJSON() as {prefix:string})?.prefix||"";
    const root="new-paper-intake/";
