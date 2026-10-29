@@ -14,6 +14,7 @@ export default function StagedPaperReview({onPublished,refreshKey=0}:{onPublishe
  const [message,setMessage]=useState("");
  const [opening,setOpening]=useState("");
  const [selectedPath,setSelectedPath]=useState("");
+ const [paperFilter,setPaperFilter]=useState("");
  const refresh=async()=>{
   if(loading)return;
   setLoading(true);setArchiveError("");
@@ -88,6 +89,8 @@ export default function StagedPaperReview({onPublished,refreshKey=0}:{onPublishe
   }catch(e){setMessage(e instanceof Error?e.message:"Unable to open file.")}
   finally{setOpening("")}
  };
+ const normalized=(value:string)=>value.toLowerCase().replace(/[^a-z0-9]+/g,"");
+ const visiblePapers=paperFilter.trim()?papers.filter(p=>normalized([p.board,p.series,p.code,p.code.endsWith("F")?"Foundation":"Higher"].join(" ")).includes(normalized(paperFilter))):papers;
  return <section className="panel" style={{padding:22}}>
  <div className="row" style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap"}}>
  <div><h2>Review Imported Papers</h2><p className="hint">Inspect archived PDFs and prepare suggested question and mark-scheme crops for approval.</p></div>
@@ -95,7 +98,12 @@ export default function StagedPaperReview({onPublished,refreshKey=0}:{onPublishe
  </div>
  <PaperCoverage staged={papers} onOpen={setSelectedPath} revision={revision} archiveError={loading?"Archive scan in progress":archiveError}/>
  {message&&<p role="status">{message}</p>}
- {papers.map(p=><div key={p.path}><div className="saved-item">
+ <div style={{margin:"10px 0 16px",maxWidth:380}}>
+  <label htmlFor="review-archive-filter">Find an archived paper</label>
+  <input id="review-archive-filter" aria-label="Find archived paper" placeholder="e.g. June 2017 2F" value={paperFilter} onChange={event=>setPaperFilter(event.target.value)}/>
+  <p className="hint">Showing {visiblePapers.length} of {papers.length} archived papers.</p>
+ </div>
+ {visiblePapers.map(p=><div key={p.path}><div className="saved-item">
  <div><strong>{p.board} · {p.series} · {p.code}</strong><p>{p.qualification} · {p.code.endsWith("F")?"Foundation":"Higher"} · {p.question&&p.mark?"Both PDFs archived":"Missing source file"} · {p.review?`${p.review.approved}/${p.review.questions} approved`:p.reviewSaved?"Review draft saved":"Awaiting extraction"}</p>{p.reviewError&&<p role="alert">{p.reviewError}</p>}</div>
  <div className="library-actions">
  <button className="secondary small" disabled={!p.question||!!opening} onClick={()=>void open(p.path,"question-paper.pdf")}>View question paper</button>
