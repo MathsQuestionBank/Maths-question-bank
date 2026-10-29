@@ -14,7 +14,7 @@ import { saveVersionedAssessment, deleteVersionedAssessment } from "./versionedA
 import { loadAccountFolders, createAccountFolder, changeAccountFolder } from "./accountFolders";
 
 type Page = "home" | "bank" | "builder" | "saved" | "qualifications" | "import" | "insights" | "review";
-type Question = { id:string; topic:string; skill:string; tier:"Foundation"|"Higher"; examBoard:string; paperCode:string; grade:number; marks:number; calculator:boolean; series:string; ao:string; challenge:string; prompt:string; answer:string; tags:string[]; sourceId?:string; meanPct?:number; gradePerformance:Record<number,number|null>; imagePending?:boolean; questionUrl?:string; markSchemeUrl?:string; imageCrops:{question:Crop;mark:Crop}; cropReview:{question:string;mark:string} };
+type Question = { id:string; topic:string; skill:string; tier:"Foundation"|"Higher"; examBoard?:string; paperCode?:string; grade:number; marks:number; calculator:boolean; series:string; ao:string; challenge:string; prompt:string; answer:string; tags:string[]; sourceId?:string; meanPct?:number; gradePerformance:Record<number,number|null>; imagePending?:boolean; questionUrl?:string; markSchemeUrl?:string; imageCrops:{question:Crop;mark:Crop}; cropReview:{question:string;mark:string} };
 const groups=["Algebra","Geometry","Number","Probability","Ratio","Statistics"];
 const tiles:{page:Page;icon:string;name:string;desc:string}[]=[
 {page:"bank",icon:"⌕",name:"Enhanced Skills Mapped Question Bank",desc:"Search GCSE questions by skill, topic, grade and assessment objective."},
