@@ -1,5 +1,5 @@
 import {describe,it,expect} from "vitest";
-import {validSlice,adjustSlice,adjustFragment,makeReviewDrafts,isReviewable,findQuestionAnchors,findMarkSchemeStartPage,totalMarks,type TextLine} from "./paperExtraction";
+import {validSlice,adjustSlice,adjustFragment,endSliceAtFirstPage,makeReviewDrafts,isReviewable,findQuestionAnchors,findMarkSchemeStartPage,totalMarks,type TextLine} from "./paperExtraction";
 import type {MappingRow} from "./EnhancedMappingImporter";
 const row=(code:string,marks:number):MappingRow=>({id:"EDX-F-NOVEMBER2022-1F-"+code.toUpperCase(),board:"Edexcel",tier:"Foundation",series:"November 2022",paper:"1F",question:code,topic:"Number",strands:"Number; Ratio",skills:"Ratio and algebra",review:"Mapped",excelRow:2,marks,ao:"AO2",spec:"R1",gradePercent:{1:24,2:43,3:60,4:77,5:88}});
 describe("staged question extraction proposals",()=>{
@@ -233,4 +233,15 @@ describe("mark-scheme boundaries across PDF pages",()=>{
   expect(proposed.mark.endPage).toBeUndefined();
   expect(proposed.approved).toBe(false);
  });
+});
+
+it("one-click mark-scheme page shortening resets the ending boundary without changing the teacher's start",()=>{
+ const original={page:12,endPage:13,top:.656,bottom:.161,left:0,right:1,fragments:[{page:12,top:.656,bottom:.94},{page:13,top:.05,bottom:.161}]};
+ const edited=endSliceAtFirstPage(original);
+ expect(edited).toMatchObject({page:12,top:.656,bottom:.96,left:0,right:1});
+ expect(edited).not.toHaveProperty("endPage");
+ expect(edited).not.toHaveProperty("fragments");
+ expect(original.endPage).toBe(13);
+ expect(original.bottom).toBe(.161);
+ expect(validSlice(edited,15)).toBe(true);
 });
