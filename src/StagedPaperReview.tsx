@@ -50,6 +50,34 @@ export default function StagedPaperReview({onPublished,refreshKey=0}:{onPublishe
   }catch(e){setPapers(old=>old.map(p=>p.path===paper.path?{...p,reviewError:e instanceof Error?e.message:"Cannot read saved review"}:p))}
   finally{setOpening("")}
  };
+ const exportReviewerPack=async(paper:Staged)=>{
+  if(!paper.reviewSaved)return;
+  setOpening(paper.path+"/reviewer-pack.zip");
+  try{
+   const {data:{user},error:authError}=await supabase.auth.getUser();
+   const {data:owner,error:ownerError}=await supabase.rpc("is_approved_owner");
+   if(authError||!user||ownerError||owner!==true)throw Error("Approved owner sign-in is required.");
+   const {buildReviewerPack}=await import("./reviewerPack");
+   const bundle=await buildReviewerPack(
+    {path:paper.path,board:paper.board,qualification:paper.qualification,series:paper.series,code:paper.code},
+    user.id,
+    async path=>{
+     const {data,error}=await supabase.storage.from(BUCKET).download(path,{cacheNonce:crypto.randomUUID()},{cache:"no-store"});
+     if(error||!data)throw Error("Could not download "+path.split("/").pop()+": "+(error?.message||"file unavailable"));
+     return data;
+    },
+    setMessage
+   );
+   const url=URL.createObjectURL(bundle.blob);
+   try{
+    const link=document.createElement("a");
+    link.href=url;link.download=bundle.filename;
+    document.body.append(link);link.click();link.remove();
+    setMessage("Private reviewer ZIP downloaded for "+paper.series+" "+paper.code+". Attach the ZIP to this chat for independent crop and mapping checks. Nothing was changed or published.");
+   }finally{setTimeout(()=>URL.revokeObjectURL(url),5000)}
+  }catch(e){setMessage("Reviewer ZIP not downloaded: "+(e instanceof Error?e.message:String(e)))}
+  finally{setOpening("")}
+ };
  useEffect(()=>{void refresh()},[refreshKey]);
  const open=async(path:string,filename:string)=>{
   setOpening(path+"/"+filename);
@@ -71,7 +99,7 @@ export default function StagedPaperReview({onPublished,refreshKey=0}:{onPublishe
  <div><strong>{p.board} · {p.series} · {p.code}</strong><p>{p.qualification} · {p.code.endsWith("F")?"Foundation":"Higher"} · {p.question&&p.mark?"Both PDFs archived":"Missing source file"} · {p.review?`${p.review.approved}/${p.review.questions} approved`:p.reviewSaved?"Review draft saved":"Awaiting extraction"}</p>{p.reviewError&&<p role="alert">{p.reviewError}</p>}</div>
  <div className="library-actions">
  <button className="secondary small" disabled={!p.question||!!opening} onClick={()=>void open(p.path,"question-paper.pdf")}>View question paper</button>
- <button className="secondary small" disabled={!p.mark||!!opening} onClick={()=>void open(p.path,"mark-scheme.pdf")}>View mark scheme</button>{p.reviewSaved&&<button className="secondary small" disabled={!!opening||loading} onClick={()=>void checkReview(p)}>Check approvals</button>}<button className="primary small" disabled={!p.question||!p.mark} onClick={()=>setSelectedPath(current=>current===p.path?"":p.path)}>{selectedPath===p.path?"Close review":"Extract & review"}</button>
+ <button className="secondary small" disabled={!p.mark||!!opening} onClick={()=>void open(p.path,"mark-scheme.pdf")}>View mark scheme</button>{p.reviewSaved&&<button className="secondary small" disabled={!!opening||loading} onClick={()=>void checkReview(p)}>Check approvals</button>}{p.reviewSaved&&<button className="secondary small" disabled={!!opening||loading||!p.question||!p.mark} onClick={()=>void exportReviewerPack(p)}>Download reviewer pack (ZIP)</button>}<button className="primary small" disabled={!p.question||!p.mark} onClick={()=>setSelectedPath(current=>current===p.path?"":p.path)}>{selectedPath===p.path?"Close review":"Extract & review"}</button>
  </div>
  </div>
  {selectedPath===p.path&&<Suspense fallback={<p role="status">Loading PDF review tools…</p>}><PaperExtractionReview source={{path:p.path,board:p.board,qualification:p.qualification,series:p.series,code:p.code}} onReviewSaved={()=>void refresh()} onPublished={()=>{onPublished?.();void refresh()}}/></Suspense>}</div>)}
