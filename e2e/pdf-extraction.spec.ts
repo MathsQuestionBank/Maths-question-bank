@@ -33,7 +33,7 @@ function rotatedSchemeFixture(){
  const pages:number[]=[];
  for(let n=1;n<=6;n++){
   const id=objects.length+1;pages.push(id);
-  const lines=n===6?[['Question Answer Mark Mark scheme',80],['1 7 B1',110],['2 11 B1',160]]:[['General marking guidance',80]];
+  const lines=n===6?[['Question Working Answer Mark Notes',80],['1 7 B1',110],['2 11 B1',160]]:[['General marking guidance',80]];
   const stream=lines.map(([text,y])=>`BT /F1 12 Tf 0 1 -1 0 ${y} 60 Tm (${text}) Tj ET`).join('\n');
   objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Rotate 90 /Resources << /Font << /F1 3 0 R >> >> /Contents ${id+1} 0 R >>`);
   objects.push(`<< /Length ${Buffer.byteLength(stream)} >>\nstream\n${stream}\nendstream`);

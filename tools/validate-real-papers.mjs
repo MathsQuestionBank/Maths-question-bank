@@ -43,7 +43,7 @@ try{
   const drafts=makeReviewDrafts(rows,questionLines,markLines);
   const canvas=document.createElement('canvas'),crops=[],questionWidths=[];
   for(const d of drafts){for(const kind of ['question','mark']){
-   await drawSlice(kind==='question'?q:m,d[kind],canvas);
+   try{await drawSlice(kind==='question'?q:m,d[kind],canvas)}catch(error){throw Error('Q'+d.number+' '+kind+' '+JSON.stringify(d[kind])+': '+error.message)}
    if(kind==='question')questionWidths.push(canvas.width);
    if(includeCrops)crops.push({number:d.number,kind,data:canvas.toDataURL('image/png')});
   }}

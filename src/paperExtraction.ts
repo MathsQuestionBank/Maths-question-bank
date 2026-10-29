@@ -34,7 +34,7 @@ export function findMarkSchemeStartPage(lines:TextLine[]):number|null{
  const pages=[...new Set(lines.map(l=>l.page))].sort((a,b)=>a-b);
  for(const page of pages){
   const top=lines.filter(l=>l.page===page&&l.top>=0&&l.top<.48);
-  const hasTableHeader=top.some(l=>/\bquestion(?:\s+number)?\b\s+\banswer\b\s+\bmarks?\b/i.test(l.text));
+  const hasTableHeader=top.some(l=>/\bquestion(?:\s+number)?\b\s+(?:working\s+)?\banswer\b\s+\bmarks?\b/i.test(l.text));
   // PDF text extraction occasionally puts heading columns in separate spans.
   const separateColumns=top.some(q=>/^(?:question|question\s+number)$/i.test(q.text.trim())&&
    top.some(a=>Math.abs(a.top-q.top)<.025&&/^(?:answer)$/i.test(a.text.trim()))&&
@@ -111,7 +111,11 @@ export function makeReviewDrafts(rows:MappingRow[],questionLines:TextLine[],mark
    if(!a)return {page:fallbackPage,top:.05,bottom:.95};
    const end=question===undefined?undefined:sourceLines.find(l=>l.page>=a.page&&new RegExp(`\\btotal\\s+for\\s+question\\s+0*${question}\\b`,"i").test(l.text));
    const endPage=end?.page??(b?(b.page>a.page&&b.top-.022<=.075?b.page-1:b.page):Math.max(a.page,...sourceLines.map(l=>l.page)));
-   return {page:a.page,top:bounded(a.top-.018),bottom:end?bounded(end.top+.035):b&&b.page===endPage?bounded(b.top-.022):.96,...(endPage>a.page?{endPage}:{})};
+   const top=bounded(a.top-.018);
+   let bottom=end?bounded(end.top+.035):b&&b.page===endPage?bounded(b.top-.022):.96;
+   // Compact one-line marking rows still need a valid, readable crop.
+   if(question===undefined&&b?.page===a.page&&bottom-top<.025)bottom=Math.min(b.top-.012,top+.026);
+   return {page:a.page,top,bottom,...(endPage>a.page?{endPage}:{})};
   };
   return {number,parts:groups.get(number)||[],question:{...(q?segment(q,nextQ,1,questionLines,number):questionFallback),trimBorder:true},mark:segment(m,nextM,markSchemeStartPage??1,standardMarkLines),
    questionDetected:!!q,questionInferred:!!inferred,markDetected:!!m,approved:false,notes:""};

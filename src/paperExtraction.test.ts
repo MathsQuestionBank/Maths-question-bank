@@ -134,3 +134,16 @@ it('excludes Pearson modified-large-print appendices from standard mark-scheme c
  const d=makeReviewDrafts([row('Q30',4)],[],lines,6)[0];
  expect(d.mark.page).toBe(16);expect(d.mark.endPage).toBeUndefined();
 });
+
+it('detects older Higher marking tables with a Working column between Question and Answer',()=>{
+ const lines:TextLine[]=[{page:3,top:.2,left:.1,text:'1 General marking instructions'},{page:7,top:.12,left:.05,text:'Question Working Answer Mark Notes'},{page:7,top:.2,left:.05,text:'1 Prime factors'}];
+ expect(findMarkSchemeStartPage(lines)).toBe(7);
+ const draft=makeReviewDrafts([row('Q01',2)],[],lines)[0];expect(draft.markDetected).toBe(true);expect(draft.mark.page).toBe(7);expect(draft.approved).toBe(false);
+});
+
+it('keeps compact single-line marking rows readable without including the following answer',()=>{
+ const lines:TextLine[]=[{page:6,top:.12,left:.05,text:'Question Answer Mark Notes'},{page:6,top:.47,left:.05,text:'6 45 B1'},{page:6,top:.498,left:.05,text:'7 12 B1'}];
+ const [draft]=makeReviewDrafts([row('Q06',1),row('Q07',1)],[],lines);
+ expect(draft.mark.bottom-draft.mark.top).toBeGreaterThanOrEqual(.025);
+ expect(draft.mark.bottom).toBeLessThan(.498-.01);expect(draft.approved).toBe(false);
+});
