@@ -95,6 +95,19 @@ export function inferQuestionFromTotalMarker(
  if(bottom-top<.025)return null;
  return {page:end.page,top,bottom};
 }
+/**
+ * A next question beginning near the top of a fresh marking-table page should
+ * not make the preceding question include that page's repeated table heading.
+ * Preserve an actual continuation if there is answer/working text above the
+ * next question number. These are proposals only; saved teacher crops win.
+ */
+export function markSchemeHasNextPageContinuation(lines:TextLine[],next:TextLine):boolean{
+ const header=/^(?:paper\s*:|pearson|edexcel|mark scheme|gcse|question(?:\s+number)?(?:\s+working)?\s+answer|page\s+\d)/i;
+ return lines.some(line=>line.page===next.page&&line.top>=.13&&
+   line.top<next.top-.018&&!!line.text.trim()&&
+   !header.test(line.text.trim())&&
+   (/\bcontinu(?:ed|ation)\b/i.test(line.text)||line.top>=.20&&next.top>=.32));
+}
 export function makeReviewDrafts(rows:MappingRow[],questionLines:TextLine[],markLines:TextLine[],markSchemeStartPage:number|null=findMarkSchemeStartPage(markLines)):QuestionDraft[]{
  const groups=new Map<number,MappingRow[]>();
  for(const row of rows){
@@ -130,7 +143,14 @@ export function makeReviewDrafts(rows:MappingRow[],questionLines:TextLine[],mark
    if(question===undefined&&b?.page===a.page&&bottom-top<.025)bottom=Math.min(b.top-.012,top+.026);
    return {page:a.page,top,bottom,...(endPage>a.page?{endPage}:{})};
   };
-  return {number,parts:groups.get(number)||[],question:{...(q?segment(q,nextQ,1,questionLines,number):questionFallback),trimBorder:true,borderVersion:2},mark:segment(m,nextM,markSchemeStartPage??1,standardMarkLines),
+  let mark=segment(m,nextM,markSchemeStartPage??1,standardMarkLines);
+  // Repeated marking-table headings on the next PDF page are not part of
+  // the previous answer. Keep genuine continuations on the next page.
+  if(m&&nextM&&nextM.page===m.page+1&&mark.endPage===nextM.page&&
+     !markSchemeHasNextPageContinuation(standardMarkLines,nextM)){
+   mark={page:m.page,top:bounded(m.top-.018),bottom:.96};
+  }
+  return {number,parts:groups.get(number)||[],question:{...(q?segment(q,nextQ,1,questionLines,number):questionFallback),trimBorder:true,borderVersion:2},mark,
    questionDetected:!!q,questionInferred:!!inferred,markDetected:!!m,approved:false,notes:""};
  });
 }
