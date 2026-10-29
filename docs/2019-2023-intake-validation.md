@@ -2,9 +2,9 @@
 
 Private source files are not committed. Nothing was approved or published by this intake.
 
-## Missing source
+## Previously missing source — resolved
 
-June 2019 Foundation 2F has a question paper but no matching mark scheme among the 47 attachments. It is not staged. All other 23 pairs are complete. May-dated Paper 1 and Summer-labelled mark schemes use the June mapping series.
+June 2019 Foundation 2F initially lacked its matching mark scheme among the 47 attachments. The user-supplied [public mark scheme](https://old-asset.mathsgenie.co.uk/papers/2fjune2019ms.pdf) became accessible after the network update. Its cover confirms Summer 2019, Foundation Calculator Paper 2F, publication code `1MA1_2F_1906_MS`. The pair now passes real-PDF validation: 29 complete questions, 41 mapped parts, 80 marks, standard mark table starting on PDF page 6. It is staged privately with zero approvals using the existing non-overwriting importer and the final user-corrected Foundation review mapping. May-dated Paper 1 and Summer-labelled mark schemes use the June mapping series.
 
 ## Data-quality warning
 
@@ -24,6 +24,7 @@ November 2019 1F Q19 contains a combining overstrike U+0336 attached to its numb
 |---|---|---:|---:|---:|
 | June 2019 | 1F | 29 | 43 | 80 |
 | June 2019 | 1H | 22 | 32 | 80 |
+| June 2019 | 2F | 29 | 41 | 80 |
 | June 2019 | 2H | 20 | 31 | 80 |
 | June 2019 | 3F | 30 | 36 | 80 |
 | June 2019 | 3H | 23 | 29 | 80 |
@@ -46,6 +47,6 @@ November 2019 1F Q19 contains a combining overstrike U+0336 attached to its numb
 | June 2023 | 3F | 28 | 44 | 80 |
 | June 2023 | 3H | 24 | 32 | 80 |
 
-All 23 candidates passed unique-ID, metadata, per-question mapped-versus-printed mark totals, question/mark anchors and crop-render validation. Every paper totals 80 marks. The initial unavailable Grade 5 percentage was subsequently replaced with the user-specified 75%, as recorded above. Structural validation does not replace full-size teacher visual review.
+All 24 candidates passed unique-ID, metadata, per-question mapped-versus-printed mark totals, question/mark anchors and crop-render validation. Every paper totals 80 marks. The initial unavailable Grade 5 percentage was subsequently replaced with the user-specified 75%, as recorded above. Structural validation does not replace full-size teacher visual review.
 
 Local checks: 103 unit tests, production build and 13 browser tests passed, with 3 intentional mobile PDF skips. Staging uses the existing dedicated import account, skips published papers and existing reviews, and uses non-overwriting writes. The original owner’s 1F review and all previously published papers remain untouched. No database migration or merge was performed.
