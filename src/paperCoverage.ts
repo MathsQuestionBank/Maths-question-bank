@@ -14,7 +14,7 @@ export function buildPaperCoverage(published:PublishedPaper[],questions:Coverage
  for(const paper of staged){
   if(!/GCSE[- ]Mathematics/i.test(paper.qualification))continue;
   const key=paperKey(paper.board,paper.series,paper.code);
-  const status=paper.reviewError?'Import error':!paper.question||!paper.mark?'PDFs archived':!paper.reviewSaved?'Extraction required':!paper.review?'Awaiting review':paper.review.approved===paper.review.questions&&paper.review.questions>0?'Fully approved':paper.review.approved>0?'Partially approved':'Awaiting review';
+  const status=paper.reviewError?'Import error':!paper.question||!paper.mark?'PDFs archived':!paper.reviewSaved?'Extraction required':!paper.review?'Review saved — open to check':paper.review.approved===paper.review.questions&&paper.review.questions>0?'Fully approved':paper.review.approved>0?'Partially approved':'Awaiting review';
   rows.set(key,{key,board:paper.board,series:paper.series.replace(/-/g,' '),code:paper.code,tier:paper.code.endsWith('F')?'Foundation':'Higher',status,records:null,marks:null,staged:paper,warning:paper.reviewError});
  }
  for(const paper of published){
