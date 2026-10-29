@@ -1,5 +1,5 @@
 import {describe,it,expect} from "vitest";
-import {validSlice,adjustSlice,makeReviewDrafts,isReviewable,findQuestionAnchors,findMarkSchemeStartPage,totalMarks,type TextLine} from "./paperExtraction";
+import {validSlice,adjustSlice,adjustFragment,makeReviewDrafts,isReviewable,findQuestionAnchors,findMarkSchemeStartPage,totalMarks,type TextLine} from "./paperExtraction";
 import type {MappingRow} from "./EnhancedMappingImporter";
 const row=(code:string,marks:number):MappingRow=>({id:"EDX-F-NOVEMBER2022-1F-"+code.toUpperCase(),board:"Edexcel",tier:"Foundation",series:"November 2022",paper:"1F",question:code,topic:"Number",strands:"Number; Ratio",skills:"Ratio and algebra",review:"Mapped",excelRow:2,marks,ao:"AO2",spec:"R1",gradePercent:{1:24,2:43,3:60,4:77,5:88}});
 describe("staged question extraction proposals",()=>{
@@ -186,4 +186,16 @@ it('requires every page of a joined crop exactly once, and keeps endpoint edits 
  for(const fragments of [[original.fragments[0]],[original.fragments[1],original.fragments[0]],[original.fragments[0],{page:7,top:.4,bottom:.35}],[{page:6,top:.3,bottom:.8},original.fragments[1]]])expect(validSlice({...original,fragments},10)).toBe(false);
  const edited=adjustSlice(original,'top',.42);expect(validSlice(edited,10)).toBe(true);expect(edited.fragments![0].top).toBe(.42);expect(original.fragments[0].top).toBe(.4);
  expect(adjustSlice(original,'endPage',8).fragments).toBeUndefined();
+});
+
+it('permits nonadjacent answer-diagram pages only with explicit page selection',()=>{
+ const crop={page:6,endPage:9,top:.2,bottom:.6,fragments:[{page:6,top:.2,bottom:.7},{page:9,top:.15,bottom:.6,left:.05,right:.65}]};
+ expect(validSlice(crop,10)).toBe(false);
+ const selected={...crop,selectedPagesOnly:true as const};expect(validSlice(selected,10)).toBe(true);
+ expect(validSlice({...selected,fragments:[]},10)).toBe(false);
+ expect(validSlice({...selected,fragments:[crop.fragments[0],{...crop.fragments[1],page:6}]},10)).toBe(false);
+ expect(validSlice({...selected,fragments:[crop.fragments[0],{...crop.fragments[1],left:.7}]},10)).toBe(false);
+ expect(validSlice({...selected,fragments:undefined},10)).toBe(false);
+ const edited=adjustFragment(selected,1,'bottom',.62);expect(edited.bottom).toBe(.62);expect(validSlice(edited,10)).toBe(true);expect(selected.bottom).toBe(.6);
+ expect(adjustSlice(selected,'endPage',8).selectedPagesOnly).toBeUndefined();
 });

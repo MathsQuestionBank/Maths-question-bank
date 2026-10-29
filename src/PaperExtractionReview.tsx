@@ -5,7 +5,7 @@ import type {PDFDocumentProxy} from "pdfjs-dist";
 import {supabase} from "./supabase";
 import {inspectFoundationMap,type MappingRow} from "./EnhancedMappingImporter";
 import {loadSourcePdf,readPdfLines,drawSlice} from "./pdfExtraction";
-import {validSlice,adjustSlice,makeReviewDrafts,findMarkSchemeStartPage,isReviewable,totalMarks,type QuestionDraft,type Slice,type TextLine} from "./paperExtraction";
+import {validSlice,adjustSlice,adjustFragment,makeReviewDrafts,findMarkSchemeStartPage,isReviewable,totalMarks,type QuestionDraft,type Slice,type TextLine} from "./paperExtraction";
 
 import {restoreSavedReview,type SavedReview} from "./savedPaperReview";
 
@@ -18,7 +18,7 @@ function CropPreview({pdf,slice,title}:{pdf:PDFDocumentProxy;slice:Slice;title:s
   let active=true;
   const render=async()=>{if(!ref.current)return;const buffer=document.createElement("canvas");try{await drawSlice(pdf,slice,buffer);if(active&&ref.current){ref.current.width=buffer.width;ref.current.height=buffer.height;ref.current.getContext("2d")?.drawImage(buffer,0,0);setError("")}buffer.width=0;buffer.height=0}catch(e){if(active)setError(e instanceof Error?e.message:"Cannot render crop")}};
   void render();return()=>{active=false};
- },[pdf,slice.page,slice.endPage,slice.top,slice.bottom,slice.left,slice.right,slice.trimBorder,slice.borderVersion,JSON.stringify(slice.fragments)]);
+ },[pdf,slice.page,slice.endPage,slice.top,slice.bottom,slice.left,slice.right,slice.trimBorder,slice.borderVersion,slice.selectedPagesOnly,JSON.stringify(slice.fragments)]);
  return <div style={{flex:"1 1 320px",minWidth:0}}><strong>{title}</strong>{error&&<p role="alert">{error}</p>}<div style={{maxHeight:500,overflow:"auto",border:"1px solid #aaa",borderRadius:6,marginTop:8}}><canvas aria-label={title} ref={ref} style={{width:"100%",display:"block"}}/></div></div>;
 }
 export default function PaperExtractionReview({source,onPublished,onReviewSaved}:{source:StagedSource;onPublished?:()=>void;onReviewSaved?:()=>void}){
@@ -131,6 +131,8 @@ export default function PaperExtractionReview({source,onPublished,onReviewSaved}
  const save=async()=>{
   if(!drafts.length)return;setBusy(true);
   try{
+   if(!questionPdf||!schemePdf||drafts.some(d=>!validSlice(d.question,questionPdf.numPages)||!validSlice(d.mark,schemePdf.numPages)))
+    throw Error("Correct the crop bounds or selected source pages before saving. Previous progress retained.");
    const {data:{user}}=await supabase.auth.getUser();const {data:approved}=await supabase.rpc("is_approved_owner");
    if(!user||approved!==true)throw Error("Approved account required.");
    const {data:latest,error:latestError}=await supabase.storage.from(bucket).download(source.path+"/extraction-review.json",{cacheNonce:crypto.randomUUID()},{cache:"no-store"});
@@ -211,6 +213,16 @@ export default function PaperExtractionReview({source,onPublished,onReviewSaved}
  <label>Left %<input aria-label={kind+" left"} type="number" min="0" max="100" step=".5" value={Math.round((selectedDraft[kind].left??0)*1000)/10} onChange={e=>adjust(kind,"left",Number(e.target.value)/100)}/></label>
  <label>Right %<input aria-label={kind+" right"} type="number" min="0" max="100" step=".5" value={Math.round((selectedDraft[kind].right??1)*1000)/10} onChange={e=>adjust(kind,"right",Number(e.target.value)/100)}/></label>
  </div>
+ {selectedDraft[kind].fragments&&<details>
+ <summary>Page sections ({selectedDraft[kind].fragments!.map(f=>f.page).join(", ")})</summary>
+ <p className="hint">Each section keeps its own crop bounds. Only enable selected pages when an answer diagram is printed separately from its marking table.</p>
+ <label><input type="checkbox" aria-label={kind+" selected pages only"} checked={selectedDraft[kind].selectedPagesOnly===true} onChange={e=>update(d=>({...d,[kind]:{...d[kind],selectedPagesOnly:e.target.checked?true:undefined},[kind==="question"?"questionManuallyAdjusted":"markManuallyAdjusted"]:true}))}/> Use only the listed source pages</label>
+ {selectedDraft[kind].fragments!.map((f,i)=><div className="library-toolbar" style={{flexWrap:"wrap"}} key={i}>
+ <strong>Section {i+1}</strong>
+ {(["page","top","bottom","left","right"] as const).map(key=><label key={key}>{key==="page"?"Page":key+" %"}<input aria-label={kind+" section "+(i+1)+" "+key} type="number" min={key==="page"?1:0} max={key==="page"?(kind==="question"?questionPdf.numPages:schemePdf.numPages):100} step={key==="page"?1:.5} value={key==="page"?f.page:Math.round((f[key]??selectedDraft[kind][key]??(key==="right"?1:0))*1000)/10} onChange={e=>update(d=>({...d,[kind]:adjustFragment(d[kind],i,key,Number(e.target.value)/(key==="page"?1:100)),[kind==="question"?"questionManuallyAdjusted":"markManuallyAdjusted"]:true}))}/></label>)}
+ </div>)}
+ </details>}
+ {!validSlice(selectedDraft[kind],kind==="question"?questionPdf.numPages:schemePdf.numPages)&&<p role="alert">Correct the crop bounds and page sections before saving.</p>}
  {kind==="question"&&<label><input aria-label="Remove question paper border" type="checkbox" checked={selectedDraft.question.trimBorder===true} onChange={e=>update(d=>({...d,question:{...d.question,trimBorder:e.target.checked,borderVersion:2},questionManuallyAdjusted:true}))}/> Remove detected paper border and side margins</label>}
  {validSlice(selectedDraft[kind],kind==="question"?questionPdf.numPages:schemePdf.numPages)
  &&<CropPreview pdf={kind==="question"?questionPdf:schemePdf} slice={selectedDraft[kind]} title={kind==="question"?"Question image":"Mark-scheme image"}/>}

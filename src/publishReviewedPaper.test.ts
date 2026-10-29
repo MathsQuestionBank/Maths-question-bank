@@ -77,3 +77,14 @@ it('requires changed page joins to be saved before publication',async()=>{
  items[0].mark={...items[0].mark,fragments:items[0].mark.fragments!.map((f,i)=>i?{...f,top:.3}:f)};
  await expect(publishReviewedPaper(args(items))).rejects.toThrow(/not saved/);expect(mock.upload).not.toHaveBeenCalled();
 });
+
+
+it('blocks unsaved supplemental page selection and fragment horizontal bounds',async()=>{
+ for(const change of ['selectedPagesOnly','left'] as const){
+  const items=drafts();items[0].mark={page:6,endPage:7,top:.2,bottom:.8,fragments:[{page:6,top:.2,bottom:.7},{page:7,top:.2,bottom:.8}]};
+  mock.download.mockResolvedValue({data:new Blob([JSON.stringify(saved(items))]),error:null});
+  if(change==='selectedPagesOnly')items[0].mark.selectedPagesOnly=true;
+  else items[0].mark.fragments![1].left=.1;
+  await expect(publishReviewedPaper(args(items))).rejects.toThrow(/not saved/);expect(mock.upload).not.toHaveBeenCalled();
+ }
+});

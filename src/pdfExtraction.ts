@@ -36,7 +36,8 @@ export async function readPdfLines(pdf:PDFDocumentProxy,onProgress?:(page:number
 export async function drawSlice(pdf:PDFDocumentProxy,selection:Slice,canvas:HTMLCanvasElement):Promise<void>{
  if(!validSlice(selection,pdf.numPages))throw Error("Invalid crop page range or boundaries.");
  const fragments:HTMLCanvasElement[]=[];
- for(let p=selection.page;p<=(selection.endPage??selection.page);p++){
+ const pages=selection.fragments?.map(f=>f.page)??Array.from({length:(selection.endPage??selection.page)-selection.page+1},(_,i)=>selection.page+i);
+ for(const p of pages){
   const page=await pdf.getPage(p);
   const viewport=page.getViewport({scale:1.4});
   const source=document.createElement("canvas");
@@ -54,7 +55,7 @@ export async function drawSlice(pdf:PDFDocumentProxy,selection:Slice,canvas:HTML
   const cut=selection.fragments?.find(f=>f.page===p);
   const top=Math.max(cut?.top??(p===selection.page?selection.top:.05),frame?.top??0);
   const bottom=Math.min(cut?.bottom??(p===(selection.endPage??selection.page)?selection.bottom:.96),frame?.bottom??1);
-  const left=Math.max(selection.left??0,frame?.left??0),right=Math.min(selection.right??1,frame?.right??1);
+  const left=Math.max(cut?.left??selection.left??0,frame?.left??0),right=Math.min(cut?.right??selection.right??1,frame?.right??1);
   if(right-left<.025||bottom-top<.025)throw Error("Crop lies outside the detected paper border. Adjust the crop or turn off border trimming.");
   const fragment=document.createElement("canvas");fragment.width=Math.max(1,Math.floor(source.width*(right-left)));fragment.height=Math.max(1,Math.floor(source.height*(bottom-top)));
   const output=fragment.getContext("2d");if(!output)throw Error("Canvas unavailable");

@@ -31,14 +31,14 @@ async function workbookFixture(format:string){
 function rotatedSchemeFixture(){
  const objects=["<< /Type /Catalog /Pages 2 0 R >>","", "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"];
  const pages:number[]=[];
- for(let n=1;n<=7;n++){
+ for(let n=1;n<=9;n++){
   const id=objects.length+1;pages.push(id);
-  const lines=n===6?[['Question Working Answer Mark Notes',80],['1 7 B1',110]]:n===7?[['Question Working Answer Mark Notes',80],['Q1 continuation: all guidance retained',110],['2 11 B1',160]]:[['General marking guidance',80]];
-  const stream=lines.map(([text,y])=>`BT /F1 12 Tf ${String(text).startsWith("Question")?"1 0 0":String(text).startsWith("Q1 continuation")?"0 0 1":"0 0 0"} rg 0 1 -1 0 ${y} 60 Tm (${text}) Tj ET`).join('\n');
+  const lines=n===6?[['Question Working Answer Mark Notes',80],['1 7 B1',110]]:n===9?[["Q1 supplemental diagram",110]]:n===8?[["Question UNRELATED CONTENT",110]]:n===7?[['Question Working Answer Mark Notes',80],['Q1 continuation: all guidance retained',110],['2 11 B1',160]]:[['General marking guidance',80]];
+  const stream=lines.map(([text,y])=>`BT /F1 12 Tf ${String(text).startsWith("Question")?"1 0 0":String(text).startsWith("Q1 supplemental")?"0 0.8 0":String(text).startsWith("Q1 continuation")?"0 0 1":"0 0 0"} rg 0 1 -1 0 ${y} 60 Tm (${text}) Tj ET`).join('\n');
   objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Rotate 90 /Resources << /Font << /F1 3 0 R >> >> /Contents ${id+1} 0 R >>`);
   objects.push(`<< /Length ${Buffer.byteLength(stream)} >>\nstream\n${stream}\nendstream`);
  }
- objects[1]=`<< /Type /Pages /Count 7 /Kids [${pages.map(n=>n+' 0 R').join(' ')}] >>`;
+ objects[1]=`<< /Type /Pages /Count 9 /Kids [${pages.map(n=>n+' 0 R').join(' ')}] >>`;
  let pdf='%PDF-1.4\n';const offsets=[0];
  objects.forEach((object,i)=>{offsets.push(Buffer.byteLength(pdf));pdf+=`${i+1} 0 obj\n${object}\nendobj\n`});
  const xref=Buffer.byteLength(pdf);
@@ -139,9 +139,10 @@ test(`extracts ${format} mapping and preserves its saved review without invalid 
  await page.getByRole("button",{name:"Save review progress to account"}).click();
  await expect(page.getByRole("status").last()).toContainText("Review progress saved privately");
  if(format==="csv"){
-  const item=(storedReview as {items:{mark:{page:number;endPage?:number;top:number;bottom:number;fragments?:{page:number;top:number;bottom:number}[]}}[]}).items[0];
+  const item=(storedReview as {items:{mark:{page:number;endPage?:number;top:number;bottom:number;selectedPagesOnly?:true;fragments?:{page:number;top:number;bottom:number}[]}}[]}).items[0];
   expect(item.mark.page).toBe(6);expect(item.mark.endPage).toBe(7);
-  item.mark.fragments=[{page:6,top:item.mark.top,bottom:.23},{page:7,top:.16,bottom:item.mark.bottom}];
+  item.mark.fragments=[{page:6,top:item.mark.top,bottom:.23},{page:7,top:.16,bottom:item.mark.bottom},{page:9,top:.16,bottom:.3}];
+  item.mark.selectedPagesOnly=true;item.mark.endPage=9;item.mark.bottom=.3;
  }
  await page.getByRole("button",{name:"Reload source and mapping"}).click();
  await expect(page.getByRole("status").last()).toContainText("Prepared 2 complete questions");
@@ -150,9 +151,9 @@ test(`extracts ${format} mapping and preserves its saved review without invalid 
  await expect(page.getByText("2/2").first()).toBeVisible();
  if(format==="csv"){
   await expect.poll(()=>page.getByLabel("Mark-scheme image").evaluate((canvas:HTMLCanvasElement)=>{
-   const pixels=canvas.getContext("2d")!.getImageData(0,0,canvas.width,canvas.height).data;let red=0,blue=0;
-   for(let i=0;i<pixels.length;i+=4){if(pixels[i]>180&&pixels[i+1]<100&&pixels[i+2]<100)red++;if(pixels[i+2]>180&&pixels[i]<100&&pixels[i+1]<100)blue++}
-   return red===0&&blue>10&&canvas.height<200;
+   const pixels=canvas.getContext("2d")!.getImageData(0,0,canvas.width,canvas.height).data;let red=0,blue=0,green=0;
+   for(let i=0;i<pixels.length;i+=4){if(pixels[i]>180&&pixels[i+1]<100&&pixels[i+2]<100)red++;if(pixels[i+2]>180&&pixels[i]<100&&pixels[i+1]<100)blue++;if(pixels[i+1]>150&&pixels[i]<100&&pixels[i+2]<100)green++}
+   return red===0&&blue>10&&green>10&&canvas.height<350;
   })).toBe(true);
  }
  expect(downloadedMappings).toEqual(["fixture."+format,"fixture."+format]);
@@ -170,7 +171,15 @@ test(`extracts ${format} mapping and preserves its saved review without invalid 
  await expect(other.getByLabel("Remove question paper border")).toBeChecked();
  await expect(other.getByText("2/2").first()).toBeVisible();
  if(format==="csv"){
-  await expect.poll(()=>other.getByLabel("Mark-scheme image").evaluate((canvas:HTMLCanvasElement)=>canvas.height)).toBeLessThan(200);
+  await expect.poll(()=>other.getByLabel("Mark-scheme image").evaluate((canvas:HTMLCanvasElement)=>canvas.height)).toBeLessThan(350);
+  await other.getByText("Page sections (6, 7, 9)").click();
+  await expect(other.getByLabel("mark selected pages only")).toBeChecked();
+  const beforeInvalid=JSON.stringify(storedReview);
+  await other.getByLabel("mark section 3 top",{exact:true}).fill("100");
+  await other.getByRole("button",{name:"Save review progress to account"}).click();
+  await expect(other.getByRole("status").last()).toContainText("Previous progress retained");
+  expect(JSON.stringify(storedReview)).toBe(beforeInvalid);
+  await other.getByLabel("mark section 3 top",{exact:true}).fill("16");
   await other.getByLabel("mark top",{exact:true}).fill("16");
  }
  await other.getByLabel("question top",{exact:true}).fill("9");
@@ -183,7 +192,7 @@ test(`extracts ${format} mapping and preserves its saved review without invalid 
  expect((storedReview as {items:{question:{top:number}}[]} | null)?.items[0].question.top).toBe(.09);
  if(format==="csv"){
   const mark=(storedReview as {items:{mark:{fragments:{page:number;top:number;bottom:number}[]}}[]}).items[0].mark;
-  expect(mark.fragments).toHaveLength(2);expect(mark.fragments[0].top).toBe(.16);expect(mark.fragments[1].page).toBe(7);expect(mark.fragments[1].top).toBe(.16);
+  expect(mark.fragments).toHaveLength(3);expect(mark.fragments[0].top).toBe(.16);expect(mark.fragments[1].page).toBe(7);expect(mark.fragments[1].top).toBe(.16);
  }
  expect(reviewReadNonces.length).toBeGreaterThan(3);expect(reviewReadNonces.every(Boolean)).toBe(true);expect(new Set(reviewReadNonces).size).toBe(reviewReadNonces.length);
  await device.close();

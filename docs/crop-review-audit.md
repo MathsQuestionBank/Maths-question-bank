@@ -40,3 +40,11 @@ This removes repeated table headers and blank page tails while retaining all act
 
 
 Mutable review reads now use a unique Storage `cacheNonce` plus `cache: no-store` for coverage, preparation, pre-save comparison and publication comparison. Immutable PDFs/mappings retain their existing reads. This prevents cached earlier approvals or crop coordinates from being mistaken for the latest account state; the cross-device browser regression checks distinct nonempty nonces on every review read. It does not turn the stale-copy check into an atomic compare-and-swap.
+
+## Separate answer-diagram pages
+
+June 2018 Higher 1H prints the Q18 answer graph after Q20's marking table. Explicit `selectedPagesOnly: true` crops can now join strictly increasing selected source pages, keeping the diagram with its own question and excluding intervening questions. Without this flag, fragments still require every page in the range. Each section can have its own horizontal bounds. Legacy crop rendering is unchanged.
+
+The review screen exposes saved page-section bounds for correction; every edit removes approval. Invalid page selections or crop bounds block saving and retain previous account progress. Restoration and publication comparison include the selection flag and section bounds. Browser coverage uses two continuation sections plus a separate green diagram page, with an unrelated red page between them: the rendered crop retains blue guidance and green diagram content, excludes all red content, and survives another-device restoration. The same test verifies invalid section bounds cannot overwrite the saved review.
+
+Validation: 116 unit tests, production build, and 13 Playwright browser tests passed, with 3 intentional mobile PDF skips. No SQL migration is needed for these optional saved-review fields. This change does not publish or approve any question automatically.

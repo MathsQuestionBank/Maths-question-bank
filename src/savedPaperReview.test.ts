@@ -58,3 +58,11 @@ it('restores approved page-by-page joins exactly and rejects missing continuatio
  expect(restoreSavedReview(review,[draft()],24,18)[0].mark).toEqual(review.items[0].mark);
  review.items[0].mark.fragments!.pop();expect(()=>restoreSavedReview(review,[draft()],24,18)).toThrow(/Original review retained/);
 });
+
+
+it('restores separate supplementary diagram pages and their horizontal bounds exactly',()=>{
+ const review=saved();review.items[0].mark={page:6,endPage:9,top:.2,bottom:.6,selectedPagesOnly:true,fragments:[{page:6,top:.2,bottom:.8},{page:9,top:.15,bottom:.6,left:.05,right:.65}]};
+ expect(restoreSavedReview(review,[draft()],24,18)[0].mark).toEqual(review.items[0].mark);
+ delete review.items[0].mark.selectedPagesOnly;
+ expect(()=>restoreSavedReview(review,[draft()],24,18)).toThrow(/Original review retained/);
+});
