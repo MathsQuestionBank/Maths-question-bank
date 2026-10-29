@@ -46,6 +46,8 @@ export default function PaperExtractionReview({source,onPublished,onReviewSaved}
  const [reviewSaved,setReviewSaved]=useState(false);
  const [publishedPaperId,setPublishedPaperId]=useState("");
  const [publishProgress,setPublishProgress]=useState("");
+ const [cropIssue,setCropIssue]=useState<{number:number;kind:"question"|"mark";message:string}|null>(null);
+ const questionHeadingRef=useRef<HTMLHeadingElement>(null);
  const [markSchemeStartPage,setMarkSchemeStartPage]=useState<number|null>(null);
  const [autoSchemeStartPage,setAutoSchemeStartPage]=useState<number|null>(null);
  const savedText=useRef<string|null>(null);
@@ -53,7 +55,7 @@ export default function PaperExtractionReview({source,onPublished,onReviewSaved}
  const selectedDraft=drafts[selected];
  const update=(fn:(d:QuestionDraft)=>QuestionDraft)=>{
   if(busy||publishedPaperId)return;
-  setReviewSaved(false);
+  setReviewSaved(false);setCropIssue(null);
   setDrafts(current=>current.map((d,i)=>i===selected?fn({...d,approved:false}):d));
  };
  const updatePart=(id:string,key:"topic"|"strands"|"skills",value:string)=>update(d=>({...d,parts:d.parts.map(p=>p.id===id?{...p,[key]:value}:p)}));
@@ -77,7 +79,7 @@ export default function PaperExtractionReview({source,onPublished,onReviewSaved}
  };
  const process=async()=>{
   if(drafts.length&&!reviewSaved&&!window.confirm("Reloading will discard unsaved review changes. Continue?"))return;
-  setReviewSaved(false);setPublishedPaperId("");setPublishProgress("");
+  setReviewSaved(false);setPublishedPaperId("");setPublishProgress("");setCropIssue(null);
   setBusy(true);setStatus("Downloading private PDFs…");setQuestionPdf(null);setSchemePdf(null);setDrafts([]);setSelected(0);setAutoSchemeStartPage(null);setMarkSchemeStartPage(null);extracted.current=null;
   try{
    const {data:{user}}=await supabase.auth.getUser();
@@ -173,7 +175,7 @@ export default function PaperExtractionReview({source,onPublished,onReviewSaved}
   if(!window.confirm("Publish "+source.board+" "+source.series.replace(/-/g," ")+" "+source.code+
     " to the private Question Bank?\\n\\n"+summary.questions+" complete questions, "+summary.parts+" mapped parts, "+
     summary.marks+" marks.\\n\\nThis creates searchable records and cannot be undone here. The original review will be kept."))return;
-  setBusy(true);setPublishProgress("Preparing publication…");
+  setBusy(true);setPublishProgress("Preparing publication…");setCropIssue(null);
   try{
    const paperId=await publishReviewedPaper({source,drafts,questionPdf,schemePdf,mappingFile,progress:message=>{setStatus(message);setPublishProgress(message)}});
    setPublishedPaperId(paperId);
@@ -181,7 +183,19 @@ export default function PaperExtractionReview({source,onPublished,onReviewSaved}
    setStatus("Published successfully: "+summary.questions+" complete questions / "+summary.parts+
      " mapped parts / "+summary.marks+" marks. Open the Question Bank to see the Foundation questions.");
    onPublished?.();
-  }catch(error){const message=error instanceof Error?error.message:"Publishing failed; no database records were changed.";setStatus(message);setPublishProgress(message)}
+   }catch(error){
+   const message=error instanceof Error?error.message:"Publishing failed; no database records were changed.";
+   setStatus(message);setPublishProgress(message);
+   const failed=message.match(/^Q(\d+) (mark scheme|question) crop:/i);
+   if(failed){
+    const number=Number(failed[1]);const index=drafts.findIndex(d=>d.number===number);
+    if(index>=0){
+     setSelected(index);
+     setCropIssue({number,kind:failed[2].toLowerCase()==="mark scheme"?"mark":"question",message});
+     requestAnimationFrame(()=>questionHeadingRef.current?.scrollIntoView({behavior:"smooth",block:"start"}));
+    }
+   }
+  }
   finally{setBusy(false)}
  };
  const select=(i:number)=>setSelected(i);
@@ -216,7 +230,8 @@ export default function PaperExtractionReview({source,onPublished,onReviewSaved}
  {drafts.map((d,i)=><button key={d.number} className={i===selected?"primary small":"secondary small"} onClick={()=>select(i)} aria-pressed={i===selected}>{d.approved?"✓ ":""}Q{d.number}</button>)}
  </div>
  {selectedDraft&&<div>
- <h3>Q{selectedDraft.number} · {selectedDraft.parts.length} part(s) · {selectedDraft.parts.reduce((n,p)=>n+p.marks,0)} marks</h3>
+ <h3 ref={questionHeadingRef}>Q{selectedDraft.number} · {selectedDraft.parts.length} part(s) · {selectedDraft.parts.reduce((n,p)=>n+p.marks,0)} marks</h3>
+ {cropIssue?.number===selectedDraft.number&&<p role="alert"><strong>Publication stopped at Q{cropIssue.number} {cropIssue.kind==="mark"?"mark scheme":"question"}.</strong> {cropIssue.message} Adjust this crop and check its preview; then approve Q{cropIssue.number} again, save review progress, and retry publishing. Other approvals are kept.</p>}
  <p className="hint">Parts: {selectedDraft.parts.map(x=>x.question).join(", ")} · Topics: {[...new Set(selectedDraft.parts.flatMap(x=>x.strands.split(/[;,]/).map(y=>y.trim()).filter(Boolean)))].join(", ")}</p>
  <p className="hint">Question location: {selectedDraft.questionDetected?"Detected from question number":selectedDraft.questionInferred?"Inferred from the printed Total for Question line — check crop":selectedDraft.questionManuallyAdjusted?"Adjusted manually":"Not detected — estimated nearby page, adjust crop manually"}. Mark scheme location: {selectedDraft.markDetected?"Suggested by PDF text":selectedDraft.markManuallyAdjusted?"Adjusted manually":"Not detected — adjust crop manually"}.</p>
  <div style={{display:"flex",gap:14,flexWrap:"wrap"}}>
