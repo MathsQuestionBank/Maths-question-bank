@@ -16,7 +16,24 @@ function CropPreview({pdf,slice,title}:{pdf:PDFDocumentProxy;slice:Slice;title:s
  const ref=useRef<HTMLCanvasElement>(null);const [error,setError]=useState("");
  useEffect(()=>{
   let active=true;
-  const render=async()=>{if(!ref.current)return;const buffer=document.createElement("canvas");try{await drawSlice(pdf,slice,buffer);if(active&&ref.current){ref.current.width=buffer.width;ref.current.height=buffer.height;ref.current.getContext("2d")?.drawImage(buffer,0,0);setError("")}buffer.width=0;buffer.height=0}catch(e){if(active)setError(e instanceof Error?e.message:"Cannot render crop")}};
+  const render=async()=>{
+   if(!ref.current)return;
+   // Do not leave the previous question's image on screen while a new crop renders.
+   ref.current.width=0;ref.current.height=0;setError("");
+   const buffer=document.createElement("canvas");
+   try{
+    await drawSlice(pdf,slice,buffer);
+    if(active&&ref.current){
+     ref.current.width=buffer.width;ref.current.height=buffer.height;
+     ref.current.getContext("2d")?.drawImage(buffer,0,0);
+    }
+   }catch(e){
+    if(active){
+     if(ref.current){ref.current.width=0;ref.current.height=0;}
+     setError(e instanceof Error?e.message:"Cannot render crop");
+    }
+   }finally{buffer.width=0;buffer.height=0}
+  };
   void render();return()=>{active=false};
  },[pdf,slice.page,slice.endPage,slice.top,slice.bottom,slice.left,slice.right,slice.trimBorder,slice.borderVersion,slice.selectedPagesOnly,JSON.stringify(slice.fragments)]);
  return <div style={{flex:"1 1 320px",minWidth:0}}><strong>{title}</strong>{error&&<p role="alert">{error}</p>}<div style={{maxHeight:500,overflow:"auto",border:"1px solid #aaa",borderRadius:6,marginTop:8}}><canvas aria-label={title} ref={ref} style={{width:"100%",display:"block"}}/></div></div>;
@@ -225,7 +242,7 @@ export default function PaperExtractionReview({source,onPublished,onReviewSaved}
  {!validSlice(selectedDraft[kind],kind==="question"?questionPdf.numPages:schemePdf.numPages)&&<p role="alert">Correct the crop bounds and page sections before saving.</p>}
  {kind==="question"&&<label><input aria-label="Remove question paper border" type="checkbox" checked={selectedDraft.question.trimBorder===true} onChange={e=>update(d=>({...d,question:{...d.question,trimBorder:e.target.checked,borderVersion:2},questionManuallyAdjusted:true}))}/> Remove detected paper border and side margins</label>}
  {validSlice(selectedDraft[kind],kind==="question"?questionPdf.numPages:schemePdf.numPages)
- &&<CropPreview pdf={kind==="question"?questionPdf:schemePdf} slice={selectedDraft[kind]} title={kind==="question"?"Question image":"Mark-scheme image"}/>}
+ &&<CropPreview key={selectedDraft.number+"-"+kind} pdf={kind==="question"?questionPdf:schemePdf} slice={selectedDraft[kind]} title={kind==="question"?"Question image":"Mark-scheme image"}/>}
  </fieldset>)}
  </div>
  <label>Review notes<textarea value={selectedDraft.notes} onChange={e=>update(d=>({...d,notes:e.target.value}))} rows={2} placeholder="Record image, answer or tag corrections needed"/></label>
