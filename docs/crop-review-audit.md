@@ -1,6 +1,6 @@
 # Pending-paper review audit
 
-The user authorised review of all papers currently awaiting review, approval only of verified complete questions, and leaving uncertain questions unapproved. Publication remains a separate action and is not authorised. The initial dedicated-import-account inventory contains 80 pending papers and 2,025 unapproved questions. Existing approved reviews and published papers are excluded from edits.
+The user authorised review of all papers currently awaiting review, approval only of verified complete questions, and leaving uncertain questions unapproved. Publication remains a separate action and is not authorised. The initial dedicated-import-account inventory contains 80 pending papers and 2,025 unapproved questions. Approvals that predate this audit and published papers are excluded from edits. Approvals created during this audit may be withdrawn if a later cross-check reveals uncertainty, with the previous review backed up.
 
 ## Crop corrections
 
@@ -14,4 +14,19 @@ June 2019 2F Q1's question crop and Q7's mark crop were explicitly corrected and
 
 Private audit originals, sources, proposed images and decisions remain outside Git. Before any saved review update, the latest exact review must match the audited original, an immutable content-hash backup is retained, and the resulting review is read back with cache bypass. Existing approvals, notes, source mapping references and immutable Pearson/grade data are retained. Only reviewed pending items may change. No publication RPC, paper/question-table write, production migration, merge or production deployment is part of this audit.
 
-Local checks for the detector correction: 108 unit tests, production build and 13 Playwright tests passed; 3 intentional mobile PDF skips. Real-PDF crop inspection is additional evidence, not an assertion that all pending papers have completed visual review.
+Question-number anchors also respect the preceding printed total, preventing a fraction denominator in Q4 from becoming the Q5 anchor. Mark-scheme anchors align with the first table question’s number column, preventing multiplication working digits from becoming later question anchors. Both have regression tests. The new boundaries and marking anchors were checked against all 80 real pending papers / 2,025 questions with no structural failures; saved reviews were not overwritten by this check.
+
+The assessment browser test now awaits both its confirmation dialog and completed versioned save, with a valid RPC response. It verifies that the original browser assessment is retained after the cloud copy completes; previously the test could end while dialog acceptance was still pending. No assessment product code changed.
+
+Local checks for the detector correction: 110 unit tests, production build and 13 Playwright tests passed; 3 intentional mobile PDF skips. Real-PDF crop inspection is additional evidence, not an assertion that all pending papers have completed visual review.
+
+
+## Saved visual-review progress (initial snapshot)
+
+| Paper | Visually reviewed groups | Approved | Left unapproved |
+|---|---:|---:|---|
+| June 2019 2F | 29 | 27 | Q6, Q12: Geometry additional tags on money/time tasks |
+| June 2017 1F | 27 | 24 | Q7: Geometry tag on money task; Q21, Q24: common-question AO differences |
+| June 2017 1H | 22 | 19 | Q1, Q4: common-question AO differences; Q3: Ratio tag on decimal multiplication |
+
+All saved results were freshly read back. These counts describe the initial completed papers, not completion of the full 80-paper audit. Differences in common-question AO labels may be deliberate tier-specific classifications; neither source AO was replaced or declared invalid. Both pending reviews carry a verification note. Earlier approvals created by this audit for Foundation Q21/Q24 were withdrawn once the Higher comparison identified that uncertainty. Pre-audit approvals and published papers remain untouched.

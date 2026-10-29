@@ -167,3 +167,15 @@ it('ends the June 2019 2F Q1 crop just below its total without the next question
  const [draft]=makeReviewDrafts([row('Q01',1),row('Q02',1)],lines,[]);
  expect(draft.question.bottom).toBeCloseTo(.305405);expect(draft.question.bottom).toBeGreaterThan(.291405);expect(draft.question.bottom).toBeLessThan(.335-.022);expect(draft.approved).toBe(false);
 });
+
+it('does not treat a fraction denominator in Q4 as the start of Q5',()=>{
+ const lines:TextLine[]=[{page:2,top:.4,left:.07,text:'4 Write the fraction as a percentage'},{page:2,top:.43,left:.18,text:'5'},{page:2,top:.52,left:.58,text:'(Total for Question 4 is 1 mark)'},{page:2,top:.57,left:.07,text:'5 Work out 60% of 70'},{page:2,top:.68,left:.58,text:'(Total for Question 5 is 2 marks)'}];
+ const drafts=makeReviewDrafts([row('Q04',1),row('Q05',2)],lines,[]);
+ expect(drafts[1].question.top).toBeCloseTo(.552);expect(drafts[1].question.top).toBeGreaterThan(.52);expect(drafts[1].parts[0].question).toBe('Q05');
+});
+
+it('does not mistake multiplication working digits for later mark-scheme question numbers',()=>{
+ const lines:TextLine[]=[{page:6,top:.12,left:.05,text:'Question Working Answer Mark Notes'},{page:6,top:.2,left:.06,text:'3 234.78 M1'},{page:6,top:.26,left:.16,text:'4 3 7 8'},{page:6,top:.29,left:.13,text:'5 4 6'},{page:6,top:.4,left:.06,text:'4 x squared plus 6x equals 1 M1'},{page:7,top:.12,left:.05,text:'Question Working Answer Mark Notes'},{page:7,top:.2,left:.06,text:'5 70.5 P1'}];
+ const drafts=makeReviewDrafts([row('Q03',3),row('Q04',3),row('Q05',5)],[],lines);
+ expect(drafts[1].mark.page).toBe(6);expect(drafts[1].mark.top).toBeCloseTo(.382);expect(drafts[2].mark.page).toBe(7);expect(drafts[2].mark.top).toBeCloseTo(.182);
+});
