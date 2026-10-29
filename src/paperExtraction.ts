@@ -1,7 +1,7 @@
 import type {MappingRow} from "./EnhancedMappingImporter";
 
 export type TextLine={page:number;top:number;left:number;text:string};
-export type Slice={page:number;top:number;bottom:number;endPage?:number;left?:number;right?:number;trimBorder?:boolean;borderVersion?:2};
+export type Slice={page:number;top:number;bottom:number;endPage?:number;left?:number;right?:number;trimBorder?:boolean;borderVersion?:2;fragments?:{page:number;top:number;bottom:number}[]};
 export type QuestionDraft={number:number;parts:MappingRow[];question:Slice;mark:Slice;questionDetected:boolean;questionInferred:boolean;questionManuallyAdjusted?:boolean;markDetected:boolean;markManuallyAdjusted?:boolean;approved:boolean;notes:string};
 export const questionNumber=(row:Pick<MappingRow,"question"|"id">):number|null=>{
  const match=(row.question||row.id).trim().match(/^Q0*(\d{1,2})(?:[a-z](?:i{1,3}|iv|v|vi{0,3}|ix|x)?)?$/i);
@@ -138,7 +138,17 @@ export const validSlice=(s:Slice,pages:number)=>Number.isInteger(s.page)&&s.page
  Number.isFinite(s.left??0)&&Number.isFinite(s.right??1)&&(s.left??0)>=0&&(s.right??1)<=1&&(s.right??1)-(s.left??0)>=.025&&
  (s.trimBorder===undefined||typeof s.trimBorder==="boolean")&&(s.borderVersion===undefined||s.borderVersion===2)&&
  Number.isFinite(s.top)&&Number.isFinite(s.bottom)&&s.top>=0&&s.top<=.975&&s.bottom>=.025&&s.bottom<=1&&
- ((s.endPage??s.page)>s.page||s.bottom-s.top>=.025);
+ ((s.endPage??s.page)>s.page||s.bottom-s.top>=.025)&&
+ (s.fragments===undefined||Array.isArray(s.fragments)&&s.fragments.length===(s.endPage??s.page)-s.page+1&&
+  s.fragments.every((f,i)=>f&&f.page===s.page+i&&Number.isFinite(f.top)&&Number.isFinite(f.bottom)&&f.top>=0&&f.bottom<=1&&f.bottom-f.top>=.025)&&
+  s.fragments[0].top===s.top&&s.fragments[s.fragments.length-1].bottom===s.bottom);
+export function adjustSlice(slice:Slice,key:"page"|"endPage"|"top"|"bottom"|"left"|"right",value:number):Slice{
+ const next={...slice,[key]:value};
+ if(key==="page"||key==="endPage")delete next.fragments;
+ else if(slice.fragments&&(key==="top"||key==="bottom"))next.fragments=slice.fragments.map((f,i)=>
+  key==="top"&&i===0?{...f,top:value}:key==="bottom"&&i===slice.fragments!.length-1?{...f,bottom:value}:{...f});
+ return next;
+}
 export const isReviewable=(d:QuestionDraft,questionPages:number,markPages:number)=>
  validSlice(d.question,questionPages)&&validSlice(d.mark,markPages)&&
  (d.questionDetected||d.questionInferred||d.questionManuallyAdjusted===true)&&

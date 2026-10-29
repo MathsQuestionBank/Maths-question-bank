@@ -5,7 +5,7 @@ import type {PDFDocumentProxy} from "pdfjs-dist";
 import {supabase} from "./supabase";
 import {inspectFoundationMap,type MappingRow} from "./EnhancedMappingImporter";
 import {loadSourcePdf,readPdfLines,drawSlice} from "./pdfExtraction";
-import {validSlice,makeReviewDrafts,findMarkSchemeStartPage,isReviewable,totalMarks,type QuestionDraft,type Slice,type TextLine} from "./paperExtraction";
+import {validSlice,adjustSlice,makeReviewDrafts,findMarkSchemeStartPage,isReviewable,totalMarks,type QuestionDraft,type Slice,type TextLine} from "./paperExtraction";
 
 import {restoreSavedReview,type SavedReview} from "./savedPaperReview";
 
@@ -18,7 +18,7 @@ function CropPreview({pdf,slice,title}:{pdf:PDFDocumentProxy;slice:Slice;title:s
   let active=true;
   const render=async()=>{if(!ref.current)return;const buffer=document.createElement("canvas");try{await drawSlice(pdf,slice,buffer);if(active&&ref.current){ref.current.width=buffer.width;ref.current.height=buffer.height;ref.current.getContext("2d")?.drawImage(buffer,0,0);setError("")}buffer.width=0;buffer.height=0}catch(e){if(active)setError(e instanceof Error?e.message:"Cannot render crop")}};
   void render();return()=>{active=false};
- },[pdf,slice.page,slice.endPage,slice.top,slice.bottom,slice.left,slice.right,slice.trimBorder,slice.borderVersion]);
+ },[pdf,slice.page,slice.endPage,slice.top,slice.bottom,slice.left,slice.right,slice.trimBorder,slice.borderVersion,JSON.stringify(slice.fragments)]);
  return <div style={{flex:"1 1 320px",minWidth:0}}><strong>{title}</strong>{error&&<p role="alert">{error}</p>}<div style={{maxHeight:500,overflow:"auto",border:"1px solid #aaa",borderRadius:6,marginTop:8}}><canvas aria-label={title} ref={ref} style={{width:"100%",display:"block"}}/></div></div>;
 }
 export default function PaperExtractionReview({source,onPublished,onReviewSaved}:{source:StagedSource;onPublished?:()=>void;onReviewSaved?:()=>void}){
@@ -41,7 +41,7 @@ export default function PaperExtractionReview({source,onPublished,onReviewSaved}
  };
  const updatePart=(id:string,key:"topic"|"strands"|"skills",value:string)=>update(d=>({...d,parts:d.parts.map(p=>p.id===id?{...p,[key]:value}:p)}));
  const adjust=(kind:"question"|"mark",key:"page"|"endPage"|"top"|"bottom"|"left"|"right",value:number)=>{
-  update(d=>({...d,[kind]:{...d[kind],[key]:value},[kind==="question"?"questionManuallyAdjusted":"markManuallyAdjusted"]:true}));
+  update(d=>({...d,[kind]:adjustSlice(d[kind],key,value),[kind==="question"?"questionManuallyAdjusted":"markManuallyAdjusted"]:true}));
  };
  const recalculateSchemeCrops=()=>{
   if(busy||publishedPaperId)return;

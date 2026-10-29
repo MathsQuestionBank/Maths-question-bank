@@ -52,3 +52,9 @@ it('preserves an approved legacy border rendering when new proposals use the out
  const [restored]=restoreSavedReview(original,[{...draft(),question:{...draft().question,trimBorder:true,borderVersion:2}}],24,18);
  expect(restored.question).toEqual(original.items[0].question);expect(restored.question.borderVersion).toBeUndefined();expect(restored.approved).toBe(true);
 });
+
+it('restores approved page-by-page joins exactly and rejects missing continuation pages',()=>{
+ const review=saved();review.items[0].mark={page:6,endPage:7,top:.4,bottom:.35,fragments:[{page:6,top:.4,bottom:.8},{page:7,top:.18,bottom:.35}]};
+ expect(restoreSavedReview(review,[draft()],24,18)[0].mark).toEqual(review.items[0].mark);
+ review.items[0].mark.fragments!.pop();expect(()=>restoreSavedReview(review,[draft()],24,18)).toThrow(/Original review retained/);
+});

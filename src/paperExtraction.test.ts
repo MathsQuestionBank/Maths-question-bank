@@ -1,5 +1,5 @@
 import {describe,it,expect} from "vitest";
-import {makeReviewDrafts,isReviewable,findQuestionAnchors,findMarkSchemeStartPage,totalMarks,type TextLine} from "./paperExtraction";
+import {validSlice,adjustSlice,makeReviewDrafts,isReviewable,findQuestionAnchors,findMarkSchemeStartPage,totalMarks,type TextLine} from "./paperExtraction";
 import type {MappingRow} from "./EnhancedMappingImporter";
 const row=(code:string,marks:number):MappingRow=>({id:"EDX-F-NOVEMBER2022-1F-"+code.toUpperCase(),board:"Edexcel",tier:"Foundation",series:"November 2022",paper:"1F",question:code,topic:"Number",strands:"Number; Ratio",skills:"Ratio and algebra",review:"Mapped",excelRow:2,marks,ao:"AO2",spec:"R1",gradePercent:{1:24,2:43,3:60,4:77,5:88}});
 describe("staged question extraction proposals",()=>{
@@ -178,4 +178,12 @@ it('does not mistake multiplication working digits for later mark-scheme questio
  const lines:TextLine[]=[{page:6,top:.12,left:.05,text:'Question Working Answer Mark Notes'},{page:6,top:.2,left:.06,text:'3 234.78 M1'},{page:6,top:.26,left:.16,text:'4 3 7 8'},{page:6,top:.29,left:.13,text:'5 4 6'},{page:6,top:.4,left:.06,text:'4 x squared plus 6x equals 1 M1'},{page:7,top:.12,left:.05,text:'Question Working Answer Mark Notes'},{page:7,top:.2,left:.06,text:'5 70.5 P1'}];
  const drafts=makeReviewDrafts([row('Q03',3),row('Q04',3),row('Q05',5)],[],lines);
  expect(drafts[1].mark.page).toBe(6);expect(drafts[1].mark.top).toBeCloseTo(.382);expect(drafts[2].mark.page).toBe(7);expect(drafts[2].mark.top).toBeCloseTo(.182);
+});
+
+it('requires every page of a joined crop exactly once, and keeps endpoint edits consistent',()=>{
+ const original={page:6,endPage:7,top:.4,bottom:.35,fragments:[{page:6,top:.4,bottom:.8},{page:7,top:.18,bottom:.35}]};
+ expect(validSlice(original,10)).toBe(true);
+ for(const fragments of [[original.fragments[0]],[original.fragments[1],original.fragments[0]],[original.fragments[0],{page:7,top:.4,bottom:.35}],[{page:6,top:.3,bottom:.8},original.fragments[1]]])expect(validSlice({...original,fragments},10)).toBe(false);
+ const edited=adjustSlice(original,'top',.42);expect(validSlice(edited,10)).toBe(true);expect(edited.fragments![0].top).toBe(.42);expect(original.fragments[0].top).toBe(.4);
+ expect(adjustSlice(original,'endPage',8).fragments).toBeUndefined();
 });

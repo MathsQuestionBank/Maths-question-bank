@@ -18,7 +18,7 @@ Question-number anchors also respect the preceding printed total, preventing a f
 
 The assessment browser test now awaits both its confirmation dialog and completed versioned save, with a valid RPC response. It verifies that the original browser assessment is retained after the cloud copy completes; previously the test could end while dialog acceptance was still pending. No assessment product code changed.
 
-Local checks for the detector correction: 110 unit tests, production build and 13 Playwright tests passed; 3 intentional mobile PDF skips. Real-PDF crop inspection is additional evidence, not an assertion that all pending papers have completed visual review.
+Local checks for the detector correction: 113 unit tests, production build and 13 Playwright tests passed; 3 intentional mobile PDF skips. Real-PDF crop inspection is additional evidence, not an assertion that all pending papers have completed visual review.
 
 
 ## Saved visual-review progress (initial snapshot)
@@ -30,3 +30,10 @@ Local checks for the detector correction: 110 unit tests, production build and 1
 | June 2017 1H | 22 | 19 | Q1, Q4: common-question AO differences; Q3: Ratio tag on decimal multiplication |
 
 All saved results were freshly read back. These counts describe the initial completed papers, not completion of the full 80-paper audit. Differences in common-question AO labels may be deliberate tier-specific classifications; neither source AO was replaced or declared invalid. Both pending reviews carry a verification note. Earlier approvals created by this audit for Foundation Q21/Q24 were withdrawn once the Higher comparison identified that uncertainty. Pre-audit approvals and published papers remain untouched.
+
+
+## Multi-page marking-table joins
+
+A crop may optionally retain one `fragments` entry per source page, with separate top/bottom bounds. Every page from `page` through `endPage` must appear exactly once in order; first/last fragment endpoints must match the overall crop. Missing pages, reversed bounds, invalid or tiny fragments are rejected. Legacy crops without fragments keep their existing rendering. Global endpoint edits update the corresponding fragment; changing the page range clears obsolete fragments and requires re-review. Saved restoration, preview dependencies and publication comparison include the page joins.
+
+This removes repeated table headers and blank page tails while retaining all actual continuation rows, including alternative solutions and marking notes. A real June 2017 2F Q18 join was visually checked against both source pages. The CSV browser fixture now spans two marking pages with red repeated headers and blue continuation guidance: the saved join renders zero red header pixels while retaining the blue guidance, and survives reopening on another device and editing its first endpoint. Unit tests reject dropped continuation pages and unsaved join changes before publication. These joins are review proposals; they do not approve questions automatically.
