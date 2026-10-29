@@ -9,17 +9,19 @@ export const questionNumber=(row:Pick<MappingRow,"question"|"id">):number|null=>
 };
 export function findQuestionAnchors(lines:TextLine[],expected:number[]):Map<number,TextLine>{
  const allowed=new Set(expected);
+ // Some embedded PDF fonts attach a combining stroke from the answer to the number.
+ const leadingNumber=(text:string)=>text.trim().replace(/^(\d{1,2})\u0336+(?=\s|$)/,"$1").match(/^(\d{1,2})(?:[.)]|\s|$)/);
  const candidates=lines.filter(l=>{
   if(l.left>.28||l.top<.035||l.top>.94)return false;
   if(/^\d{1,2}$/.test(l.text.trim())&&l.top>.85)return false;
-  const m=l.text.trim().match(/^(\d{1,2})(?:[.)]|\s|$)/);
+  const m=leadingNumber(l.text);
   return !!m&&allowed.has(Number(m[1]));
  }).sort((a,b)=>a.page-b.page||a.top-b.top||a.left-b.left);
  const byNumber=new Map<number,TextLine>();
  let previous:{page:number;top:number}|null=null;
  for(const n of [...allowed].sort((a,b)=>a-b)){
   const total=lines.find(l=>new RegExp(`\\btotal\\s+for\\s+question\\s+0*${n}\\b`,"i").test(l.text));
-  const found=candidates.find(c=>(!total||c.page<total.page||c.page===total.page&&c.top<total.top)&&c.text.match(/^(\d{1,2})(?:[.)]|\s|$)/)?.[1]===String(n) && (!previous||c.page>previous.page||(c.page===previous.page&&c.top>previous.top+.003)));
+  const found=candidates.find(c=>(!total||c.page<total.page||c.page===total.page&&c.top<total.top)&&leadingNumber(c.text)?.[1]===String(n) && (!previous||c.page>previous.page||(c.page===previous.page&&c.top>previous.top+.003)));
   if(found){byNumber.set(n,found);previous=found}
  }
  return byNumber;

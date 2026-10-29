@@ -147,3 +147,11 @@ it('keeps compact single-line marking rows readable without including the follow
  expect(draft.mark.bottom-draft.mark.top).toBeGreaterThanOrEqual(.025);
  expect(draft.mark.bottom).toBeLessThan(.498-.01);expect(draft.approved).toBe(false);
 });
+
+it('recognises a question number with an attached combining stroke without altering mathematical text',()=>{
+ const lines:TextLine[]=[{page:6,top:.12,left:.05,text:'Question Answer Mark Notes'},{page:6,top:.2,left:.05,text:'18 Answer M1'},{page:6,top:.58,left:.05,text:'19\u0336 3 ≤ p < 1 C2'},{page:7,top:.2,left:.05,text:'20 Answer B1'}];
+ const drafts=makeReviewDrafts([row('Q18',4),row('Q19',2),row('Q20',1)],[],lines);
+ expect(drafts[1].markDetected).toBe(true);expect(drafts[1].mark.page).toBe(6);expect(drafts[1].mark.top).toBeCloseTo(.562);
+ expect(lines[2].text).toContain('19\u0336 3 ≤ p < 1');expect(drafts[1].approved).toBe(false);
+ expect(findQuestionAnchors([{...lines[2],text:'19\u030a angle'}],[19]).has(19)).toBe(false);
+});
