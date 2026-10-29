@@ -2,7 +2,7 @@ import type {PDFDocumentProxy} from "pdfjs-dist";
 import {supabase} from "./supabase";
 import {drawSlice} from "./pdfExtraction";
 import {preparePublication,exportMappedParts} from "./paperPublication";
-import type {QuestionDraft,Slice} from "./paperExtraction";
+import {isReviewable,type QuestionDraft,type Slice} from "./paperExtraction";
 
 const bucket="exam-materials-private";
 type Source={path:string;board:string;series:string;code:string;qualification:string};
@@ -12,7 +12,7 @@ type StoredReview={version:number;mappingFile:string;items:{
 }[]};
 
 function equalSlice(a:Slice,b:Slice){
- return a?.page===b?.page&&Math.abs(a.top-b.top)<.00001&&Math.abs(a.bottom-b.bottom)<.00001;
+ return a?.page===b?.page&&(a.endPage??a.page)===(b.endPage??b.page)&&Math.abs(a.top-b.top)<.00001&&Math.abs(a.bottom-b.bottom)<.00001&&(a.left??0)===(b.left??0)&&(a.right??1)===(b.right??1)&&!!a.trimBorder===!!b.trimBorder&&a.borderVersion===b.borderVersion&&a.selectedPagesOnly===b.selectedPagesOnly&&a.fragments?.length===b.fragments?.length&&(!a.fragments||a.fragments.every((f,i)=>f.page===b.fragments![i].page&&f.top===b.fragments![i].top&&f.bottom===b.fragments![i].bottom&&(f.left??a.left??0)===(b.fragments![i].left??b.left??0)&&(f.right??a.right??1)===(b.fragments![i].right??b.right??1)));
 }
 function reviewMatchesStored(saved:StoredReview,drafts:QuestionDraft[],mappingFile:string){
  if(saved.version!==1||saved.mappingFile!==mappingFile||saved.items?.length!==drafts.length)return false;
@@ -51,6 +51,7 @@ export async function publishReviewedPaper(args:{
  mappingFile:string;progress:(message:string)=>void;
 }):Promise<string>{
  const {source,drafts,questionPdf,schemePdf,mappingFile,progress}=args;
+ if(drafts.some(d=>!isReviewable(d,questionPdf.numPages,schemePdf.numPages)))throw Error("Every crop must be located and valid in its source PDF before publishing.");
  const summary=preparePublication(drafts);
  const {data:{user},error:authError}=await supabase.auth.getUser();
  if(authError||!user)throw Error("Please sign in before publishing.");
@@ -58,7 +59,7 @@ export async function publishReviewedPaper(args:{
  if(roleError||owner!==true)throw Error("Only an approved owner can publish exam papers.");
  if(!source.path.endsWith("/"+user.id))throw Error("This paper is not in your account archive.");
  const reviewPath=source.path+"/extraction-review.json";
- const {data:stored,error:storedError}=await supabase.storage.from(bucket).download(reviewPath);
+ const {data:stored,error:storedError}=await supabase.storage.from(bucket).download(reviewPath,{cacheNonce:crypto.randomUUID()},{cache:"no-store"});
  if(storedError||!stored)throw Error("First save your full review progress to your account.");
  let review:StoredReview;
  try{review=JSON.parse(await stored.text()) as StoredReview}catch{throw Error("Saved review record is invalid.");}
@@ -74,6 +75,8 @@ export async function publishReviewedPaper(args:{
   .eq("series",series).eq("paper_code",source.code).eq("tier",tier).limit(1);
  if(lookupError)throw Error("Duplicate-paper check failed: "+lookupError.message);
  if(existing?.length)throw Error("This paper is already published; no changes were made.");
+ const {data:version,error:versionError}=await supabase.rpc("reviewed_publication_version");
+ if(versionError||version!==16)throw Error("Publication requires the V16 database update to preserve all mapping metadata. Your saved review is retained; no images or question records were written.");
  progress("Creating "+(summary.questions*2)+" reviewed images…");
  const items=[];
  for(let i=0;i<drafts.length;i++){

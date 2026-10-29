@@ -3,3 +3,8 @@ dist/
 .env
 .env.*
 !.env.example
+
+# Local validation outputs
+test-results/
+playwright-report/
+*.tsbuildinfo

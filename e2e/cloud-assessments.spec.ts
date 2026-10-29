@@ -7,8 +7,8 @@ const old={id:"browser-original",name:"My existing assessment",ids:[questionId],
 const token=()=>{const b64=(x:object)=>Buffer.from(JSON.stringify(x)).toString("base64url");return `${b64({alg:"HS256",typ:"JWT"})}.${b64({exp:4102444800,sub:uid,role:"authenticated",aud:"authenticated"})}.signature`;};
 
 test("cloud copy is opt-in and leaves browser assessments untouched",async({page})=>{
- let inserts=0;
- const cloudRows:Array<{id:string;created_by:string;title:string;configuration:object;created_at:string}>=[];
+ let inserts=0,rpcSaves=0;
+ const cloudRows:Array<{id:string;created_by:string;title:string;configuration:object;created_at:string;revision?:number}>=[];
  const links:Array<{assessment_id:string;question_id:string;position:number}>=[];
  await page.addInitScript(({user,token,old})=>{
   localStorage.setItem("sb-ljisttslifnyrbuybfud-auth-token",JSON.stringify({access_token:token,refresh_token:"dummy",expires_at:4102444800,expires_in:999999999,token_type:"bearer",user}));
@@ -32,6 +32,12 @@ test("cloud copy is opt-in and leaves browser assessments untouched",async({page
    if(request.method()==="POST"){links.push(...request.postDataJSON());return reply([],201)}
    return reply(links);
   }
+  if(path==="/rest/v1/rpc/save_owned_assessment"){
+   rpcSaves++;const body=request.postDataJSON(),id="33333333-3333-4333-8333-333333333333";
+   cloudRows.push({id,created_by:uid,title:body.p_title,configuration:body.p_configuration,created_at:"2026-10-27T15:00:00Z",revision:1});
+   links.push(...body.p_question_ids.map((question_id:string,position:number)=>({assessment_id:id,question_id,position})));
+   return reply({saved_id:id,saved_revision:1});
+  }
   if(path.startsWith("/rpc/")||path.includes("/rest/v1/rpc/"))return reply(true);
   return reply({},404);
  });
@@ -41,8 +47,12 @@ test("cloud copy is opt-in and leaves browser assessments untouched",async({page
  expect(inserts).toBe(0);
  await expect(page.getByRole("button",{name:/Import 1 browser-only assessment/})).toBeVisible();
  await expect(page.getByText("Browser assessments needing attention")).toBeVisible();
- page.once("dialog",dialog=>dialog.accept());
- await page.getByRole("button",{name:/Import 1 browser-only assessment/}).click();
+ await Promise.all([
+  page.waitForEvent("dialog").then(dialog=>dialog.accept()),
+  page.getByRole("button",{name:/Import 1 browser-only assessment/}).click()
+ ]);
+ await expect(page.getByText("Imported 1 assessment(s). Browser originals remain unchanged.")).toBeVisible();
+ expect(rpcSaves).toBe(1);
  await expect(page.getByText("My existing assessment")).toBeVisible();
  const stored=await page.evaluate(()=>JSON.parse(localStorage.getItem("mqb-draft-assessments")||"[]"));
  expect(stored).toEqual([old]);

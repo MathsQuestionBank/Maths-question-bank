@@ -1,4 +1,5 @@
 import {useState} from "react";
+import {inspectIntakeBatch,archiveIntakeBatch,type IntakeBatch} from "./batchIntake";
 import {supabase} from "./supabase";
 
 const bucket="exam-materials-private";
@@ -9,7 +10,8 @@ const isPdf=async(file:File)=>{
  return String.fromCharCode(...header)==="%PDF-";
 };
 const slug=(value:string)=>value.trim().replace(/[^a-zA-Z0-9_-]+/g,"-").replace(/^-+|-+$/g,"").slice(0,80);
-export default function NewExamPaperImporter(){
+export default function NewExamPaperImporter({onArchived}:{onArchived?:()=>void}){
+ const [batch,setBatch]=useState<IntakeBatch|null>(null),[batchResults,setBatchResults]=useState<string[]>([]);
  const [board,setBoard]=useState("Edexcel");
  const [qualification,setQualification]=useState("GCSE Mathematics");
  const [tier,setTier]=useState("Foundation");
@@ -24,14 +26,17 @@ export default function NewExamPaperImporter(){
  const inspect=async()=>{
   setReady(false);setStatus("");
   if(!question||!markScheme||!(await isPdf(question))||!(await isPdf(markScheme))){setStatus("Select a valid question paper and mark scheme PDF, each no larger than 30 MB.");return}
-  if(!/^(January|June|November|May|March|October|Summer|Autumn)\s+20\d{2}$/i.test(series.trim())){setStatus("Enter a recognised series and year, for example November 2022.");return}
+  const seriesMatch=series.trim().match(/^(January|June|November|May|March|October|Summer|Autumn)\s+(20\d{2})$/i);
+  if(!seriesMatch){setStatus("Enter a recognised series and year, for example November 2022.");return}
   if(!/^[123]$/.test(paper)){setStatus("Choose paper 1, 2 or 3.");return}
+  const canonicalSeries=seriesMatch[1][0].toUpperCase()+seriesMatch[1].slice(1).toLowerCase()+" "+seriesMatch[2];
+  setSeries(canonicalSeries);
   setBusy(true);
   try{
    const {data:{user},error:authError}=await supabase.auth.getUser();
    const {data:approved,error:roleError}=await supabase.rpc("is_approved_owner");
    if(authError||!user||roleError||approved!==true)throw Error("An approved account is required.");
-   const {data:found,error}=await supabase.from("exam_papers").select("id").eq("exam_board",board).eq("qualification",qualification).eq("tier",tier).eq("paper_code",code).ilike("series",series.trim()).limit(1);
+   const {data:found,error}=await supabase.from("exam_papers").select("id").eq("exam_board",board).eq("qualification",qualification).eq("tier",tier).eq("paper_code",code).ilike("series",canonicalSeries).limit(1);
    if(error)throw Error(error.message);
    if(found?.length)throw Error("This paper is already registered. Nothing was uploaded; review the existing paper rather than importing it twice.");
    setReady(true);
@@ -53,20 +58,38 @@ export default function NewExamPaperImporter(){
    if(lookupError)throw Error(lookupError.message);
    if(existing?.length)throw Error("A matching paper now exists. No files were overwritten.");
    const folder=`${base}${user.id}/`;
+   const {data:archived,error:listError}=await supabase.storage.from(bucket).list(folder.replace(/\/$/,""),{limit:100});
+   if(listError)throw Error("Cannot check existing archive: "+listError.message);
    for(const [name,file] of files){
+    if(archived?.some(x=>x.name===name)){
+     const {data:old,error:readError}=await supabase.storage.from(bucket).download(folder+name);
+     if(readError||!old)throw Error("Cannot verify existing "+name+"; nothing was overwritten.");
+     const hash=async(blob:Blob)=>Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",await blob.arrayBuffer()))).join(",");
+     if(await hash(old)!==await hash(file))throw Error("A different "+name+" is already archived. Continue its existing review; original source retained.");
+     continue;
+    }
     setStatus(`Uploading ${name} to private source storage…`);
     const {error}=await supabase.storage.from(bucket).upload(folder+name,file,{contentType:"application/pdf",upsert:false});
     if(error)throw Error(`Could not archive ${name}: ${error.message}. Any earlier uploaded source remains private and can be reviewed; nothing was published.`);
    }
    const manifest={board,qualification,tier,series:series.trim(),paper_code:code,uploaded_at:new Date().toISOString(),state:"awaiting-extraction-and-human-review",question_file:question.name,mark_scheme_file:markScheme.name};
-   const {error}=await supabase.storage.from(bucket).upload(folder+"intake.json",new Blob([JSON.stringify(manifest,null,2)],{type:"application/json"}),{contentType:"application/json",upsert:false});
+   const {error}=archived?.some(x=>x.name==="intake.json")?{error:null}:await supabase.storage.from(bucket).upload(folder+"intake.json",new Blob([JSON.stringify(manifest,null,2)],{type:"application/json"}),{contentType:"application/json",upsert:false});
    if(error)throw Error("PDFs archived, but the intake manifest was not saved: "+error.message);
+   onArchived?.();
    setStatus("Source PDFs archived privately. No exam paper or questions have been added to the searchable bank. Extraction, crop review and Enhanced Skills Mapping are the next stage.");
   }catch(e){setStatus(e instanceof Error?e.message:"Upload failed.");}
   finally{setBusy(false)}
  };
  return <section className="panel" style={{padding:22}}>
  <h2>Import New Exam Paper</h2>
+ <section className="panel" style={{padding:16,marginBottom:20}}>
+ <h3>Prepare a batch for review</h3>
+ <p>Upload one prepared review ZIP containing matched PDFs, mapping and unapproved crop proposals. Existing published papers and saved reviews are skipped. Nothing is approved or published.</p>
+ <label>Prepared review batch ZIP<input aria-label="Prepared review batch ZIP" type="file" accept=".zip" disabled={busy} onChange={e=>{const file=e.target.files?.[0];setBatch(null);setBatchResults([]);if(!file)return;setBusy(true);void inspectIntakeBatch(file).then(value=>{setBatch(value);setStatus(`${value.papers.length} papers checked and ready for batch preparation.`)}).catch(error=>setStatus(error instanceof Error?error.message:"Cannot inspect batch")).finally(()=>setBusy(false))}}/></label>
+ {batch&&<><ul>{batch.papers.map(p=><li key={p.series+p.code}>{p.board} · {p.series} · {p.code} — {p.review.items.length} complete questions{p.provenance&&<p className="hint">{p.provenance}</p>}</li>)}</ul>
+ <button className="primary" disabled={busy} onClick={()=>{setBusy(true);setBatchResults([]);void archiveIntakeBatch(batch,setStatus).then(results=>setBatchResults(results)).catch(error=>setStatus(error instanceof Error?error.message:"Batch preparation failed")).finally(()=>{setBusy(false);onArchived?.()})}}>Prepare all papers for review</button></>}
+ {batchResults.length>0&&<ul aria-label="Batch preparation results">{batchResults.map((text,i)=><li key={i}>{text}</li>)}</ul>}
+ </section>
  <p className="hint">Stage a new paper and mark scheme in private storage. Check the details and files before uploading. Questions will only be available to teachers after separate extraction and review.</p>
  <div className="library-toolbar" style={{alignItems:"end",flexWrap:"wrap"}}>
  <label>Exam board<select aria-label="New paper exam board" value={board} onChange={e=>{setBoard(e.target.value);setReady(false)}}><option>Edexcel</option><option>AQA</option></select></label>

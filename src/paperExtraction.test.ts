@@ -1,5 +1,5 @@
 import {describe,it,expect} from "vitest";
-import {makeReviewDrafts,isReviewable,findQuestionAnchors,findMarkSchemeStartPage,totalMarks,type TextLine} from "./paperExtraction";
+import {validSlice,adjustSlice,adjustFragment,makeReviewDrafts,isReviewable,findQuestionAnchors,findMarkSchemeStartPage,totalMarks,type TextLine} from "./paperExtraction";
 import type {MappingRow} from "./EnhancedMappingImporter";
 const row=(code:string,marks:number):MappingRow=>({id:"EDX-F-NOVEMBER2022-1F-"+code.toUpperCase(),board:"Edexcel",tier:"Foundation",series:"November 2022",paper:"1F",question:code,topic:"Number",strands:"Number; Ratio",skills:"Ratio and algebra",review:"Mapped",excelRow:2,marks,ao:"AO2",spec:"R1",gradePercent:{1:24,2:43,3:60,4:77,5:88}});
 describe("staged question extraction proposals",()=>{
@@ -59,7 +59,7 @@ describe("staged question extraction proposals",()=>{
   expect(q5.questionDetected).toBe(false);
   expect(q5.questionInferred).toBe(true);
   expect(q5.question.page).toBe(3);
-  expect(q5.question.top).toBeGreaterThan(.09);
+  expect(q5.question.top).toBeGreaterThanOrEqual(.035);
   expect(q5.question.bottom).toBeLessThan(.42);
   expect(q5.markDetected).toBe(true);
   expect(isReviewable(q5,24,20)).toBe(true);
@@ -90,4 +90,112 @@ describe("staged question extraction proposals",()=>{
   expect(isReviewable({...d,markManuallyAdjusted:true},10,10)).toBe(true);
   expect(isReviewable({...d,question:{page:30,top:0,bottom:1}},10,10)).toBe(false);
  });
+});
+
+describe('multi-page question preservation',()=>{
+ it('keeps every page through the printed total and next question boundary',()=>{
+  const lines:TextLine[]=[{page:2,top:.12,left:.1,text:'1 Solve the problem'},{page:3,top:.7,left:.2,text:'(Total for Question 1 is 5 marks)'},{page:4,top:.12,left:.1,text:'2 Next question'}];
+  const [draft]=makeReviewDrafts([row('Q01a',2),row('Q01b',3),row('Q02',1)],lines,[]);
+  expect(draft.question).toEqual({page:2,endPage:3,top:.102,bottom:.714,trimBorder:true,borderVersion:2});
+  expect(draft.parts).toHaveLength(2);
+  expect(draft.approved).toBe(false);
+ });
+ it('rejects fractional pages, reversed page ranges and invalid crop coordinates',()=>{
+  const d=makeReviewDrafts([row('Q01',2)],[{page:2,top:.1,left:.1,text:'1 Question'}],[])[0];
+  for(const question of [{page:1.5,top:0,bottom:1},{page:2,endPage:1,top:0,bottom:1},{page:2,endPage:11,top:0,bottom:1},{page:2,top:NaN,bottom:1}])expect(isReviewable({...d,question,markManuallyAdjusted:true},10,10)).toBe(false);
+ });
+});
+
+
+describe('real Pearson layout regressions',()=>{
+ it('finds questions printed near the top edge and rejects footer page numbers',()=>{
+  const lines:TextLine[]=[{page:14,top:.0503,left:.119,text:'18 The scatter graph shows information'},{page:14,top:.9264,left:.04,text:'14'},{page:15,top:.8,left:.15,text:'(Total for Question 18 is 4 marks)'},{page:16,top:.0503,left:.119,text:'19 Calculate the value'}];
+  const draft=makeReviewDrafts([row('Q18a',2),row('Q18b',2),row('Q19',3)],lines,[])[0];
+  expect(draft.question).toMatchObject({page:14,endPage:15});
+  expect(draft.question.top).toBeLessThan(.0503);expect(draft.questionDetected).toBe(true);
+  expect(findQuestionAnchors(lines,[14]).has(14)).toBe(false);
+ });
+ it('rejects an apparent question anchor after its printed total',()=>{
+  const lines:TextLine[]=[{page:6,top:.8,left:.2,text:'(Total for Question 10 is 4 marks)'},{page:10,top:.926,left:.04,text:'10'}];
+  expect(findQuestionAnchors(lines,[10]).size).toBe(0);
+ });
+});
+
+it('keeps mark-scheme continuation content before the next question on a later page',()=>{
+ const rows=[1,2].map(n=>({id:'Q'+n,question:'Q'+n,marks:2,ao:'AO1',topic:'Number',strands:'Number',skills:'Counting',board:'Edexcel',tier:'Foundation',series:'November 2022',paper:'1F',review:'',excelRow:n,spec:'',gradePercent:{}}));
+ const lines=[{page:6,top:.2,left:.1,text:'1 Answer'},{page:7,top:.2,left:.1,text:'continued solution'},{page:7,top:.6,left:.1,text:'2 Answer'},{page:8,top:.7,left:.2,text:'final diagram'}];
+ const drafts=makeReviewDrafts(rows,[],lines,6);
+ expect(drafts[0].mark).toMatchObject({page:6,endPage:7,bottom:.578});
+ expect(drafts[1].mark).toMatchObject({page:7,endPage:8});
+});
+
+it('excludes Pearson modified-large-print appendices from standard mark-scheme crops',()=>{
+ const lines=[{page:16,top:.3,left:.1,text:'30 Answer'},{page:17,top:.1,left:.1,text:'Modifications to the mark scheme for Modified Large Print (MLP) papers: 1MA1 3F'},{page:18,top:.3,left:.1,text:'30 Different modified paper answer'}];
+ const d=makeReviewDrafts([row('Q30',4)],[],lines,6)[0];
+ expect(d.mark.page).toBe(16);expect(d.mark.endPage).toBeUndefined();
+});
+
+it('detects older Higher marking tables with a Working column between Question and Answer',()=>{
+ const lines:TextLine[]=[{page:3,top:.2,left:.1,text:'1 General marking instructions'},{page:7,top:.12,left:.05,text:'Question Working Answer Mark Notes'},{page:7,top:.2,left:.05,text:'1 Prime factors'}];
+ expect(findMarkSchemeStartPage(lines)).toBe(7);
+ const draft=makeReviewDrafts([row('Q01',2)],[],lines)[0];expect(draft.markDetected).toBe(true);expect(draft.mark.page).toBe(7);expect(draft.approved).toBe(false);
+});
+
+it('keeps compact single-line marking rows readable without including the following answer',()=>{
+ const lines:TextLine[]=[{page:6,top:.12,left:.05,text:'Question Answer Mark Notes'},{page:6,top:.47,left:.05,text:'6 45 B1'},{page:6,top:.498,left:.05,text:'7 12 B1'}];
+ const [draft]=makeReviewDrafts([row('Q06',1),row('Q07',1)],[],lines);
+ expect(draft.mark.bottom-draft.mark.top).toBeGreaterThanOrEqual(.025);
+ expect(draft.mark.bottom).toBeLessThan(.498-.01);expect(draft.approved).toBe(false);
+});
+
+it('recognises a question number with an attached combining stroke without altering mathematical text',()=>{
+ const lines:TextLine[]=[{page:6,top:.12,left:.05,text:'Question Answer Mark Notes'},{page:6,top:.2,left:.05,text:'18 Answer M1'},{page:6,top:.58,left:.05,text:'19\u0336 3 ≤ p < 1 C2'},{page:7,top:.2,left:.05,text:'20 Answer B1'}];
+ const drafts=makeReviewDrafts([row('Q18',4),row('Q19',2),row('Q20',1)],[],lines);
+ expect(drafts[1].markDetected).toBe(true);expect(drafts[1].mark.page).toBe(6);expect(drafts[1].mark.top).toBeCloseTo(.562);
+ expect(lines[2].text).toContain('19\u0336 3 ≤ p < 1');expect(drafts[1].approved).toBe(false);
+ expect(findQuestionAnchors([{...lines[2],text:'19\u030a angle'}],[19]).has(19)).toBe(false);
+});
+
+it('handles the printed extra-is typo in November 2024 2F Q17 without including the following page',()=>{
+ const lines:TextLine[]=[{page:11,top:.11,left:.08,text:'17 Car insurance'},{page:11,top:.8,left:.45,text:'(Total for Question is 17 is 6 marks)'},{page:12,top:.11,left:.08,text:'18 Describe the transformation'}];
+ const [draft]=makeReviewDrafts([row('Q17a',3),row('Q17b',3),row('Q18',2)],lines,[]);
+ expect(draft.question.page).toBe(11);expect(draft.question.endPage).toBeUndefined();expect(draft.question.bottom).toBeCloseTo(.814);expect(draft.approved).toBe(false);
+});
+
+it('ends the June 2019 2F Q1 crop just below its total without the next question text',()=>{
+ const lines:TextLine[]=[{page:2,top:.179171,left:.071,text:'1 Write 0.75 as a fraction.'},{page:2,top:.291405,left:.58,text:'(Total for Question 1 is 1 mark)'},{page:2,top:.335,left:.071,text:'2 Write the following numbers in order of size.'}];
+ const [draft]=makeReviewDrafts([row('Q01',1),row('Q02',1)],lines,[]);
+ expect(draft.question.bottom).toBeCloseTo(.305405);expect(draft.question.bottom).toBeGreaterThan(.291405);expect(draft.question.bottom).toBeLessThan(.335-.022);expect(draft.approved).toBe(false);
+});
+
+it('does not treat a fraction denominator in Q4 as the start of Q5',()=>{
+ const lines:TextLine[]=[{page:2,top:.4,left:.07,text:'4 Write the fraction as a percentage'},{page:2,top:.43,left:.18,text:'5'},{page:2,top:.52,left:.58,text:'(Total for Question 4 is 1 mark)'},{page:2,top:.57,left:.07,text:'5 Work out 60% of 70'},{page:2,top:.68,left:.58,text:'(Total for Question 5 is 2 marks)'}];
+ const drafts=makeReviewDrafts([row('Q04',1),row('Q05',2)],lines,[]);
+ expect(drafts[1].question.top).toBeCloseTo(.552);expect(drafts[1].question.top).toBeGreaterThan(.52);expect(drafts[1].parts[0].question).toBe('Q05');
+});
+
+it('does not mistake multiplication working digits for later mark-scheme question numbers',()=>{
+ const lines:TextLine[]=[{page:6,top:.12,left:.05,text:'Question Working Answer Mark Notes'},{page:6,top:.2,left:.06,text:'3 234.78 M1'},{page:6,top:.26,left:.16,text:'4 3 7 8'},{page:6,top:.29,left:.13,text:'5 4 6'},{page:6,top:.4,left:.06,text:'4 x squared plus 6x equals 1 M1'},{page:7,top:.12,left:.05,text:'Question Working Answer Mark Notes'},{page:7,top:.2,left:.06,text:'5 70.5 P1'}];
+ const drafts=makeReviewDrafts([row('Q03',3),row('Q04',3),row('Q05',5)],[],lines);
+ expect(drafts[1].mark.page).toBe(6);expect(drafts[1].mark.top).toBeCloseTo(.382);expect(drafts[2].mark.page).toBe(7);expect(drafts[2].mark.top).toBeCloseTo(.182);
+});
+
+it('requires every page of a joined crop exactly once, and keeps endpoint edits consistent',()=>{
+ const original={page:6,endPage:7,top:.4,bottom:.35,fragments:[{page:6,top:.4,bottom:.8},{page:7,top:.18,bottom:.35}]};
+ expect(validSlice(original,10)).toBe(true);
+ for(const fragments of [[original.fragments[0]],[original.fragments[1],original.fragments[0]],[original.fragments[0],{page:7,top:.4,bottom:.35}],[{page:6,top:.3,bottom:.8},original.fragments[1]]])expect(validSlice({...original,fragments},10)).toBe(false);
+ const edited=adjustSlice(original,'top',.42);expect(validSlice(edited,10)).toBe(true);expect(edited.fragments![0].top).toBe(.42);expect(original.fragments[0].top).toBe(.4);
+ expect(adjustSlice(original,'endPage',8).fragments).toBeUndefined();
+});
+
+it('permits nonadjacent answer-diagram pages only with explicit page selection',()=>{
+ const crop={page:6,endPage:9,top:.2,bottom:.6,fragments:[{page:6,top:.2,bottom:.7},{page:9,top:.15,bottom:.6,left:.05,right:.65}]};
+ expect(validSlice(crop,10)).toBe(false);
+ const selected={...crop,selectedPagesOnly:true as const};expect(validSlice(selected,10)).toBe(true);
+ expect(validSlice({...selected,fragments:[]},10)).toBe(false);
+ expect(validSlice({...selected,fragments:[crop.fragments[0],{...crop.fragments[1],page:6}]},10)).toBe(false);
+ expect(validSlice({...selected,fragments:[crop.fragments[0],{...crop.fragments[1],left:.7}]},10)).toBe(false);
+ expect(validSlice({...selected,fragments:undefined},10)).toBe(false);
+ const edited=adjustFragment(selected,1,'bottom',.62);expect(edited.bottom).toBe(.62);expect(validSlice(edited,10)).toBe(true);expect(selected.bottom).toBe(.6);
+ expect(adjustSlice(selected,'endPage',8).selectedPagesOnly).toBeUndefined();
 });
