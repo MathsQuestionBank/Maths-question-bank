@@ -20,7 +20,7 @@ export function findQuestionAnchors(lines:TextLine[],expected:number[]):Map<numb
  const byNumber=new Map<number,TextLine>();
  let previous:{page:number;top:number}|null=null;
  for(const n of [...allowed].sort((a,b)=>a-b)){
-  const total=lines.find(l=>new RegExp(`\\btotal\\s+for\\s+question\\s+0*${n}\\b`,"i").test(l.text));
+  const total=lines.find(l=>new RegExp(`\\btotal\\s+for\\s+question\\s+(?:is\\s+)?0*${n}\\b`,"i").test(l.text));
   const found=candidates.find(c=>(!total||c.page<total.page||c.page===total.page&&c.top<total.top)&&leadingNumber(c.text)?.[1]===String(n) && (!previous||c.page>previous.page||(c.page===previous.page&&c.top>previous.top+.003)));
   if(found){byNumber.set(n,found);previous=found}
  }
@@ -63,13 +63,13 @@ export function inferQuestionFromTotalMarker(
   lines:TextLine[],
   next:TextLine|undefined
 ):Slice|null{
- const totalPattern=new RegExp(`\\btotal\\s+for\\s+question\\s+0*${number}\\b`,"i");
+ const totalPattern=new RegExp(`\\btotal\\s+for\\s+question\\s+(?:is\\s+)?0*${number}\\b`,"i");
  const totals=lines.filter(l=>totalPattern.test(l.text)&&l.top>=.07&&l.top<.96)
   .sort((a,b)=>a.page-b.page||a.top-b.top);
  const end=totals[0];
  if(!end)return null;
  const previousTotals=lines.filter(l=>l.page===end.page&&l.top<end.top&&
-  /\btotal\s+for\s+question\s+\d+\b/i.test(l.text))
+  /\btotal\s+for\s+question\s+(?:is\s+)?\d+\b/i.test(l.text))
   .sort((a,b)=>b.top-a.top);
  const earliest=Math.max(.035,(previousTotals[0]?.top??.008)+.027);
  // Look for a separately extracted question numeral even when it was too far
@@ -111,7 +111,7 @@ export function makeReviewDrafts(rows:MappingRow[],questionLines:TextLine[],mark
   const questionFallback=inferred??{page:nearbyPage,top:.10,bottom:.95};
   const segment=(a:TextLine|undefined,b:TextLine|undefined,fallbackPage=1,sourceLines:TextLine[]=[],question?:number):Slice=>{
    if(!a)return {page:fallbackPage,top:.05,bottom:.95};
-   const end=question===undefined?undefined:sourceLines.find(l=>l.page>=a.page&&new RegExp(`\\btotal\\s+for\\s+question\\s+0*${question}\\b`,"i").test(l.text));
+   const end=question===undefined?undefined:sourceLines.find(l=>l.page>=a.page&&new RegExp(`\\btotal\\s+for\\s+question\\s+(?:is\\s+)?0*${question}\\b`,"i").test(l.text));
    const endPage=end?.page??(b?(b.page>a.page&&b.top-.022<=.075?b.page-1:b.page):Math.max(a.page,...sourceLines.map(l=>l.page)));
    const top=bounded(a.top-.018);
    let bottom=end?bounded(end.top+.035):b&&b.page===endPage?bounded(b.top-.022):.96;

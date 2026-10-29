@@ -1,7 +1,9 @@
 # PR #64 review and release guide
 
 Scope: MathsQuestionBank/Maths-question-bank; Supabase ljisttslifnyrbuybfud only.
-No production migration, upload, content approval, publication, merge or deployment was performed during this review.
+No production migration, content approval, publication, merge or deployment was performed. Subsequent authorised private source/review staging is recorded in the intake reports below; it does not publish questions.
+
+Latest intake: [November 2023, June/November 2024 and June 2025](2023-2025-intake-validation.md). Current local checks: 104 unit tests and build passed; 13 browser tests passed, 3 intentional mobile PDF skips. Earlier evidence below describes the initial review. See also [2017/2018](2017-2018-intake-validation.md) and [2019/2022/2023](2019-2023-intake-validation.md) for subsequent source corrections.
 
 ## Data preservation and fixes
 
@@ -52,9 +54,9 @@ After the reviewed frontend is deployed, sign in with the approved owner account
 6. Click **Save review progress to account** regularly and before refreshing, leaving or changing devices. On another device, sign in to the same account, reopen the paper and prepare the review: original mapping, saved coordinates and edits are restored, and navigation resumes at the first unapproved question. Close the previous editing tab. If another device saved later, reload before saving; its changes are retained.
 7. Coverage distinguishes **Extraction required**, **Awaiting review**, **Partially approved**, **Fully approved**, **Published** and **Import error** from real saved data. **Fully approved** is not published. Leave **Publish Approved Paper** untouched while reviewing; publication is a separate explicit owner action and requires the verified V16 backend.
 
-## Source corrections for later
+## Original source issues and subsequent review corrections
 
-Do not modify the source CSVs as part of this PR. Foundation contains duplicate `EDX-F-June2017-2F-Q05a` (case-insensitive). Higher contains AO `0` for `EDX-H-JUNE2025-1H-Q02B` and `EDX-H-JUNE2025-1H-Q03A`; those parts need a source-backed correction before their paper can be published. Neither issue affects November 2022 2F/3F.
+Do not modify the source CSVs as part of this PR. Foundation contains duplicate `EDX-F-June2017-2F-Q05a` (case-insensitive). Higher contains AO `0` for `EDX-H-JUNE2025-1H-Q02B` and `EDX-H-JUNE2025-1H-Q03A`; those parts need a source-backed correction before their paper can be published. Neither issue affects November 2022 2F/3F. Subsequent separate review copies correct June 2017 2F Q05b using its PDFs and cross-reference the June 2025 Higher AOs to identical Foundation questions, with teacher-verification notes. Original spreadsheets remain unchanged; see the intake reports.
 
 ## Supplied 2020/2021 Foundation papers
 

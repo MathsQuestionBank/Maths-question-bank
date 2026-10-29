@@ -10,6 +10,8 @@ June 2019 Foundation 2F has a question paper but no matching mark scheme among t
 
 The supplied June 2022 Foundation 2F Q24(b) row has Grade 5 mean score 1.07 for a one-mark part, producing a supplied success percentage of 107.0. The question PDF confirms the part is worth one mark. No corrected percentage can be inferred safely. The original source CSV is retained. A separate review copy leaves only that success-percent field unavailable and adds an explicit teacher-review warning recording the original 107.0 value. All other fields/rows remain unchanged, including the raw mean score. The warning is visible in the review table and retained in private intake provenance. This is not a clamp to 100 or a fabricated replacement.
 
+Subsequent user correction: the final requested Grade 5 success percentage is **75%**, superseding 91.2%. A separate immutable mapping and backed-up review update preserve every crop, approval, note and other field, including the original raw mean score 1.07. The value is a user override, not a calculation.
+
 The review copy retains earlier explicitly labelled supplemental corrections; it never replaces mappings pinned by existing reviews.
 
 ## Extraction correction
@@ -44,6 +46,6 @@ November 2019 1F Q19 contains a combining overstrike U+0336 attached to its numb
 | June 2023 | 3F | 28 | 44 | 80 |
 | June 2023 | 3H | 24 | 32 | 80 |
 
-All 23 candidates passed unique-ID, metadata, per-question mapped-versus-printed mark totals, question/mark anchors and crop-render validation. Every paper totals 80 marks. Grade 5 for Q24(b) above is explicitly unavailable. Structural validation does not replace full-size teacher visual review.
+All 23 candidates passed unique-ID, metadata, per-question mapped-versus-printed mark totals, question/mark anchors and crop-render validation. Every paper totals 80 marks. The initial unavailable Grade 5 percentage was subsequently replaced with the user-specified 75%, as recorded above. Structural validation does not replace full-size teacher visual review.
 
 Local checks: 103 unit tests, production build and 13 browser tests passed, with 3 intentional mobile PDF skips. Staging uses the existing dedicated import account, skips published papers and existing reviews, and uses non-overwriting writes. The original owner’s 1F review and all previously published papers remain untouched. No database migration or merge was performed.

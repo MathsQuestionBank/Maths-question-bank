@@ -155,3 +155,9 @@ it('recognises a question number with an attached combining stroke without alter
  expect(lines[2].text).toContain('19\u0336 3 ≤ p < 1');expect(drafts[1].approved).toBe(false);
  expect(findQuestionAnchors([{...lines[2],text:'19\u030a angle'}],[19]).has(19)).toBe(false);
 });
+
+it('handles the printed extra-is typo in November 2024 2F Q17 without including the following page',()=>{
+ const lines:TextLine[]=[{page:11,top:.11,left:.08,text:'17 Car insurance'},{page:11,top:.8,left:.45,text:'(Total for Question is 17 is 6 marks)'},{page:12,top:.11,left:.08,text:'18 Describe the transformation'}];
+ const [draft]=makeReviewDrafts([row('Q17a',3),row('Q17b',3),row('Q18',2)],lines,[]);
+ expect(draft.question.page).toBe(11);expect(draft.question.endPage).toBeUndefined();expect(draft.question.bottom).toBeCloseTo(.835);expect(draft.approved).toBe(false);
+});

@@ -28,7 +28,7 @@ try{
   const m=await loadSourcePdf(await (await fetch('/private-source-scheme.pdf')).blob());
   const markLines=await readPdfLines(m);
   // Printed totals independently verify boundaries; these are not enhanced mapping records.
-  const totals=questionLines.flatMap(l=>{const match=l.text.match(/Total for Question (\d+) is (\d+) marks?/i);return match?[{number:Number(match[1]),marks:Number(match[2]),page:l.page}]:[]});
+  const totals=questionLines.flatMap(l=>{const match=l.text.match(/Total for Question (?:is )?(\d+) is (\d+) marks?/i);return match?[{number:Number(match[1]),marks:Number(match[2]),page:l.page}]:[]});
   let rows=totals.map(t=>({id:'source-Q'+t.number,question:'Q'+t.number,marks:t.marks,topic:'Unmapped',strands:'',skills:'',ao:'',gradePercent:{}}));
   if(mapping){
    const {inspectFoundationMap}=await import('/src/EnhancedMappingImporter.tsx');
