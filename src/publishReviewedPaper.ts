@@ -84,7 +84,12 @@ export async function publishReviewedPaper(args:{
   const paths:{question_path?:string;mark_path?:string}={};
   for(const kind of ["question","mark"] as const){
    progress("Archiving "+(i+1)+"/"+drafts.length+" — Q"+draft.number+" "+(kind==="mark"?"mark scheme":"question")+".");
-   const blob=await pngForCrop(kind==="question"?questionPdf:schemePdf,draft[kind]);
+   let blob:Blob;
+   try{blob=await pngForCrop(kind==="question"?questionPdf:schemePdf,draft[kind]);}
+   catch(error){
+    const reason=error instanceof Error?error.message:String(error);
+    throw new Error("Q"+draft.number+" "+(kind==="mark"?"mark scheme":"question")+" crop: "+reason);
+   }
    const hash=await sha256(blob);
    const path=base+"Q"+String(draft.number).padStart(2,"0")+"/"+kind+"-"+hash+".png";
    await archiveCrop(path,blob);
