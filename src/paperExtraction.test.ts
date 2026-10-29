@@ -199,3 +199,38 @@ it('permits nonadjacent answer-diagram pages only with explicit page selection',
  const edited=adjustFragment(selected,1,'bottom',.62);expect(edited.bottom).toBe(.62);expect(validSlice(edited,10)).toBe(true);expect(selected.bottom).toBe(.6);
  expect(adjustSlice(selected,'endPage',8).selectedPagesOnly).toBeUndefined();
 });
+
+describe("mark-scheme boundaries across PDF pages",()=>{
+ it("stops at the preceding page when the next question begins after a repeated page header",()=>{
+  const scheme:TextLine[]=[
+   {page:12,top:.655,left:.08,text:"15 4/9, 3/5, 2/8 M1 fractions in correct order"},
+   {page:12,top:.80,left:.30,text:"Accept equivalent decimals"},
+   {page:13,top:.080,left:.08,text:"Paper: 1MA1/2F"},
+   {page:13,top:.13,left:.08,text:"Question Answer Mark Mark scheme Additional guidance"},
+   {page:13,top:.183,left:.08,text:"16 25 B2 answer"}
+  ];
+  const drafts=makeReviewDrafts([row("Q15",2),row("Q16",2)],[],scheme,12);
+  expect(drafts[0].mark).toEqual({page:12,top:.637,bottom:.96});
+  expect(drafts[0].mark.endPage).toBeUndefined();
+  expect(drafts[0].approved).toBe(false);
+ });
+ it("retains genuine answer continuation above a next-page question",()=>{
+  const scheme:TextLine[]=[
+   {page:12,top:.655,left:.08,text:"15 Working M1"},
+   {page:13,top:.080,left:.08,text:"Paper: 1MA1/2F"},
+   {page:13,top:.13,left:.08,text:"Question Answer Mark Mark scheme Additional guidance"},
+   {page:13,top:.205,left:.12,text:"Q15 continued solution with accepted alternatives"},
+   {page:13,top:.58,left:.08,text:"16 Answer B1"}
+  ];
+  const draft=makeReviewDrafts([row("Q15",2),row("Q16",2)],[],scheme,12)[0];
+  expect(draft.mark).toMatchObject({page:12,endPage:13,bottom:.558});
+ });
+ it("does not touch manually saved or approved crops when proposals are recalculated",()=>{
+  const proposed=makeReviewDrafts([row("Q15",2),row("Q16",2)],[],[
+   {page:12,top:.656,left:.08,text:"15 Final answer"},
+   {page:13,top:.183,left:.08,text:"16 Next answer"}
+  ],12)[0];
+  expect(proposed.mark.endPage).toBeUndefined();
+  expect(proposed.approved).toBe(false);
+ });
+});
