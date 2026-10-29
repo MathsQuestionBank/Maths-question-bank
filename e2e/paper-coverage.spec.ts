@@ -42,7 +42,11 @@ test('coverage derives published counts and saved approvals, resumes reviews and
  await expect(page.getByRole('button',{name:'Prepare question review'})).toBeVisible();
  expect(mutations).toEqual([]);
  fail=true;await page.getByRole('button',{name:'Refresh list'}).click();
- await expect(coverage.getByRole('alert')).toContainText('Showing the last verified database snapshot');
+ const refreshAlert=coverage.getByRole('alert').filter({hasText:'Showing the last verified database snapshot'});
+ await expect(refreshAlert).toBeVisible();
+ await expect(refreshAlert).toContainText('Coverage read denied');
+ await expect(coverage.getByRole('alert').filter({hasText:'Duplicate published paper identity'})).toBeVisible();
+ await expect(higher.getByRole('cell',{name:'5',exact:true})).toBeVisible();
 });
 
 test('interrupted intake retries only missing files and rejects different archived PDFs',async({page})=>{

@@ -223,7 +223,8 @@ describe("mark-scheme boundaries across PDF pages",()=>{
    {page:13,top:.58,left:.08,text:"16 Answer B1"}
   ];
   const draft=makeReviewDrafts([row("Q15",2),row("Q16",2)],[],scheme,12)[0];
-  expect(draft.mark).toMatchObject({page:12,endPage:13,bottom:.558});
+  expect(draft.mark).toMatchObject({page:12,endPage:13});
+  expect(draft.mark.bottom).toBeCloseTo(.558,6);
  });
  it("does not touch manually saved or approved crops when proposals are recalculated",()=>{
   const proposed=makeReviewDrafts([row("Q15",2),row("Q16",2)],[],[

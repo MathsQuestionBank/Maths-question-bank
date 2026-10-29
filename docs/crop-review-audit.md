@@ -1,6 +1,20 @@
 # Pending-paper review audit
 
-The user authorised review of all papers currently awaiting review, approval only of verified complete questions, and leaving uncertain questions unapproved. Publication remains a separate action and is not authorised. The initial dedicated-import-account inventory contains 80 pending papers and 2,025 unapproved questions. Approvals that predate this audit and published papers are excluded from edits. Approvals created during this audit may be withdrawn if a later cross-check reveals uncertainty, with the previous review backed up.
+The user authorised review of all papers currently awaiting review, approval only of verified complete questions, and leaving uncertain questions unapproved. Publication remains a separate action and is not authorised. The initial dedicated-import-account inventory contains 80 pending papers and 2,025 unapproved questions. Published papers are excluded from edits. Pre-audit approvals are retained; the user separately requested crop corrections to November 2022 Foundation 1F while retaining its 26 approvals. Approvals created during this audit may be withdrawn if a later cross-check reveals uncertainty, with the previous review backed up.
+
+## Latest unpublished-paper checkpoint — 29 October 2026
+
+The latest read-only publication snapshot leaves 54 unpublished papers from the original inventory. All 54 have now had every question and mark-scheme crop pair visually inspected: 1,343 complete question groups, with 1,223 approvals saved and freshly read back. The remaining 120 groups are unapproved with notes about source classifications, common-question AO differences, or provisional mapping rows. These flags do not assert that tier-specific AO differences are errors, and source values were preserved.
+
+Across the full audit, 61 paper reviews / 1,532 groups have verified saves, including seven papers subsequently published separately. Papers already published when a save was attempted were skipped. The audit did not publish any paper, modify published question records, or change saved assessments. The separate November 2022 Foundation 1F correction retained all 26 pre-existing approvals and was verified before that paper appeared published.
+
+June 2022, June 2024 and June 2025 are included. Marking appendices, alternative methods, separate answer diagrams, multipart grouping, raised numerators and exponents were checked against the actual PDFs. June 2022 Foundation 2F Q24b retains the user-specified 75% Grade 5 value and its original 107% provenance. June 2025 Higher 1H Q2/Q3 remain unapproved for the existing provisional mapping flags.
+
+One concurrent change was preserved: November 2019 Higher 2H's remote review had all 25 approvals rather than the audit's expected 22. Only three approval flags differed; crop coordinates, notes and metadata matched. The newer remote review was not overwritten, and the paper subsequently appeared published.
+
+Private per-question exceptions and source backups remain outside Git. Use the current branch preview with the dedicated import account to inspect saved reviews. These counts are a dated snapshot, not a claim that the original 80 papers remain unpublished or were all approved by this audit.
+
+Verification on the latest PR code: 136 unit tests, production build, 13 Playwright tests (three intentional mobile PDF skips), and the isolated PostgreSQL V15/V16 compatibility/concurrency suite passed. Regression fixtures now tolerate floating-point crop arithmetic, distinguish the retained duplicate warning from a refresh error, and use existing PDF pages when testing failed-render canvas clearing. No product code changed in this checkpoint. Real-schema/RLS staging verification remains a release gate; no production SQL was run.
 
 ## Crop corrections
 

@@ -202,7 +202,10 @@ test(`extracts ${format} mapping and preserves its saved review without invalid 
   await page.getByRole("button",{name:/Q2$/}).click();
   await expect.poll(()=>page.getByLabel("Mark-scheme image").evaluate((canvas:HTMLCanvasElement)=>canvas.width)).toBeGreaterThan(0);
   await page.getByRole("button",{name:/Q1$/}).click();
-  await page.getByLabel("mark end page",{exact:true}).fill("7");
+  // Keep the range within the six-page fixture so the render itself fails:
+  // the first page ends at 96%, below the requested 97% start.
+  await page.getByLabel("mark page",{exact:true}).fill("5");
+  await page.getByLabel("mark end page",{exact:true}).fill("6");
   await page.getByLabel("mark top",{exact:true}).fill("97");
   await expect(page.getByText(/Crop section is too narrow or too short/)).toBeVisible();
   await expect.poll(()=>page.getByLabel("Mark-scheme image").evaluate((canvas:HTMLCanvasElement)=>canvas.width)).toBe(0);
