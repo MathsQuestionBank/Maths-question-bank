@@ -56,7 +56,12 @@ export async function drawSlice(pdf:PDFDocumentProxy,selection:Slice,canvas:HTML
   const top=Math.max(cut?.top??(p===selection.page?selection.top:.05),frame?.top??0);
   const bottom=Math.min(cut?.bottom??(p===(selection.endPage??selection.page)?selection.bottom:.96),frame?.bottom??1);
   const left=Math.max(cut?.left??selection.left??0,frame?.left??0),right=Math.min(cut?.right??selection.right??1,frame?.right??1);
-  if(right-left<.025||bottom-top<.025)throw Error("Crop lies outside the detected paper border. Adjust the crop or turn off border trimming.");
+  if(right-left<.025||bottom-top<.025){
+   const problem=frame?
+    "Crop lies outside the detected paper border. Adjust the crop or turn off border trimming.":
+    "Crop section is too narrow or too short. Check this page's Top/Bottom and Left/Right percentages (including Page sections for multi-page crops).";
+   throw Error("PDF page "+p+": "+problem);
+  }
   const fragment=document.createElement("canvas");fragment.width=Math.max(1,Math.floor(source.width*(right-left)));fragment.height=Math.max(1,Math.floor(source.height*(bottom-top)));
   const output=fragment.getContext("2d");if(!output)throw Error("Canvas unavailable");
   output.drawImage(source,Math.floor(source.width*left),Math.floor(source.height*top),fragment.width,fragment.height,0,0,fragment.width,fragment.height);
