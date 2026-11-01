@@ -184,3 +184,12 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
 .library-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .library-actions .remove{padding:8px}
 @media(max-width:700px){.library-toolbar label{flex:1 1 100%}.library-item>div:first-child,.library-actions{flex:1 1 100%}}
+
+
+/* Teacher-facing question statistics in the assessment builder (never printed). */
+.builder-question-performance{margin:12px 0 10px 30px;padding:11px 13px;background:#f4f8fa;border:1px solid #dbe7ed;border-radius:8px;color:#30485b;font-size:12px}
+.builder-question-performance>strong{display:block;margin-bottom:7px;font-size:12px}
+.builder-performance-values{display:flex;flex-wrap:wrap;gap:6px}
+.builder-performance-values span{display:inline-block;background:white;border:1px solid #dae5ea;border-radius:6px;padding:4px 7px;font-variant-numeric:tabular-nums}
+.builder-question-performance small{display:block;margin-top:7px;color:#617383;line-height:1.4}
+@media print{.builder-question-performance{display:none!important}}
