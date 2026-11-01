@@ -193,3 +193,31 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
 .builder-performance-values span{display:inline-block;background:white;border:1px solid #dae5ea;border-radius:6px;padding:4px 7px;font-variant-numeric:tabular-nums}
 .builder-question-performance small{display:block;margin-top:7px;color:#617383;line-height:1.4}
 @media print{.builder-question-performance{display:none!important}}
+
+
+/* Distinguish separate exam subparts; never hide valid data because another part is missing. */
+.teacher-grade-rows{display:grid;gap:7px}
+.teacher-grade-row{display:flex;gap:10px;align-items:start;flex-wrap:wrap}
+.teacher-grade-row>strong{min-width:58px;color:#24495a;font-size:12px;padding-top:5px}
+.builder-performance-values .combined-performance{background:#ddf1ef;border-color:#b4d7d2;font-weight:650}
+.builder-question-performance.teacher-stats-mark{display:none}
+.paper.teacher-stats-print .builder-question-performance.teacher-stats-mark{display:block}
+
+/* Default remains a clean student paper; the teacher must opt into printing results. */
+@media print{
+ .builder-question-performance{display:none!important}
+ .paper.teacher-stats-print.export-questions .builder-question-performance.teacher-stats-question,
+ .paper.teacher-stats-print.export-marks .builder-question-performance.teacher-stats-mark,
+ .paper.teacher-stats-print.export-both .builder-question-performance.teacher-stats-mark{
+  display:block!important;
+  color:#111!important;
+  background:#fff!important;
+  border:1px solid #888!important;
+  margin:0 0 8px!important;
+  padding:7px 9px!important;
+  font-size:10px!important;
+  break-inside:avoid;
+  page-break-inside:avoid
+ }
+ .builder-question-performance .builder-performance-values span{color:#111!important;background:#fff!important;border:1px solid #ccc!important}
+}
