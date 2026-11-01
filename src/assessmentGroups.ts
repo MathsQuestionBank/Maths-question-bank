@@ -12,15 +12,21 @@ export type AssessmentGroup = {
 export function getAssessmentGroupKey(q:Pick<BankQuestion,"id"|"sourceId">):string {
  return q.sourceId?.match(/^(20\d{2}_[123][HF]_Q\d{2})([a-z][a-z0-9]*)$/i)?.[1]||q.id;
 }
+/** A shadow group's parent is its original question, not its shadow image filename. */
+function keyForQuestion(q:BankQuestion,byId:ReadonlyMap<string,BankQuestion>):string{
+ if(q.shadowPaperId&&q.shadowOfQuestionId){
+  const original=byId.get(q.shadowOfQuestionId);
+  return q.shadowPaperId+":"+(original?getAssessmentGroupKey(original):q.shadowOfQuestionId);
+ }
+ return getAssessmentGroupKey(q);
+}
 
 /** Selecting any lettered part includes the complete original question exactly once. */
 export function buildAssessmentGroups(all:BankQuestion[], selectedIds:string[]):AssessmentGroup[]{
  const byId=new Map(all.map(q=>[q.id,q]));
  const parents=new Map<string,BankQuestion[]>();
  for(const q of all){
-  const match=q.sourceId?.match(/^(20\d{2}_[123][HF]_Q\d{2})([a-z][a-z0-9]*)$/i);
-  if(!match)continue;
-  const key=match[1];
+  const key=keyForQuestion(q,byId);
   const entries=parents.get(key)||[];
   entries.push(q);parents.set(key,entries);
  }
@@ -28,15 +34,16 @@ export function buildAssessmentGroups(all:BankQuestion[], selectedIds:string[]):
  const seen=new Set<string>();
  for(const id of selectedIds){
   const q=byId.get(id);if(!q)continue;
-  const match=q.sourceId?.match(/^(20\d{2}_[123][HF]_Q\d{2})([a-z][a-z0-9]*)$/i);
-  const key=getAssessmentGroupKey(q);
+  const key=keyForQuestion(q,byId);
   if(seen.has(key))continue;
   seen.add(key);
-  if(!match){output.push({key,question:q,parts:[q],marks:q.marks,label:q.sourceId||q.id});continue}
-  const parts=(parents.get(key)||[]).slice().sort((a,b)=>(a.sourceId||"").localeCompare(b.sourceId||"",undefined,{numeric:true}));
+  const parts=(parents.get(key)||[q]).slice().sort((a,b)=>(a.questionNumber||a.sourceId||"").localeCompare(b.questionNumber||b.sourceId||"",undefined,{numeric:true}));
   const representative=parts.find(p=>p.questionUrl)||q;
   const marks=parts.reduce((sum,p)=>sum+p.marks,0);
-  output.push({key,question:representative,parts,marks,label:`${key} (${parts.map(p=>(p.sourceId||"").slice(key.length)).join(", ")})`});
+  const label=q.shadowPaperId
+   ?`Shadow ${q.shadowSet||"set"} · ${(byId.get(q.shadowOfQuestionId||"")?.sourceId)||q.questionNumber||"Question"}`
+   :parts.length>1?`${key} (${parts.map(p=>p.questionNumber||p.sourceId||p.id).join(", ")})`:q.sourceId||q.id;
+  output.push({key,question:representative,parts,marks,label});
  }
  return output;
 }
@@ -50,7 +57,7 @@ export function removeAssessmentGroupIds(all:ReadonlyArray<BankQuestion>,selecte
  const byId=new Map(all.map(q=>[q.id,q]));
  return selectedIds.filter(id=>{
   const q=byId.get(id);
-  return q ? getAssessmentGroupKey(q)!==groupKey : true;
+  return q ? keyForQuestion(q,byId)!==groupKey : true;
  });
 }
 
@@ -70,7 +77,7 @@ export function moveAssessmentGroupIds(all:ReadonlyArray<BankQuestion>,selectedI
  for(const id of selectedIds){
   const q=byId.get(id);
   if(!q){stale.push(id);continue;}
-  selectedByGroup.get(getAssessmentGroupKey(q))?.push(id);
+  selectedByGroup.get(keyForQuestion(q,byId))?.push(id);
  }
  return [...reordered.flatMap(g=>selectedByGroup.get(g.key)||[]),...stale];
 }

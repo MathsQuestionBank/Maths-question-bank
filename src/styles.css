@@ -221,3 +221,12 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
  }
  .builder-question-performance .builder-performance-values span{color:#111!important;background:#fff!important;border:1px solid #ccc!important}
 }
+
+/* Official shadow paper discovery and paired assessment controls */
+.shadow-question-actions{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin-top:8px;padding-top:8px;border-top:1px solid #e3eaf0}
+.shadow-question-actions select{max-width:165px;border:1px solid #ccdbe2;border-radius:7px;padding:6px;background:#fff;color:#203442;font-size:12px}
+.shadow-question-actions small{flex-basis:100%}
+.shadow-builder-actions{padding:12px;margin:0 0 17px;border:1px solid #cbe2df;border-radius:9px;background:#f0faf8}
+.shadow-builder-actions label{margin-bottom:10px}
+.shadow-builder-actions .hint{margin:10px 0 0;font-size:12px}
+@media print{.shadow-question-actions,.shadow-builder-actions{display:none!important}}
