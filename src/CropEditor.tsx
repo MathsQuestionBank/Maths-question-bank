@@ -1,3 +1,4 @@
+import { metadataWithChangedCrop } from "./legacyImageMetadata";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { supabase } from "./supabase";
 
@@ -65,8 +66,7 @@ export default function CropEditor({id,sourceId,kind,src,initial,onSaved}:{id:st
    const {data:row,error:readError}=await supabase.from("questions").select("metadata").eq("id",id).single();
    if(readError)throw readError;
    const metadata=(row.metadata||{}) as Record<string,unknown>;
-   const current=(metadata.image_crops&&typeof metadata.image_crops==="object"?metadata.image_crops:{}) as Record<string,unknown>;
-   const next={...metadata,image_crops:{...current,[kind]:crop}};
+   const next=metadataWithChangedCrop(metadata,kind,crop);
    const {error:updateError}=await supabase.from("questions").update({metadata:next}).eq("id",id);
    if(updateError)throw updateError;
    onSaved(crop);setMessage("Crop saved. Original image preserved.");setOpen(false);
