@@ -187,7 +187,7 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
 
 
 /* Teacher-facing question statistics in the assessment builder (never printed). */
-.builder-question-performance{margin:12px 0 10px 30px;padding:11px 13px;background:#f4f8fa;border:1px solid #dbe7ed;border-radius:8px;color:#30485b;font-size:12px}
+.builder-question-performance{margin:0 0 14px;padding:11px 13px;background:#edf7f8;border:1px solid #cbdfe2;border-left:4px solid #167d86;border-radius:8px;color:#30485b;font-size:12px}
 .builder-question-performance>strong{display:block;margin-bottom:7px;font-size:12px}
 .builder-performance-values{display:flex;flex-wrap:wrap;gap:6px}
 .builder-performance-values span{display:inline-block;background:white;border:1px solid #dae5ea;border-radius:6px;padding:4px 7px;font-variant-numeric:tabular-nums}
