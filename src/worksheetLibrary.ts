@@ -1,7 +1,7 @@
 export type ExportMode="questions"|"marks"|"both";
 export type SavedAssessment={
  id:string;name:string;ids:string[];minutes:number;folder:string;
- nameBox?:boolean;classBox?:boolean;paperTier?:string;paperCalc?:string;cover?:boolean;answers?:boolean;exportMode?:ExportMode;
+ nameBox?:boolean;classBox?:boolean;paperTier?:string;paperCalc?:string;cover?:boolean;answers?:boolean;exportMode?:ExportMode;performanceGrade?:string;printTeacherStats?:boolean;
 };
 export type LegacyAssessment=Omit<SavedAssessment,"id"|"folder">&{id?:string;folder?:string};
 export const ASSESSMENTS_KEY="mqb-draft-assessments";
