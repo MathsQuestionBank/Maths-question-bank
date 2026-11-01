@@ -9,7 +9,8 @@ import { CroppedImage, type Crop } from "./CropEditor";
 import ZipImporter from "./ZipImporter";
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./styles.css";
-import { loadBankQuestions } from "./questionData";
+import { loadBankQuestions, type BankQuestion } from "./questionData";
+import {shadowIsReady,shadowOptionsForOriginal,convertToShadowAssessment} from "./shadowAssessments";
 import { supabase } from "./supabase";
 import { getCloudAssessments, type CloudAssessment } from "./cloudAssessments";
 import { reconcileAssessments } from "./assessmentReconciliation";
@@ -17,7 +18,7 @@ import { saveVersionedAssessment, deleteVersionedAssessment } from "./versionedA
 import { loadAccountFolders, createAccountFolder, changeAccountFolder } from "./accountFolders";
 
 type Page = "home" | "bank" | "builder" | "saved" | "qualifications" | "import" | "insights" | "review";
-type Question = { id:string; topic:string; skill:string; tier:"Foundation"|"Higher"; examBoard?:string; paperCode?:string; questionNumber?:string; grade:number; marks:number; calculator:boolean; series:string; ao:string; challenge:string; prompt:string; answer:string; tags:string[]; sourceId?:string; meanPct?:number; gradePerformance:Record<number,number|null>; imagePending?:boolean; questionUrl?:string; markSchemeUrl?:string; imageCrops:{question:Crop;mark:Crop}; cropReview:{question:string;mark:string} };
+type Question = BankQuestion;
 const groups=["Algebra","Geometry","Number","Probability","Ratio","Statistics"];
 const tiles:{page:Page;icon:string;name:string;desc:string}[]=[
 {page:"bank",icon:"⌕",name:"Enhanced Skills Mapped Question Bank",desc:"Search GCSE questions by skill, topic, grade and assessment objective."},
@@ -74,6 +75,12 @@ const draggingGroupKey=useRef<string|null>(null);
 const [dropTargetKey,setDropTargetKey]=useState<string|null>(null);
 const [previewId,setPreviewId]=useState<string|null>(null);
 const [previewKind,setPreviewKind]=useState<"question"|"mark">("question");
+const [shadowChoice,setShadowChoice]=useState<Record<string,string>>({});
+const [versionFilter,setVersionFilter]=useState("Original questions");
+const [shadowSetChoice,setShadowSetChoice]=useState("Set 1");
+const [shadowMessage,setShadowMessage]=useState("");
+const [shadowParentId,setShadowParentId]=useState<string|null>(null);
+const [shadowAssessmentSet,setShadowAssessmentSet]=useState<string|null>(null);
 const [assessmentTitle,setAssessmentTitle]=useState("Mathematics Assessment");
 const [minutes,setMinutes]=useState(45);
 const [cover,setCover]=useState(true);
@@ -93,7 +100,7 @@ const [editingCloud,setEditingCloud]=useState<{cloudId:string;revision:number}|n
 const [cloudWriteStatus,setCloudWriteStatus]=useState("");
 const saveToAccount=async(asNew=false)=>{
  if(cloudBusy)return;
- const item:SavedAssessment={id:asNew?"assessment-"+Date.now():currentAssessmentId||"assessment-"+Date.now(),folder:editingCloud?cloudItems.find(x=>x.cloudId===editingCloud.cloudId)?.item.folder||"Unfiled":saved.find(x=>x.id===currentAssessmentId)?.folder||"Unfiled",name:assessmentTitle.trim()||"Untitled assessment",ids:[...selected],minutes,nameBox:includeName,classBox:includeClass,paperTier:builderTier,paperCalc:builderCalc,cover,answers:exportMode!=="questions",exportMode,performanceGrade,printTeacherStats};
+ const item:SavedAssessment={id:asNew?"assessment-"+Date.now():currentAssessmentId||"assessment-"+Date.now(),folder:editingCloud?cloudItems.find(x=>x.cloudId===editingCloud.cloudId)?.item.folder||"Unfiled":saved.find(x=>x.id===currentAssessmentId)?.folder||"Unfiled",name:assessmentTitle.trim()||"Untitled assessment",ids:[...selected],minutes,nameBox:includeName,classBox:includeClass,paperTier:builderTier,paperCalc:builderCalc,cover,answers:exportMode!=="questions",exportMode,performanceGrade,printTeacherStats,linkedOriginalAssessmentId:shadowParentId||undefined,shadowSet:shadowAssessmentSet||undefined};
  setCloudBusy(true);setCloudWriteStatus("Saving to your account…");
  try{const result=await saveVersionedAssessment(item,asNew?undefined:editingCloud??undefined);setEditingCloud(result);setCloudWriteStatus("Saved to your account");await refreshCloud()}
  catch(e){setCloudWriteStatus(e instanceof Error?e.message:"Save failed. Your open assessment has not been discarded.")}
@@ -194,7 +201,8 @@ const meetsChallenge=(q:Question)=>{
  return !!band&&percent>=band.min&&percent<band.max;
 };
 const filtered=useMemo(()=>questions.filter(q=>
- (tier==="All"||q.tier===tier)
+ (versionFilter==="All versions"||(versionFilter==="Original questions"?!q.shadowPaperId:shadowIsReady(q)))
+ &&(tier==="All"||q.tier===tier)
  &&(topic==="All"||q.topic===topic||q.tags.includes(topic))
  &&(skill==="All"||q.skill===skill)
  &&(ao==="All"||q.ao===ao)
@@ -213,8 +221,9 @@ const filtered=useMemo(()=>questions.filter(q=>
   if(sort==="Original paper question: lowest first")return compareOriginalQuestionNumber(a,b);
   if(sort==="Original paper question: highest first")return compareOriginalQuestionNumber(a,b,true);
  return a.topic.localeCompare(b.topic);
-}),[questions,tier,topic,skill,ao,grade,challenge,series,calc,paperNumber,tags,match,query,sort]);
+}),[questions,tier,topic,skill,ao,grade,challenge,series,calc,paperNumber,versionFilter,tags,match,query,sort]);
 const chosenAll=useMemo(()=>buildAssessmentGroups(questions,selected),[questions,selected]);
+const readyShadowSets=[...new Set(questions.filter(shadowIsReady).map(q=>q.shadowSet).filter((value):value is string=>!!value))].sort();
 const chosen=chosenAll.filter(group=>((builderTier==="Any"||builderTier==="Crossover")||group.question.tier===builderTier)&&(builderCalc==="Any"||(builderCalc==="Calculator"?group.question.calculator:!group.question.calculator)));
 const excluded=chosenAll.length-chosen.length;
 const includedIds=new Set(chosenAll.flatMap(group=>group.parts.map(part=>part.id)));
@@ -229,7 +238,7 @@ const total=calculateAssessmentMarks(chosen);
 const exportReadiness=checkAssessmentExport(chosen,exportMode);
 const toggle=(id:string)=>setSelected(current=>{
  const question=questions.find(q=>q.id===id);
- const key=question?.sourceId?.match(/^(20\d{2}_[123][HF]_Q\d{2})[a-z][a-z0-9]*$/i)?.[1];
+ const key=question?.shadowPaperId?undefined:question?.sourceId?.match(/^(20\d{2}_[123][HF]_Q\d{2})[a-z][a-z0-9]*$/i)?.[1];
  if(includedIds.has(id)||current.includes(id)){
   if(!key)return current.filter(x=>x!==id);
   return current.filter(x=>{
@@ -249,10 +258,12 @@ const openSavedAssessment=(item:SavedAssessment)=>{
  setCover(item.cover??true);
  setPerformanceGrade(item.performanceGrade==="All grades"||/^[1-9]$/.test(item.performanceGrade||"")?item.performanceGrade!:"All grades");
  setPrintTeacherStats(item.printTeacherStats===true);
+ setShadowParentId(item.linkedOriginalAssessmentId||null);
+ setShadowAssessmentSet(item.shadowSet||null);
  setExportMode(item.exportMode==="questions"||item.exportMode==="marks"||item.exportMode==="both"?item.exportMode:(item.answers?"both":"questions"));
  navigate("builder");
 };
-const reset=()=>{setTier("All");setTopic("All");setSkill("All");setAo("All");setGrade("Any");setChallenge("Any");setSeries("All");setCalc("All");setPaperNumber("All");setTags([]);setQuery("");setSort("Selected grade: highest % first");void reloadQuestions()};
+const reset=()=>{setTier("All");setTopic("All");setSkill("All");setAo("All");setGrade("Any");setChallenge("Any");setSeries("All");setCalc("All");setPaperNumber("All");setVersionFilter("Original questions");setTags([]);setQuery("");setSort("Selected grade: highest % first");void reloadQuestions()};
 const options=(items:string[])=>items.map(x=><option key={x}>{x}</option>);
 return <div className="site"><header className="header"><div className="header-inner"><button className="brand brand-button" onClick={()=>navigate("home")}><span className="logo">∑</span><span>Maths <strong>Question Bank</strong></span></button><span className="header-note">Made for UK mathematics teachers</span></div></header><main className="main">
 {page==="home"?<><section className="hero"><span className="eyebrow">MATHS QUESTION BANK</span><h1>Find questions. Build better assessments.</h1><p>Choose a tool to get started.</p></section><h2 className="dashboard-title">What would you like to do?</h2><div className="dashboard-grid">{tiles.map(t=><button className="dashboard-tile" key={t.page} onClick={()=>navigate(t.page)}><span className="tile-icon">{t.icon}</span><strong>{t.name}</strong><span>{t.desc}</span><span className="tile-arrow">Explore →</span></button>)}</div><div className="notice"><strong>Early preview:</strong> The mapped exam-question metadata is now in your private Supabase database. Import your existing V6.2 ZIP using the owner-only Import Exam Papers tool to add question images and mark schemes securely.</div><section className="owner-info"><h2>Owner tools</h2><div className="dashboard-grid"><button className="dashboard-tile" onClick={()=>navigate("import")}><span className="tile-icon">⇧</span><strong>Import Exam Papers</strong><span>Upload your V6.2 ZIP securely to private storage.</span><span className="tile-arrow">Open →</span></button><button className="dashboard-tile" onClick={()=>navigate("review")}><span className="tile-icon">✓</span><strong>Review image crops</strong><span>Check imported question images and mark schemes.</span><span className="tile-arrow">Open →</span></button><button className="dashboard-tile" onClick={()=>navigate("insights")}><span className="tile-icon">▥</span><strong>Question Bank Insights</strong><span>Review mapping coverage and question bank performance — in development.</span><span className="tile-arrow">Open →</span></button></div></section></>:
