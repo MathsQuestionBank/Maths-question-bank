@@ -1,7 +1,7 @@
 export type ExportMode="questions"|"marks"|"both";
 export type SavedAssessment={
  id:string;name:string;ids:string[];minutes:number;folder:string;
- nameBox?:boolean;classBox?:boolean;paperTier?:string;paperCalc?:string;cover?:boolean;answers?:boolean;exportMode?:ExportMode;performanceGrade?:string;printTeacherStats?:boolean;linkedOriginalAssessmentId?:string;shadowSet?:string;
+ nameBox?:boolean;classBox?:boolean;paperTier?:string;paperCalc?:string;cover?:boolean;answers?:boolean;exportMode?:ExportMode;performanceGrade?:string;printTeacherStats?:boolean;renumberStudentQuestions?:boolean;replaceSourceTotals?:boolean;numberingMasks?:Record<string,{numberWidth:number;numberHeight:number;footerHeight:number}>;linkedOriginalAssessmentId?:string;shadowSet?:string;
 };
 export type LegacyAssessment=Omit<SavedAssessment,"id"|"folder">&{id?:string;folder?:string};
 export const ASSESSMENTS_KEY="mqb-draft-assessments";
@@ -52,7 +52,7 @@ export function mergeWorksheetBackup(existing:SavedAssessment[],existingFolders:
  const names=new Set(existing.map(a=>a.name.toLowerCase()));
  const merged=[...existing];
  let counter=0,skipped=0;
- const signature=(a:SavedAssessment)=>JSON.stringify({folder:a.folder,ids:a.ids,minutes:a.minutes,nameBox:a.nameBox??true,classBox:a.classBox??false,paperTier:a.paperTier??"Any",paperCalc:a.paperCalc??"Any",cover:a.cover??true,exportMode:a.exportMode??(a.answers?"both":"questions")});
+ const signature=(a:SavedAssessment)=>JSON.stringify({folder:a.folder,ids:a.ids,minutes:a.minutes,nameBox:a.nameBox??true,classBox:a.classBox??false,paperTier:a.paperTier??"Any",paperCalc:a.paperCalc??"Any",cover:a.cover??true,exportMode:a.exportMode??(a.answers?"both":"questions"),renumberStudentQuestions:a.renumberStudentQuestions??false,replaceSourceTotals:a.replaceSourceTotals??true,numberingMasks:a.numberingMasks??{}});
  for(const a of backup.assessments){
   // Same name and same content/settings means restoring would add an indistinguishable duplicate.
   if(merged.some(item=>item.name===a.name&&signature(item)===signature(a))){skipped++;continue;}
