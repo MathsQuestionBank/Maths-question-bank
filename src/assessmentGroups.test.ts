@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { buildAssessmentGroups, calculateAssessmentMarks, checkAssessmentExport, getAssessmentGroupKey, moveAssessmentGroupIds, removeAssessmentGroupIds, sortAssessmentGroupIdsByGrade } from "./assessmentGroups";
+import { buildAssessmentGroups, calculateAssessmentMarks, checkAssessmentExport, getAssessmentGroupKey, moveAssessmentGroupIds, removeAssessmentGroupIds, sortAssessmentGroupIdsByGrade, sortAssessmentGroupIds, appendAssessmentGroupIds } from "./assessmentGroups";
 import type { BankQuestion } from "./questionData";
+import { weightedGradePerformance, averageQuestionPerformance } from "./teacherQuestionStats";
 
 const make=(id:string,sourceId:string,marks:number,image=false):BankQuestion=>({
  id,sourceId,marks,questionUrl:image?"signed-question-url":undefined,markSchemeUrl:image?"signed-mark-url":undefined,
@@ -142,5 +143,67 @@ describe("automatic grade-performance question ordering",()=>{
  });
  it("rejects invalid grade values without reordering",()=>{
   expect(sortAssessmentGroupIdsByGrade(graded,["d","a","c"],0)).toEqual(["d","a","c"]);
+ });
+});
+
+describe("June 2022 Foundation real import multipart IDs",()=>{
+ const q8a={...make("q8a","EDX-F-JUNE2022-1F-Q08A",2,true),series:"June 2022",paperCode:"1F",questionNumber:"Q08a",tier:"Foundation" as const,gradePerformance:{1:70,2:60,3:null,4:null,5:null}};
+ const q8b={...make("q8b","EDX-F-JUNE2022-1F-Q08B",1,true),series:"June 2022",paperCode:"1F",questionNumber:"Q08b",tier:"Foundation" as const,gradePerformance:{1:90,2:80,3:null,4:null,5:null}};
+ const q9a={...make("q9a","EDX-F-JUNE2022-1F-Q09A",1,true),series:"June 2022",paperCode:"1F",questionNumber:"Q09a",tier:"Foundation" as const};
+ const q9b={...make("q9b","EDX-F-JUNE2022-1F-Q09B",1,true),series:"June 2022",paperCode:"1F",questionNumber:"Q09b",tier:"Foundation" as const};
+ const all=[q8a,q8b,q9a,q9b];
+ it("groups source IDs with uppercase part suffix into one question and adds all its marks once",()=>{
+  expect(getAssessmentGroupKey(q8a)).toBe("EDX-F-JUNE2022-1F-Q08");
+  const groups=buildAssessmentGroups(all,["q8a","q8b","q8b"]);
+  expect(groups).toHaveLength(1);
+  expect(groups[0].parts.map(part=>part.questionNumber)).toEqual(["Q08a","Q08b"]);
+  expect(calculateAssessmentMarks(groups)).toBe(3);
+ });
+ it("adding part b after part a or bulk adding the same paper never duplicates groups",()=>{
+  const afterFirst=appendAssessmentGroupIds(all,[],["q8a"]);
+  const afterSecond=appendAssessmentGroupIds(all,afterFirst,["q8b"]);
+  expect(afterSecond).toEqual(["q8a"]);
+  const bulk=appendAssessmentGroupIds(all,afterSecond,["q8a","q8b","q9a","q9b"]);
+  expect(bulk).toEqual(["q8a","q9a"]);
+  expect(buildAssessmentGroups(all,bulk)).toHaveLength(2);
+  expect(calculateAssessmentMarks(buildAssessmentGroups(all,bulk))).toBe(5);
+  expect(removeAssessmentGroupIds(all,bulk,"EDX-F-JUNE2022-1F-Q08")).toEqual(["q9a"]);
+ });
+ it("retains the different part percentages for the mark-weighted combined historic stats",()=>{
+  expect(weightedGradePerformance([q8a,q8b],1)).toBe(76.7);
+  expect(weightedGradePerformance([q8a,q8b],2)).toBe(66.7);
+  expect(averageQuestionPerformance([q8a,q8b],"Foundation")).toBe(71.7);
+ });
+ it("preserves paper identity across series and tiers",()=>{
+  const elsewhere={...q8a,id:"other",sourceId:"EDX-F-NOVEMBER2022-1F-Q08A",series:"November 2022"};
+  expect(buildAssessmentGroups([...all,elsewhere],["q8a","other"])).toHaveLength(2);
+ });
+});
+describe("full builder sort options",()=>{
+ const graded=[
+  {...a,gradePerformance:{...a.gradePerformance,7:65,8:40}},
+  {...b,gradePerformance:{...b.gradePerformance,7:45,8:80}},
+  {...c,topic:"Geometry",gradePerformance:{...c.gradePerformance,7:50,8:30}},
+  {...d,topic:"Number",gradePerformance:{...d.gradePerformance,7:75,8:70}}
+ ];
+ const allIds=["d","a","c"];
+ it("sorts Grade 8 lowest or highest with multipart score once",()=>{
+  expect(sortAssessmentGroupIds(graded,allIds,"grade-lowest",8)).toEqual(["c","a","d"]);
+  expect(sortAssessmentGroupIds(graded,allIds,"grade-highest",8)).toEqual(["d","a","c"]);
+ });
+ it("sorts mean of available grade-group averages easiest or hardest, not percent fully correct",()=>{
+  expect(sortAssessmentGroupIds(graded,allIds,"average-highest")).toEqual(["d","a","c"]);
+  expect(sortAssessmentGroupIds(graded,allIds,"average-lowest")).toEqual(["c","a","d"]);
+ });
+ it("sorts by marks, original question and topic while keeping multipart questions intact",()=>{
+  expect(sortAssessmentGroupIds(graded,allIds,"marks-highest")).toEqual(["c","a","d"]);
+  expect(sortAssessmentGroupIds(graded,allIds,"paper-lowest")).toEqual(["a","d","c"]);
+  expect(sortAssessmentGroupIds(graded,allIds,"paper-highest")).toEqual(["c","d","a"]);
+  expect(sortAssessmentGroupIds(graded,allIds,"topic-az")).toEqual(["a","c","d"]);
+ });
+ it("keeps unavailable grades at the end for both average directions",()=>{
+  const incomplete=graded.map(q=>q.id==="c"?{...q,gradePerformance:{}}:q);
+  expect(sortAssessmentGroupIds(incomplete,allIds,"average-highest").slice(-1)).toEqual(["c"]);
+  expect(sortAssessmentGroupIds(incomplete,allIds,"average-lowest").slice(-1)).toEqual(["c"]);
  });
 });
