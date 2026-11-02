@@ -119,5 +119,25 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening acc
  await expect(page.getByLabel("Assessment title")).toHaveValue("Test assessment");
  await expect(page.getByRole("button",{name:"Questions + mark scheme",exact:true})).toHaveAttribute("aria-pressed","true");
  await expect(page.locator(".paper-question")).toHaveCount(3);
+ // Removing one multipart question from the compact sidebar updates preview,
+ // mark scheme and total immediately, and is persisted on the next cloud save.
+ await page.setViewportSize({width:390,height:844});
+ const multipartRow=page.locator(".builder-order-sidebar .assessment-order-row").filter({hasText:"Q02"});
+ await expect(multipartRow).toHaveCount(1);
+ await multipartRow.getByRole("button",{name:/Remove question .* from assessment/}).click();
+ await expect(page.locator(".builder-order-sidebar .assessment-order-row")).toHaveCount(2);
+ await expect(page.locator(".paper-question")).toHaveCount(2);
+ await expect(page.locator(".mark-scheme-item")).toHaveCount(2);
+ await expect(page.locator(".builder-overview-stats")).toContainText("9");
+ await expect(page.locator(".cover")).toContainText("Total marks: 9");
+ await expect(page.locator(".builder-order-sidebar .assessment-order-row").filter({hasText:"Q02"})).toHaveCount(0);
+ await page.getByRole("button",{name:"Save changes to my account"}).click();
+ expect(storedQuestions).toHaveLength(2);
+ expect(storedQuestions.map(entry=>entry.question_id)).not.toContain("a");
+ expect(storedQuestions.map(entry=>entry.question_id)).not.toContain("b");
+ await page.getByRole("navigation",{name:"Main navigation"}).getByRole("button",{name:"My Worksheets"}).click();
+ await page.getByRole("button",{name:"Open / Edit",exact:true}).click();
+ await expect(page.locator(".builder-order-sidebar .assessment-order-row")).toHaveCount(2);
+ await expect(page.locator(".cover")).toContainText("Total marks: 9");
  expect(errors).toEqual([]);
 });
