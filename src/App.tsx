@@ -105,6 +105,7 @@ const [cover,setCover]=useState(true);
 const [renumberStudentQuestions,setRenumberStudentQuestions]=useState(false);
 const [replaceSourceTotals,setReplaceSourceTotals]=useState(true);
 const [numberingMasks,setNumberingMasks]=useState<Record<string,NumberingMask>>({});
+const [maskEditorGroupKey,setMaskEditorGroupKey]=useState<string|null>(null);
 const [exportMode,setExportMode]=useState<"questions"|"marks"|"both">("questions");
 const [includeName,setIncludeName]=useState(true);
 const [includeClass,setIncludeClass]=useState(false);
@@ -323,7 +324,7 @@ const openSavedAssessment=(item:SavedAssessment)=>{
  setCover(item.cover??true);
  setRenumberStudentQuestions(item.renumberStudentQuestions===true);
  setReplaceSourceTotals(item.replaceSourceTotals!==false);
- setNumberingMasks(item.numberingMasks||{});
+ setNumberingMasks(item.numberingMasks||{});setMaskEditorGroupKey(null);
  setPerformanceGrade(item.performanceGrade==="All grades"||/^[1-9]$/.test(item.performanceGrade||"")?item.performanceGrade!:"All grades");
  setPrintTeacherStats(item.printTeacherStats===true);
  setShadowParentId(item.linkedOriginalAssessmentId||null);
@@ -377,7 +378,7 @@ return <div className="site">
  <button className="primary full builder-save-button" disabled={!chosen.length||cloudBusy} onClick={()=>void saveToAccount()}>{cloudBusy?"Saving…":editingCloud?"Save changes to my account":"Save to my account"}</button>
  {(editingCloud||currentAssessmentId)&&<button className="secondary full" disabled={cloudBusy||!chosen.length} onClick={()=>void saveToAccount(true)}>Save as new assessment</button>}
  {cloudWriteStatus&&<p role="status" className="builder-save-status">{cloudWriteStatus}</p>}
- <button className="secondary full builder-new-button" onClick={()=>{setEditingCloud(null);setCurrentAssessmentId(null);setAssessmentTitle("Mathematics Assessment");setSelected([]);setMinutes(45);setIncludeName(true);setIncludeClass(false);setBuilderTier("Any");setBuilderCalc("Any");setCover(true);setRenumberStudentQuestions(false);setReplaceSourceTotals(true);setNumberingMasks({});setExportMode("questions");setPerformanceGrade("All grades");setPrintTeacherStats(false);setShadowParentId(null);setShadowAssessmentSet(null);setShadowMessage("")}}>Start new assessment</button>
+ <button className="secondary full builder-new-button" onClick={()=>{setEditingCloud(null);setCurrentAssessmentId(null);setAssessmentTitle("Mathematics Assessment");setSelected([]);setMinutes(45);setIncludeName(true);setIncludeClass(false);setBuilderTier("Any");setBuilderCalc("Any");setCover(true);setRenumberStudentQuestions(false);setReplaceSourceTotals(true);setNumberingMasks({});setMaskEditorGroupKey(null);setExportMode("questions");setPerformanceGrade("All grades");setPrintTeacherStats(false);setShadowParentId(null);setShadowAssessmentSet(null);setShadowMessage("")}}>Start new assessment</button>
 </div></section>
 <div className="layout builder-layout">
 <section className="results builder-preview-section" id="assessment-preview"><div className="section-heading builder-preview-head print-hide"><div><span className="builder-eyebrow">LIVE PAPER PREVIEW</span><h2>Assessment preview</h2><p>{chosen.length} distinct questions · {total} marks · {builderTier==="Any"?"Mixed tiers":builderTier} · {builderCalc==="Any"?"Mixed calculator":builderCalc}</p></div><button className="secondary small" onClick={()=>navigate("bank")}>+ Add questions</button></div> <div className={`paper${printTeacherStats?` teacher-stats-print export-${exportMode}`:""}`}>{exportMode!=="marks"&&cover&&<div className="cover"><div className="paper-brand">MATHS QUESTION BANK</div><h2>{assessmentTitle}</h2><p className="cover-paper-type">{builderTier==="Any"?"Mixed Tier":builderTier+" Tier"} · {builderCalc==="Any"?"Mixed Calculator / Non-calculator":builderCalc+" Paper"}</p><p>Time allowed: {minutes} minutes</p><p>Total marks: {total}</p><div className="paper-student-fields">{includeName&&<div className="name-line">Name: __________________________________</div>}{includeClass&&<div className="name-line">Class: __________________________________</div>}</div><p className="paper-instructions">Answer all questions. Show your working clearly.</p></div>}{exportMode!=="marks"&&!cover&&(includeName||includeClass)&&<div className="paper-student-fields paper-inline-fields">{includeName&&<div className="name-line">Name: __________________________________</div>}{includeClass&&<div className="name-line">Class: __________________________________</div>}</div>}{!chosen.length?<div className="empty"><h3>Your assessment is empty</h3><p>Visit the Enhanced Skills Mapped Question Bank to add questions.</p></div>:exportMode==="marks"?null:chosen.map((group,i)=><div className="paper-question" key={group.key}><TeacherGradePerformance parts={group.parts} tier={group.question.tier} selectedGrade={performanceGrade} className="teacher-stats-question"/><div className="paper-row"><strong>{i+1}.</strong><span>
@@ -399,6 +400,13 @@ return <div className="site">
   <button className="secondary full" disabled={chosenAll.length<2} onClick={sortAssessmentByGrade}>Sort questions</button>
   <p className="hint">Grade sorting uses the average % of available marks at your selected grade. Overall average sorting uses the mean of available grade-group percentages, not the proportion of all pupils getting the question right. Multipart scores are weighted by marks; missing data goes last.</p>
  </div>
+ {renumberStudentQuestions&&maskEditorGroupKey&&chosenAll.filter(item=>item.key===maskEditorGroupKey).map(group=>{const index=chosenAll.findIndex(item=>item.key===group.key);return <div className="builder-mask-editor" key={group.key}>
+  <div className="builder-mask-editor-title"><strong>Adjust covers — Question {index+1}</strong><button type="button" className="secondary small" onClick={()=>setMaskEditorGroupKey(null)} aria-label="Close cover adjustments">Close</button></div>
+  <p>Adjust the white areas covering the printed original number and total line. Only this assessment changes; the source image stays intact.</p>
+  {([{key:"numberWidth",label:"Number cover width"},{key:"numberHeight",label:"Number cover height"},{key:"footerHeight",label:"Footer cover height"}] as const).filter(field=>replaceSourceTotals||field.key!=="footerHeight").map(field=><label key={field.key}>{field.label}
+  <input aria-label={`${field.label} for question ${index+1}`} type="number" min="0" max="25" step="1" value={(numberingMasks[group.key]||defaultNumberingMask)[field.key]} onChange={e=>{const value=Math.max(0,Math.min(25,Number(e.target.value)||0));setNumberingMasks(previous=>({...previous,[group.key]:{...(previous[group.key]||defaultNumberingMask),[field.key]:value}}))}}/>%</label>)}
+  <button type="button" className="secondary small" onClick={()=>setNumberingMasks(previous=>{const next={...previous};delete next[group.key];return next})}>Reset covers for this question</button>
+ </div>})}
  <ol className="assessment-order-list builder-order-scroll">
  {chosenAll.map((group,index)=>{const pct=weightedGradePerformance(group.parts,orderSortGrade);const avg=averageQuestionPerformance(group.parts,group.question.tier);return <li key={group.key} className={`assessment-order-row${dropTargetKey===group.key?" is-drop-target":""}${chosen.some(c=>c.key===group.key)?"":" is-excluded"}`}
   draggable
@@ -410,12 +418,7 @@ return <div className="site">
   <span className="builder-order-item-text"><strong>{index+1}. {group.label}</strong><small>{group.marks} {group.marks===1?"mark":"marks"} · Grade {orderSortGrade}: {pct===null?"No data":`${pct}%`} · Avg: {avg===null?"No data":`${avg}%`}{chosen.some(c=>c.key===group.key)?"":" · Filtered out"}</small></span>
   <label className="assessment-order-jump"><span className="visually-hidden">Move question {index+1} to position</span><select aria-label={`Move question ${index+1} to position`} value={index+1} onChange={event=>moveAssessmentGroup(index,Number(event.target.value)-1)}>{chosenAll.map((_,position)=><option key={position} value={position+1}>{position+1}</option>)}</select></label>
   <button type="button" className="builder-order-remove" draggable={false} title={`Remove question ${index+1} from assessment`} aria-label={`Remove question ${index+1} from assessment: ${group.label}`} onDragStart={event=>{event.preventDefault();event.stopPropagation()}} onClick={()=>removeGroup(group.key)}><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m5 4v6m4-6v6"/></svg></button>
-  {renumberStudentQuestions&&<details className="builder-mask-adjust" draggable={false}><summary>Adjust original print covers</summary>
-   <p>Only affects this question in your assessment; the original Edexcel image is unchanged.</p>
-   {([{key:"numberWidth",label:"Number cover width"},{key:"numberHeight",label:"Number cover height"},{key:"footerHeight",label:"Footer cover height"}] as const).filter(field=>replaceSourceTotals||field.key!=="footerHeight").map(field=><label key={field.key}>{field.label}
-   <input aria-label={`${field.label} for question ${index+1}`} type="number" min="0" max="25" step="1" value={(numberingMasks[group.key]||defaultNumberingMask)[field.key]} onChange={e=>{const value=Math.max(0,Math.min(25,Number(e.target.value)||0));setNumberingMasks(previous=>({...previous,[group.key]:{...(previous[group.key]||defaultNumberingMask),[field.key]:value}}))}}/>%</label>)}
-   <button type="button" className="secondary small" onClick={()=>setNumberingMasks(previous=>{const next={...previous};delete next[group.key];return next})}>Reset covers for this question</button>
-  </details>}
+  {renumberStudentQuestions&&<button type="button" className="builder-adjust-covers" draggable={false} aria-label={`Adjust original print covers for question ${index+1}`} title="Adjust original print covers" onClick={()=>setMaskEditorGroupKey(maskEditorGroupKey===group.key?null:group.key)}>Adjust covers</button>}
  </li>})}
  </ol>
  {!chosenAll.length&&<p className="builder-order-empty">Add questions from the Question Bank to arrange your paper.</p>}
