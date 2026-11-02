@@ -51,9 +51,8 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening acc
  await expect(page.locator(".site-masthead .brand")).toHaveCSS("background-color","rgb(246, 229, 237)");
  await expect(page.getByRole("navigation",{name:"Main navigation"}).getByRole("button",{name:"Question Bank"})).toHaveAttribute("aria-current","page",{timeout:12000});
  await expect(page.getByText("4 question records match your filters")).toBeVisible({timeout:12000});
- await page.getByRole("button",{name:"+ Add"}).first().click();
- await page.getByRole("button",{name:"+ Add"}).first().click();
- await page.getByRole("button",{name:"+ Add"}).first().click();
+ await page.getByRole("button",{name:"Add all filtered results"}).click();
+ await page.getByRole("button",{name:"Add all filtered results"}).click(); // idempotent, never duplicates multipart groups
  await page.getByRole("button",{name:"Open assessment builder →"}).click();
  await expect(page.getByRole("heading",{name:"Assessment preview"})).toBeVisible();
  await expect(page.getByRole("heading",{name:"Put your assessment together"})).toBeVisible();
@@ -66,6 +65,9 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening acc
  await expect(page.locator(".paper-question")).toHaveCount(3);
  await expect(page.locator(".teacher-stats-question").first()).toContainText("Q02");
  await expect(page.locator(".teacher-stats-question").first()).toContainText("Combined:");
+ await expect(page.locator(".teacher-stats-question").first()).toContainText("Q02A: 40%");
+ await expect(page.locator(".teacher-stats-question").first()).toContainText("Q02B: 80%");
+ await expect(page.locator(".teacher-stats-question").first()).toContainText("Combined: 60%");
  await expect(page.getByText("13 marks").first()).toBeVisible();
  await order.first().getByRole("combobox").selectOption("3");
  await expect(order.last()).toContainText("Q02");
