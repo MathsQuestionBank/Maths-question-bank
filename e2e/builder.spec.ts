@@ -78,7 +78,7 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening acc
  await expect(page.locator(".assessment-renumber-total")).toHaveCount(3);
  await expect(page.locator(".assessment-renumber-total").first()).toHaveText("Total for Question 1 is 4 marks");
  await expect(page.locator(".paper-question").first()).toContainText("EDX-H-JUNE2022-1H-Q02");
- await page.locator(".builder-mask-adjust").first().locator("summary").click();
+ await page.getByRole("button",{name:"Adjust original print covers for question 1"}).click();
  await page.getByRole("spinbutton",{name:"Footer cover height for question 1"}).fill("12");
  await expect(page.locator(".mqb-original-total-mask").first()).toHaveCSS("height",/\d+px/);
  await page.getByRole("checkbox",{name:/Replace original total lines/}).uncheck();
