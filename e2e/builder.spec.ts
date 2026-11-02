@@ -132,7 +132,7 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening acc
  await expect(page.locator(".cover")).toContainText("Total marks: 9");
  await expect(page.locator(".builder-order-sidebar .assessment-order-row").filter({hasText:"Q02"})).toHaveCount(0);
  await page.getByRole("button",{name:"Save changes to my account"}).click();
- expect(storedQuestions).toHaveLength(2);
+ await expect.poll(()=>storedQuestions.length).toBe(2);
  expect(storedQuestions.map(entry=>entry.question_id)).not.toContain("a");
  expect(storedQuestions.map(entry=>entry.question_id)).not.toContain("b");
  await page.getByRole("navigation",{name:"Main navigation"}).getByRole("button",{name:"My Worksheets"}).click();
