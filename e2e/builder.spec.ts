@@ -4,7 +4,7 @@ const uid="11111111-1111-4111-8111-111111111111";
 const user={id:uid,aud:"authenticated",role:"authenticated",email:"owner@example.test",app_metadata:{provider:"email",providers:["email"]},user_metadata:{},created_at:"2026-01-01T00:00:00Z"};
 const png=Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/NVcAAAAASUVORK5CYII=","base64");
 const rows=[
- ["a","2022_1H_Q02a",2],["b","2022_1H_Q02b",2],["c","2021_2H_Q11",6],["d","2020_3H_Q07",3]
+ ["a","EDX-H-JUNE2022-1H-Q02A",2],["b","EDX-H-JUNE2022-1H-Q02B",2],["c","2021_2H_Q11",6],["d","2020_3H_Q07",3]
 ].map(([id,sourceId,marks])=>({
  id,topic:"Number",skill:"Fractions",marks,assessment_objective:"AO1",
  question_storage_path:`questions/${sourceId}.png`,mark_scheme_storage_path:`marks/${sourceId}.png`,
@@ -64,6 +64,8 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening acc
  const order=page.locator(".assessment-order-row");
  await expect(order).toHaveCount(3);
  await expect(page.locator(".paper-question")).toHaveCount(3);
+ await expect(page.locator(".teacher-stats-question").first()).toContainText("Q02");
+ await expect(page.locator(".teacher-stats-question").first()).toContainText("Combined:");
  await expect(page.getByText("13 marks").first()).toBeVisible();
  await order.first().getByRole("combobox").selectOption("3");
  await expect(order.last()).toContainText("Q02");
@@ -86,9 +88,18 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening acc
  await expect(order.nth(0)).toContainText("Q11");
  await expect(order.nth(1)).toContainText("Q02");
  await expect(order.nth(2)).toContainText("Q07");
- await page.getByRole("combobox",{name:"Sort performance direction"}).selectOption("descending");
+ await page.getByRole("combobox",{name:"Sort assessment questions by"}).selectOption("grade-highest");
  await page.getByRole("button",{name:"Sort questions",exact:true}).click();
  await expect(order.first()).toContainText("Q07");
+ await page.getByRole("combobox",{name:"Sort assessment questions by"}).selectOption("average-lowest");
+ await page.getByRole("button",{name:"Sort questions",exact:true}).click();
+ await expect(order.first()).toContainText("Q11");
+ await page.getByRole("combobox",{name:"Sort assessment questions by"}).selectOption("average-highest");
+ await page.getByRole("button",{name:"Sort questions",exact:true}).click();
+ await expect(order.first()).toContainText("Q07");
+ await page.getByRole("combobox",{name:"Sort assessment questions by"}).selectOption("marks-highest");
+ await page.getByRole("button",{name:"Sort questions",exact:true}).click();
+ await expect(order.first()).toContainText("Q11");
  await expect(page.locator(".builder-order-scroll")).toHaveCSS("overflow-y","auto");
  await page.getByLabel("Assessment title").fill("Test assessment");
  for(const [label,expectQuestions,expectMarks] of [
