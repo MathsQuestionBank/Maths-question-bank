@@ -16,6 +16,7 @@ const makeToken=()=>{
 };
 
 test("owner Assessment Builder: multipart, reordering, exports and reopening account assessment",async ({page,browserName})=>{
+ test.setTimeout(90000); // image masks, PDF rendering and save/reopen are all verified in this extended end-to-end flow
  test.skip(browserName!=="chromium","Chromium PDF tests only");
  const errors:string[]=[];page.on("pageerror",e=>errors.push(e.message));
  const token=makeToken();
@@ -68,6 +69,24 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening acc
  await expect(page.locator(".teacher-stats-question").first()).toContainText("Q02A: 40%");
  await expect(page.locator(".teacher-stats-question").first()).toContainText("Q02B: 80%");
  await expect(page.locator(".teacher-stats-question").first()).toContainText("Combined: 60%");
+ // Opt-in paper renumbering keeps original source references available to teachers.
+ await expect(page.getByRole("checkbox",{name:/Hide original question numbers/})).not.toBeChecked();
+ await expect(page.locator(".mqb-original-number-mask")).toHaveCount(0);
+ await page.getByRole("checkbox",{name:/Hide original question numbers/}).check();
+ await expect(page.locator(".mqb-original-number-mask")).toHaveCount(3);
+ await expect(page.locator(".mqb-original-total-mask")).toHaveCount(3);
+ await expect(page.locator(".assessment-renumber-total")).toHaveCount(3);
+ await expect(page.locator(".assessment-renumber-total").first()).toHaveText("Total for Question 1 is 4 marks");
+ await expect(page.locator(".paper-question").first()).toContainText("EDX-H-JUNE2022-1H-Q02");
+ await page.getByRole("button",{name:"Adjust original print covers for question 1"}).click();
+ await page.getByRole("spinbutton",{name:"Footer cover height for question 1"}).fill("12");
+ await expect(page.locator(".mqb-original-total-mask").first()).toHaveCSS("height",/\d+px/);
+ await page.getByRole("checkbox",{name:/Replace original total lines/}).uncheck();
+ await expect(page.locator(".mqb-original-total-mask")).toHaveCount(0);
+ await expect(page.locator(".assessment-renumber-total")).toHaveCount(0);
+ await page.getByRole("checkbox",{name:/Replace original total lines/}).check();
+ await expect(page.locator(".assessment-renumber-total")).toHaveCount(3);
+
  await expect(page.getByText("13 marks").first()).toBeVisible();
  await order.first().getByRole("combobox").selectOption("3");
  await expect(order.last()).toContainText("Q02");
@@ -131,6 +150,11 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening acc
  await page.getByRole("button",{name:"Open / Edit",exact:true}).click();
  await expect(page.getByLabel("Assessment title")).toHaveValue("Test assessment");
  await expect(page.getByRole("button",{name:"Questions + mark scheme",exact:true})).toHaveAttribute("aria-pressed","true");
+ await expect(page.getByRole("checkbox",{name:/Hide original question numbers/})).toBeChecked();
+ await expect(page.getByRole("checkbox",{name:/Replace original total lines/})).toBeChecked();
+ await expect(page.locator(".assessment-renumber-total")).toHaveCount(3);
+ await expect(page.locator(".mqb-original-total-mask").first()).toHaveCSS("height",/\d+px/);
+
  await expect(page.locator(".paper-question")).toHaveCount(3);
  // Removing one multipart question from the compact sidebar updates preview,
  // mark scheme and total immediately, and is persisted on the next cloud save.
