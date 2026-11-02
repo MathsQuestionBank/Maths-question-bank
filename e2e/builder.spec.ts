@@ -2,7 +2,9 @@ import { test, expect } from "@playwright/test";
 
 const uid="11111111-1111-4111-8111-111111111111";
 const user={id:uid,aud:"authenticated",role:"authenticated",email:"owner@example.test",app_metadata:{provider:"email",providers:["email"]},user_metadata:{},created_at:"2026-01-01T00:00:00Z"};
-const png=Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/NVcAAAAASUVORK5CYII=","base64");
+// Deliberately short landscape question image: this reproduces the original bug
+// where a footer masked by 7% of IMAGE HEIGHT was only about 10px high.
+const questionSvg=Buffer.from("<svg xmlns='http://www.w3.org/2000/svg' width='900' height='150'><rect width='900' height='150' fill='white'/><text x='12' y='25' font-size='20'>2</text><text x='100' y='25' font-size='19'>Write 60 as a product of its prime factors.</text><text x='620' y='140' font-size='14'>Total for Question 2 is 2 marks</text></svg>");
 const rows=[
  ["a","EDX-H-JUNE2022-1H-Q02A",2],["b","EDX-H-JUNE2022-1H-Q02B",2],["c","2021_2H_Q11",6],["d","2020_3H_Q07",3]
 ].map(([id,sourceId,marks])=>({
@@ -46,7 +48,7 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening acc
   }
   return route.fulfill({status:404,contentType:"application/json",body:"{}"});
  });
- await page.route("**/fixture-image.png**",route=>route.fulfill({status:200,contentType:"image/png",body:png}));
+ await page.route("**/fixture-image.png**",route=>route.fulfill({status:200,contentType:"image/svg+xml",body:questionSvg}));
  await page.goto("/");
  await expect(page.locator(".owner-banner")).toHaveCount(0);
  await expect(page.locator(".site-masthead .brand")).toHaveCSS("background-color","rgb(246, 229, 237)");
@@ -75,11 +77,39 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening acc
  await page.getByRole("checkbox",{name:/Hide original question numbers/}).check();
  await expect(page.locator(".mqb-original-number-mask")).toHaveCount(3);
  await expect(page.locator(".mqb-original-total-mask")).toHaveCount(3);
+ // Verify the white covers actually span the original image lettering on a
+ // short wide question; simply checking the masks exist did not catch the bug.
+ const coverGeometry=await page.locator(".paper-question").first().evaluate(node=>{
+  const wrapper=node.querySelector(".mqb-original-number-mask")!.parentElement!.getBoundingClientRect();
+  const number=node.querySelector(".mqb-original-number-mask")!.getBoundingClientRect();
+  const footer=node.querySelector(".mqb-original-total-mask")!.getBoundingClientRect();
+  const contains=(r:DOMRect,x:number,y:number)=>x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom;
+  const at=(x:number,y:number)=>({x:wrapper.left+wrapper.width*x/900,y:wrapper.top+wrapper.width*y/900});
+  const oldNumber=at(13,20),questionText=at(100,20),oldFooter=at(710,135);
+  return {
+   numberCovered:contains(number,oldNumber.x,oldNumber.y),
+   questionTextNotCovered:!contains(number,questionText.x,questionText.y),
+   footerCovered:contains(footer,oldFooter.x,oldFooter.y),
+   numberHeightRatio:number.height/wrapper.width,
+   footerHeightRatio:footer.height/wrapper.width,
+   footerAnchoredRight:Math.abs(footer.right-wrapper.right)<2
+  };
+ });
+ expect(coverGeometry.numberCovered).toBe(true);
+ expect(coverGeometry.questionTextNotCovered).toBe(true);
+ expect(coverGeometry.footerCovered).toBe(true);
+ expect(coverGeometry.numberHeightRatio).toBeGreaterThan(.055);
+ expect(coverGeometry.footerHeightRatio).toBeGreaterThan(.045);
+ expect(coverGeometry.footerAnchoredRight).toBe(true);
  await expect(page.locator(".assessment-renumber-total")).toHaveCount(3);
  await expect(page.locator(".assessment-renumber-total").first()).toHaveText("Total for Question 1 is 4 marks");
  await expect(page.locator(".paper-question").first()).toContainText("EDX-H-JUNE2022-1H-Q02");
  await page.getByRole("button",{name:"Adjust original print covers for question 1"}).click();
- await page.getByRole("spinbutton",{name:"Footer cover height for question 1"}).fill("12");
+ await page.getByRole("spinbutton",{name:"Footer cover depth for question 1"}).fill("12");
+ await page.getByRole("spinbutton",{name:"Footer cover up for question 1"}).fill("1");
+ await page.getByRole("spinbutton",{name:"Number cover down for question 1"}).fill("1");
+ await expect(page.locator(".mqb-original-total-mask").first()).toHaveCSS("bottom",/\d+px/);
+ await expect(page.locator(".mqb-original-number-mask").first()).toHaveClass(/is-adjusting/);
  await expect(page.locator(".mqb-original-total-mask").first()).toHaveCSS("height",/\d+px/);
  await page.getByRole("checkbox",{name:/Replace original total lines/}).uncheck();
  await expect(page.locator(".mqb-original-total-mask")).toHaveCount(0);

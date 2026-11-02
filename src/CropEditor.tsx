@@ -12,23 +12,28 @@ export function validCrop(value:unknown):Crop {
  if(Object.values(c).some(n=>!Number.isFinite(n)||n<0||n>95)||c.top+c.bottom>=95||c.left+c.right>=95)return {...empty};
  return c;
 }
-export type NumberingMask = {numberWidth:number;numberHeight:number;footerHeight:number};
-export const defaultNumberingMask:NumberingMask={numberWidth:6,numberHeight:6,footerHeight:7};
+/** Cover dimensions are percentages of the displayed CROPPED IMAGE WIDTH.
+ * Using its height is unreliable: a short one-mark question can make a 7%
+ * footer mask only a few pixels tall, leaving Edexcel's original footer visible.
+ * Optional offsets support atypical source crops without changing the originals.
+ */
+export type NumberingMask = {numberWidth:number;numberHeight:number;footerHeight:number;numberTop?:number;footerBottom?:number;footerWidth?:number};
+export const defaultNumberingMask:NumberingMask={numberWidth:5,numberHeight:6,footerHeight:5,numberTop:0,footerBottom:0,footerWidth:70};
 const maskPercent=(value:number,defaultValue:number)=>Number.isFinite(value)?Math.max(0,Math.min(25,value)):defaultValue;
-export function CroppedImage({src,crop,alt,coverOriginalNumber=false,coverOriginalFooter=false,numberingMask=defaultNumberingMask}:{src:string;crop:Crop;alt:string;coverOriginalNumber?:boolean;coverOriginalFooter?:boolean;numberingMask?:NumberingMask}){
+export function CroppedImage({src,crop,alt,coverOriginalNumber=false,coverOriginalFooter=false,numberingMask=defaultNumberingMask,showCoverGuides=false}:{src:string;crop:Crop;alt:string;coverOriginalNumber?:boolean;coverOriginalFooter?:boolean;numberingMask?:NumberingMask;showCoverGuides?:boolean}){
  const [dimensions,setDimensions]=useState<{w:number;h:number}|null>(null);
  const [error,setError]=useState(false);
  const [attempt,setAttempt]=useState(0);
  const horizontal=100-crop.left-crop.right,vertical=100-crop.top-crop.bottom;
- const style:CSSProperties=dimensions?{position:"relative",width:"100%",aspectRatio:String((dimensions.w*horizontal)/(dimensions.h*vertical)),overflow:"hidden"}:{width:"100%",position:"relative"};
+ const style:CSSProperties=dimensions?{position:"relative",width:"100%",aspectRatio:String((dimensions.w*horizontal)/(dimensions.h*vertical)),overflow:"hidden",containerType:"inline-size"}:{width:"100%",position:"relative",containerType:"inline-size"};
  // A new question must not inherit the previous image's dimensions or load state.
  useEffect(()=>{setDimensions(null);setError(false);setAttempt(0)},[src]);
  if(error)return <div role="alert" style={{padding:20,border:"1px solid #cc8c8c"}}><p>Image failed to load. The original file may still exist in private storage.</p><button className="secondary small" onClick={()=>{setError(false);setDimensions(null);setAttempt(x=>x+1)}}>Retry image</button></div>;
  return <div style={style}>
  {!dimensions&&<p role="status" style={{padding:16}}>Loading image…</p>}
  <img key={src+"-"+attempt} src={src} alt={alt} onLoad={e=>{const {naturalWidth:w,naturalHeight:h}=e.currentTarget;if(w>0&&h>0)setDimensions({w,h});else setError(true)}} onError={()=>setError(true)} style={dimensions?{position:"absolute",maxWidth:"none",width:`${10000/horizontal}%`,height:"auto",left:`-${crop.left/horizontal*100}%`,top:`-${crop.top/vertical*100}%`}:{width:"100%",height:"auto",display:"none"}}/>
- {coverOriginalNumber&&<div className="mqb-original-number-mask" aria-hidden="true" style={{width:`${maskPercent(numberingMask.numberWidth,6)}%`,height:`${maskPercent(numberingMask.numberHeight,6)}%`}}/>}
- {coverOriginalFooter&&<div className="mqb-original-total-mask" aria-hidden="true" style={{height:`${maskPercent(numberingMask.footerHeight,7)}%`}}/>}
+ {coverOriginalNumber&&<div className={`mqb-original-number-mask${showCoverGuides?" is-adjusting":""}`} aria-hidden="true" style={{width:`${maskPercent(numberingMask.numberWidth,5)}%`,height:`${maskPercent(numberingMask.numberHeight,6)}cqw`,top:`${maskPercent(numberingMask.numberTop??0,0)}cqw`}}/>}
+ {coverOriginalFooter&&<div className={`mqb-original-total-mask${showCoverGuides?" is-adjusting":""}`} aria-hidden="true" style={{height:`${maskPercent(numberingMask.footerHeight,5)}cqw`,bottom:`${maskPercent(numberingMask.footerBottom??0,0)}cqw`,width:`${Math.max(25,Math.min(100,Number.isFinite(numberingMask.footerWidth??70)?(numberingMask.footerWidth??70):70))}%`}}/>}
  </div>;
 }
 function VisualSelection({src,crop,onChange}:{src:string;crop:Crop;onChange:(c:Crop)=>void}){
