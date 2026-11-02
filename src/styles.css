@@ -590,3 +590,27 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
 /* Keep expanded grade/average sorting choices readable in the narrow sidebar. */
 .site .builder-order-sort-fields{grid-template-columns:minmax(0,1fr)}
 .site .builder-order-sort-fields select{font-size:12px;min-height:37px;padding:8px 8px}
+
+/* Optional student-paper renumbering — non-destructive overlays on archived source images. */
+.site .builder-numbering-options{border-top:1px solid #e4e9ed;margin-top:17px;padding-top:16px}
+.site .builder-numbering-options h4{font-size:13px;color:#2e4352;margin:0 0 10px}
+.site .builder-numbering-options .check{font-size:12px;line-height:1.55;align-items:flex-start}
+.site .builder-numbering-options .check input:disabled{opacity:.4}
+.site .builder-numbering-options .hint{font-size:11px;line-height:1.55;margin-top:10px}
+.mqb-original-number-mask,.mqb-original-total-mask{position:absolute;z-index:2;background:#fff;pointer-events:none}
+.mqb-original-number-mask{top:0;left:0}
+.mqb-original-total-mask{bottom:0;left:0;right:0;width:100%}
+.assessment-renumber-total{margin:12px 0 6px;text-align:right;font-family:Georgia,"Times New Roman",serif;font-weight:700;font-size:13px;line-height:1.5;color:#28313a}
+.site .builder-order-scroll .assessment-order-row:has(.builder-mask-adjust){flex-wrap:wrap}
+.site .builder-mask-adjust{flex:1 0 100%;font-size:11px;color:#466173;border-top:1px solid #edf0f2;padding-top:5px}
+.site .builder-mask-adjust summary{cursor:pointer;font-size:10px;line-height:1.5;color:#4b6170;font-weight:650;list-style-position:inside}
+.site .builder-mask-adjust[open]{padding:8px;margin-top:4px;background:#fafbfd}
+.site .builder-mask-adjust p{font-size:10px;line-height:1.5;margin:4px 0 8px}
+.site .builder-mask-adjust label{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:5px 0;color:#3e5363}
+.site .builder-mask-adjust input{min-width:0;width:58px;padding:5px 7px;font-size:11px;border-radius:4px;border:1px solid #c9d5dd}
+.site .builder-mask-adjust button{width:100%;margin-top:8px}
+@media print{
+ .site .builder-mask-adjust{display:none!important}
+ .mqb-original-number-mask,.mqb-original-total-mask{background:#fff!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+ .assessment-renumber-total{break-inside:avoid;page-break-inside:avoid}
+}
