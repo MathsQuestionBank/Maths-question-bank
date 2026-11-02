@@ -72,10 +72,15 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening acc
   const config=document.querySelector(".builder-config")!.getBoundingClientRect();
   const preview=document.querySelector(".builder-preview-section")!.getBoundingClientRect();
   const sidebar=document.querySelector(".builder-order-sidebar")!.getBoundingClientRect();
-  return {configBottom:config.bottom,previewTop:preview.top,previewRight:preview.right,sidebarLeft:sidebar.left};
+  return {configBottom:config.bottom,previewTop:preview.top,previewRight:preview.right,sidebarLeft:sidebar.left,sidebarTop:sidebar.top,sidebarBottom:sidebar.bottom};
  });
  expect(panelCoordinates.configBottom).toBeLessThanOrEqual(panelCoordinates.previewTop);
- expect(panelCoordinates.previewRight).toBeLessThanOrEqual(panelCoordinates.sidebarLeft);
+ if((page.viewportSize()?.width||0)>780){
+  expect(panelCoordinates.previewRight).toBeLessThanOrEqual(panelCoordinates.sidebarLeft);
+ }else{
+  expect(panelCoordinates.configBottom).toBeLessThanOrEqual(panelCoordinates.sidebarTop);
+  expect(panelCoordinates.sidebarBottom).toBeLessThanOrEqual(panelCoordinates.previewTop);
+ }
  await page.getByRole("combobox",{name:"Sort questions by grade"}).selectOption("8");
  await page.getByRole("button",{name:"Sort questions",exact:true}).click();
  await expect(order.nth(0)).toContainText("Q11");
