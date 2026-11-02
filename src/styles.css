@@ -235,9 +235,11 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
 /* Pink masthead and full-width workspace — branding stays above the work area. */
 .site{min-height:100vh;background:#f7f8fa;color:#283542}
 .site .site-masthead{position:relative;isolation:isolate;min-height:115px;background:#f6e5ed;border-bottom:1px solid #dec5d1;overflow:hidden}
-.site .masthead-lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.38;z-index:-1}
-.site .site-masthead .header-inner{max-width:none;min-height:115px;margin:0;padding:18px clamp(18px,2.5vw,45px);gap:24px}
-.site .site-masthead .brand{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:8px;text-align:left;min-width:0;line-height:1}
+.site .masthead-lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.26;z-index:0}
+/* A pale-pink fade protects the wordmark while keeping geometry visible to the right. */
+.site .site-masthead::after{content:"";position:absolute;inset:0 auto 0 0;width:min(680px,85%);background:linear-gradient(to right,#f6e5ed 0%,#f6e5ed 73%,rgba(246,229,237,0) 100%);pointer-events:none;z-index:1}
+.site .site-masthead .header-inner{position:relative;z-index:2;max-width:none;min-height:115px;margin:0;padding:18px clamp(18px,2.5vw,45px);gap:24px}
+.site .site-masthead .brand{position:relative;z-index:3;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:8px;text-align:left;min-width:0;line-height:1;background:#f6e5ed;padding:9px 16px 9px 0}
 .site .site-masthead .brand>span{font-family:Georgia,"Times New Roman",serif;font-size:clamp(29px,3.6vw,47px);letter-spacing:-1.5px;font-weight:500;color:#3a2d36;white-space:nowrap}
 .site .site-masthead .brand em{font-style:italic;font-weight:400;color:#804662}
 .site .site-masthead .brand small{font-family:Inter,system-ui,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:#68505c}
@@ -275,8 +277,6 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
 .site .builder-question-performance{background:#f3f6f8;border-color:#d3dfe6;border-left-color:#496679}
 .site .shadow-builder-actions{background:#f6f8fa;border-color:#dce5ea}
 .site .account-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:20px}
-.owner-banner{background:#f7f8fa!important;color:#64717c!important;border-bottom:1px solid #e2e6e9;padding:6px clamp(16px,2vw,42px)!important;font-size:11px!important}
-.owner-banner button{background:transparent;color:#344b5d;border:1px solid #d0dbe2;border-radius:4px;padding:5px 10px}
 @media(max-width:900px){
  .site .v62-bank-layout{grid-template-columns:1fr}
  .site .v62-basket{position:static;max-height:none}
