@@ -132,7 +132,8 @@ describe("automatic grade-performance question ordering",()=>{
   const incomplete=graded.map(q=>q.id==="b"?{...q,gradePerformance:{...q.gradePerformance,8:null}}:q);
   for(const direction of ["ascending","descending"] as const){
    const result=sortAssessmentGroupIdsByGrade(incomplete,["a","c","d"],8,direction);
-   expect(buildAssessmentGroups(incomplete,result).at(-1)?.key).toBe("2022_1H_Q02");
+   const sortedGroups=buildAssessmentGroups(incomplete,result);
+   expect(sortedGroups[sortedGroups.length-1]?.key).toBe("2022_1H_Q02");
   }
  });
  it("preserves tied scores and stale references",()=>{
