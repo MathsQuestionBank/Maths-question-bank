@@ -4,7 +4,7 @@ import { supabase } from "./supabase";
 export type BankQuestion = { id:string; topic:string; skill:string; tier:"Foundation"|"Higher"; examBoard?:string; paperCode?:string; questionNumber?:string; shadowPaperId?:string;shadowOfQuestionId?:string;shadowSet?:string;shadowStatus?:string;questionPath?:string;markSchemePath?:string; grade:number; marks:number; calculator:boolean; series:string; ao:string; challenge:string; prompt:string; answer:string; tags:string[]; sourceId?:string; meanPct?:number; gradePerformance:Record<number,number|null>; originalContent?:boolean; imagePending?:boolean; questionUrl?:string; markSchemeUrl?:string; imageCrops:{question:Crop;mark:Crop}; cropReview:{question:string;mark:string} };
 type Row = { id:string; question_number?:string|null; shadow_paper_id?:string|null; shadow_of_question_id?:string|null; shadow_papers?:{shadow_set:string;status:string}|null; topic:string|null; skill:string|null; assessment_objective:string|null; marks:number|null; metadata:Record<string,unknown>; question_storage_path?:string|null; mark_scheme_storage_path?:string|null; exam_papers?:{exam_board:string;series:string;paper_code:string;tier:string|null}|null };
 const str=(v:unknown, fallback="")=>typeof v==="string"?v:fallback;
-export async function loadBankQuestions(onImageUrls?: (questions:BankQuestion[])=>void):Promise<BankQuestion[]> {
+export async function loadBankQuestions(onImageUrls?: (questions:BankQuestion[])=>void,imageUrlLifetimeSeconds=3600):Promise<BankQuestion[]> {
  const {data:{session},error:sessionError}=await supabase.auth.getSession();
  if(sessionError)throw new Error("Authentication unavailable: "+sessionError.message);
  if(!session)throw new Error("Your session is not ready. Please sign in again.");
@@ -25,7 +25,7 @@ export async function loadBankQuestions(onImageUrls?: (questions:BankQuestion[])
   void (async()=>{
    const signed=new Map<string,string>();
    for(let i=0;i<paths.length;i+=100){
-    const {data:urls,error:signError}=await supabase.storage.from("exam-materials-private").createSignedUrls(paths.slice(i,i+100),3600);
+    const {data:urls,error:signError}=await supabase.storage.from("exam-materials-private").createSignedUrls(paths.slice(i,i+100),imageUrlLifetimeSeconds);
     if(signError){console.warn("Some private image links could not be refreshed",signError.message);continue;}
     for(const u of urls||[])if(u.signedUrl&&u.path)signed.set(u.path,u.signedUrl);
    }
