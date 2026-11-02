@@ -56,6 +56,11 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening acc
  await page.getByRole("button",{name:"+ Add"}).first().click();
  await page.getByRole("button",{name:"Open assessment builder →"}).click();
  await expect(page.getByRole("heading",{name:"Assessment preview"})).toBeVisible();
+ await expect(page.getByRole("heading",{name:"Put your assessment together"})).toBeVisible();
+ await expect(page.getByRole("heading",{name:"Configure your paper"})).toBeVisible();
+ await expect(page.getByRole("heading",{name:"Save your work"})).toBeVisible();
+ await expect(page.getByRole("button",{name:"Save to my account",exact:true})).toHaveCount(1);
+ await expect(page.locator(".builder-overview-stats")).toContainText("13");
  const order=page.locator(".assessment-order-row");
  await expect(order).toHaveCount(3);
  await expect(page.locator(".paper-question")).toHaveCount(3);
@@ -76,7 +81,13 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening acc
   expect(pdf.length).toBeGreaterThan(900);
   if(label==="Mark scheme only")await expect(page.locator(".cover")).toHaveCount(0);
  }
- await page.getByRole("button",{name:"Save assessment to my account"}).click();
+ await page.setViewportSize({width:390,height:844});
+ await expect(page.getByRole("link",{name:/View preview/})).toBeVisible();
+ await expect(page.getByRole("heading",{name:"Configure your paper"})).toBeVisible();
+ const mobileSizing=await page.evaluate(()=>({page:document.documentElement.scrollWidth,screen:window.innerWidth}));
+ expect(mobileSizing.page).toBeLessThanOrEqual(mobileSizing.screen);
+ await page.setViewportSize({width:1280,height:900});
+ await page.getByRole("button",{name:"Save to my account",exact:true}).click();
  await page.getByRole("button",{name:"← Question Bank"}).click();
  await page.getByRole("navigation",{name:"Main navigation"}).getByRole("button",{name:"My Worksheets"}).click();
  await page.getByRole("button",{name:"Open / Edit",exact:true}).click();
