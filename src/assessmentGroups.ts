@@ -1,4 +1,5 @@
 import type { BankQuestion } from "./questionData";
+import { weightedGradePerformance } from "./teacherQuestionStats";
 
 export type AssessmentGroup = {
  key:string;
@@ -80,6 +81,39 @@ export function moveAssessmentGroupIds(all:ReadonlyArray<BankQuestion>,selectedI
   selectedByGroup.get(keyForQuestion(q,byId))?.push(id);
  }
  return [...reordered.flatMap(g=>selectedByGroup.get(g.key)||[]),...stale];
+}
+
+/** Sort the complete selected exam questions by mark-weighted grade performance.
+ *  Lower percentages are harder for pupils who achieved that grade. Multipart
+ *  questions move together and only receive a score when ALL parts have data.
+ *  Missing data always goes at the end; tied scores preserve teacher ordering.
+ *  Unavailable/stale IDs are kept rather than silently removed from saved work.
+ */
+export function sortAssessmentGroupIdsByGrade(
+ all:ReadonlyArray<BankQuestion>,selectedIds:ReadonlyArray<string>,grade:number,
+ direction:"ascending"|"descending"="ascending"
+):string[]{
+ if(!Number.isInteger(grade)||grade<1||grade>9)return [...selectedIds];
+ const groups=buildAssessmentGroups([...all],[...selectedIds]);
+ if(groups.length<2)return [...selectedIds];
+ const byId=new Map(all.map(q=>[q.id,q]));
+ const selectedByGroup=new Map(groups.map(g=>[g.key,[] as string[]]));
+ const stale:string[]=[];
+ for(const id of selectedIds){
+  const q=byId.get(id);
+  if(!q){stale.push(id);continue;}
+  selectedByGroup.get(keyForQuestion(q,byId))?.push(id);
+ }
+ const order=groups.map((group,index)=>({
+  group,index,percent:weightedGradePerformance(group.parts,grade)
+ }));
+ order.sort((a,b)=>{
+  if(a.percent===null)return b.percent===null?a.index-b.index:1;
+  if(b.percent===null)return -1;
+  const delta=direction==="ascending"?a.percent-b.percent:b.percent-a.percent;
+  return delta||a.index-b.index;
+ });
+ return [...order.flatMap(({group})=>selectedByGroup.get(group.key)||[]),...stale];
 }
 
 export type AssessmentExportMode = "questions"|"marks"|"both";

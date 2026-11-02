@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildAssessmentGroups, calculateAssessmentMarks, checkAssessmentExport, getAssessmentGroupKey, moveAssessmentGroupIds, removeAssessmentGroupIds } from "./assessmentGroups";
+import { buildAssessmentGroups, calculateAssessmentMarks, checkAssessmentExport, getAssessmentGroupKey, moveAssessmentGroupIds, removeAssessmentGroupIds, sortAssessmentGroupIdsByGrade } from "./assessmentGroups";
 import type { BankQuestion } from "./questionData";
 
 const make=(id:string,sourceId:string,marks:number,image=false):BankQuestion=>({
@@ -108,5 +108,39 @@ describe("teacher original practice export",()=>{
  it("does not bypass exam-image checks for unsupported questions",()=>{
   const question={...make("exam-1","2020_1H_Q01",2),originalContent:false};
   expect(checkAssessmentExport(buildAssessmentGroups([question],["exam-1"]),"both").ready).toBe(false);
+ });
+});
+
+describe("automatic grade-performance question ordering",()=>{
+ const graded=[
+  {...a,gradePerformance:{...a.gradePerformance,8:40,7:65}},
+  {...b,gradePerformance:{...b.gradePerformance,8:80,7:45}},
+  {...c,gradePerformance:{...c.gradePerformance,8:30,7:50}},
+  {...d,gradePerformance:{...d.gradePerformance,8:70,7:75}}
+ ];
+ it("sorts grade 8 lowest to highest without splitting parts of Q02",()=>{
+  const result=sortAssessmentGroupIdsByGrade(graded,["d","b","a","c"],8,"ascending");
+  expect(result).toEqual(["c","b","a","d"]);
+  expect(buildAssessmentGroups(graded,result).map(g=>g.key)).toEqual(["c","2022_1H_Q02","d"]);
+  expect(calculateAssessmentMarks(buildAssessmentGroups(graded,result))).toBe(13);
+ });
+ it("sorts highest to lowest with multipart percent weighted by marks",()=>{
+  const result=sortAssessmentGroupIdsByGrade(graded,["a","c","d"],8,"descending");
+  expect(result).toEqual(["d","a","c"]);
+ });
+ it("keeps missing grade data LAST even when sorting descending",()=>{
+  const incomplete=graded.map(q=>q.id==="b"?{...q,gradePerformance:{...q.gradePerformance,8:null}}:q);
+  for(const direction of ["ascending","descending"] as const){
+   const result=sortAssessmentGroupIdsByGrade(incomplete,["a","c","d"],8,direction);
+   const sortedGroups=buildAssessmentGroups(incomplete,result);
+   expect(sortedGroups[sortedGroups.length-1]?.key).toBe("2022_1H_Q02");
+  }
+ });
+ it("preserves tied scores and stale references",()=>{
+  const equal=graded.map(q=>({...q,gradePerformance:{...q.gradePerformance,8:50}}));
+  expect(sortAssessmentGroupIdsByGrade(equal,["d","unknown","b","c"],8,"ascending")).toEqual(["d","b","c","unknown"]);
+ });
+ it("rejects invalid grade values without reordering",()=>{
+  expect(sortAssessmentGroupIdsByGrade(graded,["d","a","c"],0)).toEqual(["d","a","c"]);
  });
 });
