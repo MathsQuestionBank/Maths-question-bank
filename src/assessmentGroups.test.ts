@@ -96,3 +96,17 @@ describe("assessment PDF export readiness",()=>{
   for(const mode of ["questions","marks","both"] as const)expect(checkAssessmentExport([],mode).ready).toBe(false);
  });
 });
+
+describe("teacher original practice export",()=>{
+ it("allows text-only original questions and answer sheets in all export modes",()=>{
+  const question={...make("original-1","ORIGINAL-PRACTICE-01",2),originalContent:true};
+  const groups=buildAssessmentGroups([question],["original-1"]);
+  expect(checkAssessmentExport(groups,"questions").ready).toBe(true);
+  expect(checkAssessmentExport(groups,"marks").ready).toBe(true);
+  expect(checkAssessmentExport(groups,"both").ready).toBe(true);
+ });
+ it("does not bypass exam-image checks for unsupported questions",()=>{
+  const question={...make("exam-1","2020_1H_Q01",2),originalContent:false};
+  expect(checkAssessmentExport(buildAssessmentGroups([question],["exam-1"]),"both").ready).toBe(false);
+ });
+});
