@@ -599,7 +599,7 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
 .site .builder-numbering-options .hint{font-size:11px;line-height:1.55;margin-top:10px}
 .mqb-original-number-mask,.mqb-original-total-mask{position:absolute;z-index:2;background:#fff;pointer-events:none}
 .mqb-original-number-mask{top:0;left:0}
-.mqb-original-total-mask{bottom:0;left:0;right:0;width:100%}
+.mqb-original-total-mask{bottom:0;left:auto;right:0;width:70%}
 .assessment-renumber-total{margin:12px 0 6px;text-align:right;font-family:Georgia,"Times New Roman",serif;font-weight:700;font-size:13px;line-height:1.5;color:#28313a}
 .site .builder-order-scroll .assessment-order-row:has(.builder-mask-adjust){flex-wrap:wrap}
 .site .builder-mask-adjust{flex:1 0 100%;font-size:11px;color:#466173;border-top:1px solid #edf0f2;padding-top:5px}
@@ -633,3 +633,18 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
 .site .builder-mask-editor input{min-width:0;width:61px;border:1px solid #cad6de;border-radius:4px;padding:6px 5px;font-size:12px}
 .site .builder-mask-editor>button{margin-top:10px;width:100%}
 @media print{.site .builder-mask-editor{display:none!important}}
+
+/* Mask rectangles now have width-relative HEIGHTS, not image-height percentages:
+   for short questions a percent-of-height strip misses the printed Edexcel total. */
+.mqb-original-number-mask,.mqb-original-total-mask{box-sizing:border-box}
+.mqb-original-number-mask.is-adjusting,.mqb-original-total-mask.is-adjusting{
+  background:#fff4f4;
+  outline:2px dashed #b95465;
+  outline-offset:-2px;
+}
+@media print{
+ .mqb-original-number-mask.is-adjusting,.mqb-original-total-mask.is-adjusting{
+  background:#fff!important;
+  outline:0!important;
+ }
+}
