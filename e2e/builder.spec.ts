@@ -16,6 +16,7 @@ const makeToken=()=>{
 };
 
 test("owner Assessment Builder: multipart, reordering, exports and reopening account assessment",async ({page,browserName})=>{
+ test.setTimeout(90000); // image masks, PDF rendering and save/reopen are all verified in this extended end-to-end flow
  test.skip(browserName!=="chromium","Chromium PDF tests only");
  const errors:string[]=[];page.on("pageerror",e=>errors.push(e.message));
  const token=makeToken();
