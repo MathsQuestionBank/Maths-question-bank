@@ -47,6 +47,8 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening acc
  });
  await page.route("**/fixture-image.png**",route=>route.fulfill({status:200,contentType:"image/png",body:png}));
  await page.goto("/");
+ await expect(page.locator(".owner-banner")).toHaveCount(0);
+ await expect(page.locator(".site-masthead .brand")).toHaveCSS("background-color","rgb(246, 229, 237)");
  await expect(page.getByRole("navigation",{name:"Main navigation"}).getByRole("button",{name:"Question Bank"})).toHaveAttribute("aria-current","page",{timeout:12000});
  await expect(page.getByText("4 question records match your filters")).toBeVisible({timeout:12000});
  await page.getByRole("button",{name:"+ Add"}).first().click();
