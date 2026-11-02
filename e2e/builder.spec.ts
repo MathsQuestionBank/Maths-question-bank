@@ -8,7 +8,7 @@ const rows=[
 ].map(([id,sourceId,marks])=>({
  id,topic:"Number",skill:"Fractions",marks,assessment_objective:"AO1",
  question_storage_path:`questions/${sourceId}.png`,mark_scheme_storage_path:`marks/${sourceId}.png`,
- metadata:{id:sourceId,tier:"Higher",calculator:false,series:"November 2022",grade:6,prompt:"Example question",answer:"Example answer",tags:["Number"],g6:55}
+ metadata:{id:sourceId,tier:"Higher",calculator:false,series:"November 2022",grade:6,prompt:"Example question",answer:"Example answer",tags:["Number"],g6:55,g8:id==="a"?40:id==="b"?80:id==="c"?30:70}
 }));
 const makeToken=()=>{
  const b64=(o:object)=>Buffer.from(JSON.stringify(o)).toString("base64url");
@@ -67,6 +67,24 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening acc
  await expect(page.getByText("13 marks").first()).toBeVisible();
  await order.first().getByRole("combobox").selectOption("3");
  await expect(order.last()).toContainText("Q02");
+ await expect(page.locator(".builder-config")).toBeVisible();
+ const panelCoordinates=await page.evaluate(()=>{
+  const config=document.querySelector(".builder-config")!.getBoundingClientRect();
+  const preview=document.querySelector(".builder-preview-section")!.getBoundingClientRect();
+  const sidebar=document.querySelector(".builder-order-sidebar")!.getBoundingClientRect();
+  return {configBottom:config.bottom,previewTop:preview.top,previewRight:preview.right,sidebarLeft:sidebar.left};
+ });
+ expect(panelCoordinates.configBottom).toBeLessThanOrEqual(panelCoordinates.previewTop);
+ expect(panelCoordinates.previewRight).toBeLessThanOrEqual(panelCoordinates.sidebarLeft);
+ await page.getByRole("combobox",{name:"Sort questions by grade"}).selectOption("8");
+ await page.getByRole("button",{name:"Sort questions",exact:true}).click();
+ await expect(order.nth(0)).toContainText("Q11");
+ await expect(order.nth(1)).toContainText("Q02");
+ await expect(order.nth(2)).toContainText("Q07");
+ await page.getByRole("combobox",{name:"Sort performance direction"}).selectOption("descending");
+ await page.getByRole("button",{name:"Sort questions",exact:true}).click();
+ await expect(order.first()).toContainText("Q07");
+ await expect(page.locator(".builder-order-scroll")).toHaveCSS("overflow-y","auto");
  await page.getByLabel("Assessment title").fill("Test assessment");
  for(const [label,expectQuestions,expectMarks] of [
   ["Questions only",3,0],["Mark scheme only",0,3],["Questions + mark scheme",3,3]
@@ -83,6 +101,8 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening acc
  }
  await page.setViewportSize({width:390,height:844});
  await expect(page.getByRole("link",{name:/View preview/})).toBeVisible();
+ await expect(page.getByRole("complementary",{name:"Question order"})).toBeVisible();
+ await expect(page.getByRole("combobox",{name:"Sort questions by grade"})).toBeVisible();
  await expect(page.getByRole("heading",{name:"Configure your paper"})).toBeVisible();
  const mobileSizing=await page.evaluate(()=>({page:document.documentElement.scrollWidth,screen:window.innerWidth}));
  expect(mobileSizing.page).toBeLessThanOrEqual(mobileSizing.screen);
