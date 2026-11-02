@@ -47,8 +47,7 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening acc
  });
  await page.route("**/fixture-image.png**",route=>route.fulfill({status:200,contentType:"image/png",body:png}));
  await page.goto("/");
- await expect(page.getByRole("button",{name:/Enhanced Skills Mapped Question Bank/})).toBeVisible({timeout:12000});
- await page.getByRole("button",{name:/Enhanced Skills Mapped Question Bank/}).click();
+ await expect(page.getByRole("navigation",{name:"Main navigation"}).getByRole("button",{name:"Question Bank"})).toHaveAttribute("aria-current","page",{timeout:12000});
  await expect(page.getByText("4 question records match your filters")).toBeVisible({timeout:12000});
  await page.getByRole("button",{name:"+ Add"}).first().click();
  await page.getByRole("button",{name:"+ Add"}).first().click();
@@ -76,8 +75,8 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening acc
   if(label==="Mark scheme only")await expect(page.locator(".cover")).toHaveCount(0);
  }
  await page.getByRole("button",{name:"Save assessment to my account"}).click();
- await page.getByRole("button",{name:"← Home"}).click();
- await page.getByRole("button",{name:/My Assessments/}).click();
+ await page.getByRole("button",{name:"← Question Bank"}).click();
+ await page.getByRole("navigation",{name:"Main navigation"}).getByRole("button",{name:"My Worksheets"}).click();
  await page.getByRole("button",{name:"Open / Edit",exact:true}).click();
  await expect(page.getByLabel("Assessment title")).toHaveValue("Test assessment");
  await expect(page.getByRole("button",{name:"Questions + mark scheme",exact:true})).toHaveAttribute("aria-pressed","true");
