@@ -73,7 +73,8 @@ test("extracts question paper and mark scheme in the same review without invalid
   return json({message:"No fixture for "+path},404);
  });
  await page.goto("/");
- await page.getByRole("button",{name:/Import Exam Papers/}).click();
+ await page.getByRole("navigation",{name:"Main navigation"}).getByRole("button",{name:"Account"}).click();
+  await page.getByRole("button",{name:"Import exam papers"}).click();
  await expect(page.getByText("Edexcel · November-2022 · 1F")).toBeVisible();
  await page.getByRole("button",{name:"Extract & review"}).click();
  await page.getByRole("button",{name:"Prepare question review"}).click();
