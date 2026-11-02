@@ -18,7 +18,7 @@ export function validCrop(value:unknown):Crop {
  * Optional offsets support atypical source crops without changing the originals.
  */
 export type NumberingMask = {numberWidth:number;numberHeight:number;footerHeight:number;numberTop?:number;footerBottom?:number;footerWidth?:number};
-export const defaultNumberingMask:NumberingMask={numberWidth:5,numberHeight:6,footerHeight:5,numberTop:0,footerBottom:0,footerWidth:70};
+export const defaultNumberingMask:NumberingMask={numberWidth:3.5,numberHeight:3.5,footerHeight:2.8,numberTop:0,footerBottom:0,footerWidth:55};
 const maskPercent=(value:number,defaultValue:number)=>Number.isFinite(value)?Math.max(0,Math.min(25,value)):defaultValue;
 export function CroppedImage({src,crop,alt,coverOriginalNumber=false,coverOriginalFooter=false,numberingMask=defaultNumberingMask,showCoverGuides=false}:{src:string;crop:Crop;alt:string;coverOriginalNumber?:boolean;coverOriginalFooter?:boolean;numberingMask?:NumberingMask;showCoverGuides?:boolean}){
  const [dimensions,setDimensions]=useState<{w:number;h:number}|null>(null);
@@ -32,8 +32,8 @@ export function CroppedImage({src,crop,alt,coverOriginalNumber=false,coverOrigin
  return <div style={style}>
  {!dimensions&&<p role="status" style={{padding:16}}>Loading image…</p>}
  <img key={src+"-"+attempt} src={src} alt={alt} onLoad={e=>{const {naturalWidth:w,naturalHeight:h}=e.currentTarget;if(w>0&&h>0)setDimensions({w,h});else setError(true)}} onError={()=>setError(true)} style={dimensions?{position:"absolute",maxWidth:"none",width:`${10000/horizontal}%`,height:"auto",left:`-${crop.left/horizontal*100}%`,top:`-${crop.top/vertical*100}%`}:{width:"100%",height:"auto",display:"none"}}/>
- {coverOriginalNumber&&<div className={`mqb-original-number-mask${showCoverGuides?" is-adjusting":""}`} aria-hidden="true" style={{width:`${maskPercent(numberingMask.numberWidth,5)}%`,height:`${maskPercent(numberingMask.numberHeight,6)}cqw`,top:`${maskPercent(numberingMask.numberTop??0,0)}cqw`}}/>}
- {coverOriginalFooter&&<div className={`mqb-original-total-mask${showCoverGuides?" is-adjusting":""}`} aria-hidden="true" style={{height:`${maskPercent(numberingMask.footerHeight,5)}cqw`,bottom:`${maskPercent(numberingMask.footerBottom??0,0)}cqw`,width:`${Math.max(25,Math.min(100,Number.isFinite(numberingMask.footerWidth??70)?(numberingMask.footerWidth??70):70))}%`}}/>}
+ {coverOriginalNumber&&<div className={`mqb-original-number-mask${showCoverGuides?" is-adjusting":""}`} aria-hidden="true" style={{width:`${maskPercent(numberingMask.numberWidth,3.5)}%`,height:`${maskPercent(numberingMask.numberHeight,3.5)}cqw`,top:`${maskPercent(numberingMask.numberTop??0,0)}cqw`}}/>}
+ {coverOriginalFooter&&<div className={`mqb-original-total-mask${showCoverGuides?" is-adjusting":""}`} aria-hidden="true" style={{height:`${maskPercent(numberingMask.footerHeight,2.8)}cqw`,bottom:`${maskPercent(numberingMask.footerBottom??0,0)}cqw`,width:`${Math.max(25,Math.min(100,Number.isFinite(numberingMask.footerWidth??55)?(numberingMask.footerWidth??55):70))}%`}}/>}
  </div>;
 }
 function VisualSelection({src,crop,onChange}:{src:string;crop:Crop;onChange:(c:Crop)=>void}){
