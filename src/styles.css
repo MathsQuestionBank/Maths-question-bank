@@ -586,3 +586,7 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
 @media(max-width:780px){
   .site .builder-order-scroll .builder-order-remove{flex-basis:38px;width:38px;height:38px}
 }
+
+/* Keep expanded grade/average sorting choices readable in the narrow sidebar. */
+.site .builder-order-sort-fields{grid-template-columns:minmax(0,1fr)}
+.site .builder-order-sort-fields select{font-size:12px;min-height:37px;padding:8px 8px}

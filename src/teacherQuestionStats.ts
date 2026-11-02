@@ -1,4 +1,5 @@
 import type { BankQuestion } from "./questionData";
+import { gradesForTier } from "./gradeBands";
 
 /** The paper number is independent of tier and calculator mode. */
 export function paperNumberFromCode(paperCode?: string): number | null {
@@ -44,4 +45,20 @@ export function weightedGradePerformance(parts:readonly GradePart[],grade:number
   totalMarks+=part.marks;
  }
  return totalMarks>0?Math.round(weighted/totalMarks*10)/10:null;
+}
+
+/** Unweighted mean of the available final-GCSE-grade group average marks percentages.
+ * Each grade's multipart score is weighted by the marks for its parts; grade
+ * groups with incomplete part data are excluded rather than guessed.
+ * No cohort sizes are supplied, so this is NOT the overall percentage of pupils
+ * who got a question correct. Use a precise label in the builder UI.
+ */
+export function averageQuestionPerformance(
+ parts:ReadonlyArray<Pick<BankQuestion,"marks"|"gradePerformance">>,
+ tier:string
+):number|null {
+ const values=gradesForTier(tier).map(grade=>weightedGradePerformance(parts,grade))
+  .filter((x):x is number=>x!==null);
+ if(!values.length)return null;
+ return Math.round(values.reduce((sum,n)=>sum+n,0)/values.length*10)/10;
 }
