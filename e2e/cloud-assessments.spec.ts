@@ -36,7 +36,7 @@ test("cloud copy is opt-in and leaves browser assessments untouched",async({page
   return reply({},404);
  });
  await page.goto("/");
- await page.getByRole("button",{name:/My Assessments/}).click();
+ await page.getByRole("navigation",{name:"Main navigation"}).getByRole("button",{name:"My Worksheets"}).click();
  await expect(page.getByText("My existing assessment")).toBeVisible();
  expect(inserts).toBe(0);
  await expect(page.getByRole("button",{name:/Import 1 browser-only assessment/})).toBeVisible();
