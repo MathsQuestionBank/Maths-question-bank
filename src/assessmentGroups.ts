@@ -1,5 +1,5 @@
 import type { BankQuestion } from "./questionData";
-import { weightedGradePerformance } from "./teacherQuestionStats";
+import { weightedGradePerformance, averageQuestionPerformance, compareOriginalQuestionNumber } from "./teacherQuestionStats";
 
 export type AssessmentGroup = {
  key:string;
@@ -11,7 +11,9 @@ export type AssessmentGroup = {
 
 /** Parent IDs are shared by each lettered part of the same complete exam question. */
 export function getAssessmentGroupKey(q:Pick<BankQuestion,"id"|"sourceId">):string {
- return q.sourceId?.match(/^(20\d{2}_[123][HF]_Q\d{2})([a-z][a-z0-9]*)$/i)?.[1]||q.id;
+ // Real imported sources include EDX-F-JUNE2022-1F-Q08A / Q08B as well
+ // as older 2022_1H_Q02a / Q02b identifiers.
+ return q.sourceId?.match(/^(.+[-_]Q\d+)[a-z]$/i)?.[1]||q.id;
 }
 /** A shadow group's parent is its original question, not its shadow image filename. */
 function keyForQuestion(q:BankQuestion,byId:ReadonlyMap<string,BankQuestion>):string{
@@ -83,6 +85,23 @@ export function moveAssessmentGroupIds(all:ReadonlyArray<BankQuestion>,selectedI
  return [...reordered.flatMap(g=>selectedByGroup.get(g.key)||[]),...stale];
 }
 
+/** Add an entire filtered set without inserting any existing question a second time.
+ * One representative ID per whole question is enough: rendering auto-expands all parts.
+ */
+export function appendAssessmentGroupIds(all:ReadonlyArray<BankQuestion>,selectedIds:ReadonlyArray<string>,incomingIds:ReadonlyArray<string>):string[]{
+ const byId=new Map(all.map(q=>[q.id,q]));
+ const seen=new Set<string>();
+ const output:string[]=[];
+ for(const id of [...selectedIds,...incomingIds]){
+  const q=byId.get(id);
+  if(!q){if(selectedIds.includes(id)&&!output.includes(id))output.push(id);continue;}
+  const key=keyForQuestion(q,byId);
+  if(seen.has(key))continue;
+  seen.add(key);output.push(id);
+ }
+ return output;
+}
+
 /** Sort the complete selected exam questions by mark-weighted grade performance.
  *  Lower percentages are harder for pupils who achieved that grade. Multipart
  *  questions move together and only receive a score when ALL parts have data.
@@ -112,6 +131,48 @@ export function sortAssessmentGroupIdsByGrade(
   if(b.percent===null)return -1;
   const delta=direction==="ascending"?a.percent-b.percent:b.percent-a.percent;
   return delta||a.index-b.index;
+ });
+ return [...order.flatMap(({group})=>selectedByGroup.get(group.key)||[]),...stale];
+}
+
+export type AssessmentSortMode =
+ |"grade-lowest"|"grade-highest"
+ |"average-lowest"|"average-highest"
+ |"marks-highest"|"paper-lowest"|"paper-highest"|"topic-az";
+
+export function sortAssessmentGroupIds(
+ all:ReadonlyArray<BankQuestion>,selectedIds:ReadonlyArray<string>,mode:AssessmentSortMode,grade:number=8
+):string[]{
+ const groups=buildAssessmentGroups([...all],[...selectedIds]);
+ if(groups.length<2)return [...selectedIds];
+ const byId=new Map(all.map(q=>[q.id,q]));
+ const selectedByGroup=new Map(groups.map(g=>[g.key,[] as string[]]));
+ const stale:string[]=[];
+ for(const id of selectedIds){
+  const q=byId.get(id);
+  if(!q){stale.push(id);continue;}
+  selectedByGroup.get(keyForQuestion(q,byId))?.push(id);
+ }
+ const order=groups.map((group,index)=>({
+  group,index,
+  score:mode.startsWith("grade-")?weightedGradePerformance(group.parts,grade)
+   :mode.startsWith("average-")?averageQuestionPerformance(group.parts,group.question.tier)
+   :null
+ }));
+ order.sort((a,b)=>{
+  let diff=0;
+  if(mode.startsWith("grade-")||mode.startsWith("average-")){
+   if(a.score===null)return b.score===null?a.index-b.index:1;
+   if(b.score===null)return -1;
+   diff=(mode.endsWith("lowest")?a.score-b.score:b.score-a.score);
+  }else if(mode==="marks-highest"){
+   diff=b.group.marks-a.group.marks;
+  }else if(mode==="paper-lowest"||mode==="paper-highest"){
+   diff=compareOriginalQuestionNumber(a.group.question,b.group.question,mode==="paper-highest");
+  }else if(mode==="topic-az"){
+   diff=a.group.question.topic.localeCompare(b.group.question.topic);
+  }
+  return diff||a.index-b.index;
  });
  return [...order.flatMap(({group})=>selectedByGroup.get(group.key)||[]),...stale];
 }
