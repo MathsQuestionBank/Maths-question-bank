@@ -20,7 +20,7 @@ export function CroppedImage({src,crop,alt,coverOriginalNumber=false,coverOrigin
  const [error,setError]=useState(false);
  const [attempt,setAttempt]=useState(0);
  const horizontal=100-crop.left-crop.right,vertical=100-crop.top-crop.bottom;
- const style:CSSProperties=dimensions?{position:"relative",width:"100%",aspectRatio:String((dimensions.w*horizontal)/(dimensions.h*vertical)),overflow:"hidden":{width:"100%",position:"relative"};
+ const style:CSSProperties=dimensions?{position:"relative",width:"100%",aspectRatio:String((dimensions.w*horizontal)/(dimensions.h*vertical)),overflow:"hidden"}:{width:"100%",position:"relative"};
  // A new question must not inherit the previous image's dimensions or load state.
  useEffect(()=>{setDimensions(null);setError(false);setAttempt(0)},[src]);
  if(error)return <div role="alert" style={{padding:20,border:"1px solid #cc8c8c"}}><p>Image failed to load. The original file may still exist in private storage.</p><button className="secondary small" onClick={()=>{setError(false);setDimensions(null);setAttempt(x=>x+1)}}>Retry image</button></div>;
