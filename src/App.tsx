@@ -38,6 +38,7 @@ const [loadStatus,setLoadStatus]=useState("Not started");
 const [diagnostics,setDiagnostics]=useState("");
 const [checking,setChecking]=useState(false);
 const requestVersion=useRef(0);
+const lastQuestionRefreshAt=useRef(0);
 const reloadQuestions=async()=>{
  const version=++requestVersion.current;
  setQuestionError("");setLoadingQuestions(true);setLoadStatus("Loading records…");
@@ -45,7 +46,7 @@ const reloadQuestions=async()=>{
   try{
    const data=await loadBankQuestions(withImages=>{if(version===requestVersion.current)setQuestions(withImages)},isOwner?3600:900);
    if(version!==requestVersion.current)return;
-   if(data.length>0){setQuestions(data);setQuestionError("");setLoadStatus(`${data.length} records loaded`);setLoadingQuestions(false);return;}
+   if(data.length>0){lastQuestionRefreshAt.current=Date.now();setQuestions(data);setQuestionError("");setLoadStatus(`${data.length} records loaded`);setLoadingQuestions(false);return;}
    if(attempt===4){setQuestionError("No question records returned from the database. Please check the connection.");setLoadStatus("No visible records");setLoadingQuestions(false);return;}
   }catch(e){
    if(version!==requestVersion.current)return;
@@ -61,6 +62,17 @@ useEffect(()=>{
  if(page==="bank"||page==="builder"||page==="saved"||(isOwner&&(page==="review"||page==="insights")))void reloadQuestions();
  return()=>{requestVersion.current++};
 },[page]);
+// Teacher image links have a short lifetime; refresh them during longer planning sessions.
+// Revoked accounts cannot obtain new links because both the database and storage enforce RLS.
+useEffect(()=>{
+ if(isOwner||!["bank","builder","saved"].includes(page))return;
+ const maybeRefresh=()=>{
+  if(document.visibilityState==="visible" && Date.now()-lastQuestionRefreshAt.current>11*60*1000)void reloadQuestions();
+ };
+ const timer=window.setInterval(maybeRefresh,60*1000);
+ document.addEventListener("visibilitychange",maybeRefresh);
+ return()=>{window.clearInterval(timer);document.removeEventListener("visibilitychange",maybeRefresh)};
+},[page,isOwner]);
 const [tier,setTier]=useState("All");
 const [topic,setTopic]=useState("All");
 const [skill,setSkill]=useState("All");
