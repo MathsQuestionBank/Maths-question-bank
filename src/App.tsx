@@ -139,7 +139,7 @@ const [editingCloud,setEditingCloud]=useState<{cloudId:string;revision:number}|n
 const [cloudWriteStatus,setCloudWriteStatus]=useState("");
 const saveToAccount=async(asNew=false)=>{
  if(cloudBusy)return;
- const item:SavedAssessment={id:asNew?"assessment-"+Date.now():currentAssessmentId||"assessment-"+Date.now(),folder:editingCloud?cloudItems.find(x=>x.cloudId===editingCloud.cloudId)?.item.folder||"Unfiled":saved.find(x=>x.id===currentAssessmentId)?.folder||"Unfiled",name:assessmentTitle.trim()||"Untitled assessment",ids:[...selected],minutes,nameBox:includeName,classBox:includeClass,paperTier:builderTier,paperCalc:builderCalc,cover,answers:exportMode!=="questions",exportMode,performanceGrade,printTeacherStats,linkedOriginalAssessmentId:shadowParentId||undefined,shadowSet:shadowAssessmentSet||undefined};
+ const item:SavedAssessment={id:asNew?"assessment-"+Date.now():currentAssessmentId||"assessment-"+Date.now(),folder:editingCloud?cloudItems.find(x=>x.cloudId===editingCloud.cloudId)?.item.folder||"Unfiled":saved.find(x=>x.id===currentAssessmentId)?.folder||"Unfiled",name:assessmentTitle.trim()||"Untitled assessment",ids:appendAssessmentGroupIds(questions,[],selected),minutes,nameBox:includeName,classBox:includeClass,paperTier:builderTier,paperCalc:builderCalc,cover,answers:exportMode!=="questions",exportMode,performanceGrade,printTeacherStats,linkedOriginalAssessmentId:shadowParentId||undefined,shadowSet:shadowAssessmentSet||undefined};
  setCloudBusy(true);setCloudWriteStatus("Saving to your account…");
  try{const result=await saveVersionedAssessment(item,asNew?undefined:editingCloud??undefined);setEditingCloud(result);setCloudWriteStatus("Saved to your account");await refreshCloud()}
  catch(e){setCloudWriteStatus(e instanceof Error?e.message:"Save failed. Your open assessment has not been discarded.")}
@@ -313,7 +313,7 @@ const toggle=(id:string)=>setSelected(current=>{
 });
 const navigate=(p:Page)=>{if(p==="builder"&&page!=="builder")setEditingCloud(null);setPage(p);window.scrollTo(0,0)};
 const openSavedAssessment=(item:SavedAssessment)=>{
- setCurrentAssessmentId(item.id);setAssessmentTitle(item.name);setSelected(item.ids);setMinutes(item.minutes);
+ setCurrentAssessmentId(item.id);setAssessmentTitle(item.name);setSelected(appendAssessmentGroupIds(questions,[],item.ids));setMinutes(item.minutes);
  setIncludeName(item.nameBox??true);setIncludeClass(item.classBox??false);
  setBuilderTier(item.paperTier==="Higher"||item.paperTier==="Foundation"||item.paperTier==="Crossover"?item.paperTier:"Any");
  setBuilderCalc(item.paperCalc==="Calculator"||item.paperCalc==="Non-calculator"?item.paperCalc:"Any");
