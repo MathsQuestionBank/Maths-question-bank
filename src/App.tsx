@@ -147,7 +147,7 @@ const saveToAccount=async(asNew=false)=>{
 };
 const openCloudForEdit=(entry:CloudAssessment)=>{
  if(entry.revision===undefined){setCloudWriteStatus("Cloud revision unavailable. Reload after upgrading the database.");return}
- setEditingCloud({cloudId:entry.cloudId,revision:entry.revision});openSavedAssessment(entry.item);
+ openSavedAssessment(entry.item);setEditingCloud({cloudId:entry.cloudId,revision:entry.revision});
 };
 const modifyCloudEntry=async(entry:CloudAssessment,patch:Partial<SavedAssessment>)=>{
  if(entry.revision===undefined){setCloudWriteStatus("Reload cloud assessments before editing.");return}
@@ -390,6 +390,7 @@ return <div className="site">
   <span className="assessment-order-grip" aria-hidden="true">⠿</span>
   <span className="builder-order-item-text"><strong>{index+1}. {group.label}</strong><small>{group.marks} {group.marks===1?"mark":"marks"} · Grade {orderSortGrade}: {pct===null?"No data":`${pct}%`}{chosen.some(c=>c.key===group.key)?"":" · Filtered out"}</small></span>
   <label className="assessment-order-jump"><span className="visually-hidden">Move question {index+1} to position</span><select aria-label={`Move question ${index+1} to position`} value={index+1} onChange={event=>moveAssessmentGroup(index,Number(event.target.value)-1)}>{chosenAll.map((_,position)=><option key={position} value={position+1}>{position+1}</option>)}</select></label>
+  <button type="button" className="builder-order-remove" draggable={false} title={`Remove question ${index+1} from assessment`} aria-label={`Remove question ${index+1} from assessment: ${group.label}`} onDragStart={event=>{event.preventDefault();event.stopPropagation()}} onClick={()=>removeGroup(group.key)}><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m5 4v6m4-6v6"/></svg></button>
  </li>})}
  </ol>
  {!chosenAll.length&&<p className="builder-order-empty">Add questions from the Question Bank to arrange your paper.</p>}
