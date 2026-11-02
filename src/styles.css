@@ -614,3 +614,22 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
  .mqb-original-number-mask,.mqb-original-total-mask{background:#fff!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}
  .assessment-renumber-total{break-inside:avoid;page-break-inside:avoid}
 }
+
+/* Question-cover editor lives outside draggable cards so controls are never obscured. */
+.site .builder-order-scroll .assessment-order-row{flex-wrap:nowrap}
+.site .builder-order-scroll .builder-adjust-covers{
+  display:inline-grid;place-items:center;flex:0 0 25px;width:25px;height:32px;padding:0;
+  border:1px solid #d9e2e8;border-radius:5px;background:#fff;color:#526c7d;
+  font-size:17px;line-height:1;cursor:pointer
+}
+.site .builder-order-scroll .builder-adjust-covers:hover{background:#eef3f6;color:#21475e}
+.site .builder-order-scroll .builder-adjust-covers:focus-visible{outline:2px solid #315a70;outline-offset:2px}
+.site .builder-mask-editor{padding:13px 16px;margin:0;border-top:1px solid #e3e9ee;border-bottom:1px solid #e3e9ee;background:#f7f9fb;color:#2d4556;flex:none}
+.site .builder-mask-editor-title{display:flex;align-items:center;justify-content:space-between;gap:7px;margin-bottom:9px}
+.site .builder-mask-editor-title strong{font-size:12px}
+.site .builder-mask-editor-title button{padding:5px 9px;font-size:11px}
+.site .builder-mask-editor p{font-size:10px;line-height:1.5;margin:0 0 10px}
+.site .builder-mask-editor label{display:flex;gap:9px;align-items:center;justify-content:space-between;margin:6px 0;font-size:11px}
+.site .builder-mask-editor input{min-width:0;width:61px;border:1px solid #cad6de;border-radius:4px;padding:6px 5px;font-size:12px}
+.site .builder-mask-editor>button{margin-top:10px;width:100%}
+@media print{.site .builder-mask-editor{display:none!important}}
