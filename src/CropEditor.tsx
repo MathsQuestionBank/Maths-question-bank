@@ -13,7 +13,7 @@ export function validCrop(value:unknown):Crop {
  return c;
 }
 export type NumberingMask = {numberWidth:number;numberHeight:number;footerHeight:number};
-export const defaultNumberingMask:NumberingMask={numberWidth:11,numberHeight:8,footerHeight:9};
+export const defaultNumberingMask:NumberingMask={numberWidth:6,numberHeight:6,footerHeight:7};
 const maskPercent=(value:number,defaultValue:number)=>Number.isFinite(value)?Math.max(0,Math.min(25,value)):defaultValue;
 export function CroppedImage({src,crop,alt,coverOriginalNumber=false,coverOriginalFooter=false,numberingMask=defaultNumberingMask}:{src:string;crop:Crop;alt:string;coverOriginalNumber?:boolean;coverOriginalFooter?:boolean;numberingMask?:NumberingMask}){
  const [dimensions,setDimensions]=useState<{w:number;h:number}|null>(null);
@@ -27,8 +27,8 @@ export function CroppedImage({src,crop,alt,coverOriginalNumber=false,coverOrigin
  return <div style={style}>
  {!dimensions&&<p role="status" style={{padding:16}}>Loading image…</p>}
  <img key={src+"-"+attempt} src={src} alt={alt} onLoad={e=>{const {naturalWidth:w,naturalHeight:h}=e.currentTarget;if(w>0&&h>0)setDimensions({w,h});else setError(true)}} onError={()=>setError(true)} style={dimensions?{position:"absolute",maxWidth:"none",width:`${10000/horizontal}%`,height:"auto",left:`-${crop.left/horizontal*100}%`,top:`-${crop.top/vertical*100}%`}:{width:"100%",height:"auto",display:"none"}}/>
- {dimensions&&coverOriginalNumber&&<div className="mqb-original-number-mask" aria-hidden="true" style={{width:`${maskPercent(numberingMask.numberWidth,11)}%`,height:`${maskPercent(numberingMask.numberHeight,8)}%`}}/>}
- {dimensions&&coverOriginalFooter&&<div className="mqb-original-total-mask" aria-hidden="true" style={{height:`${maskPercent(numberingMask.footerHeight,9)}%`}}/>}
+ {dimensions&&coverOriginalNumber&&<div className="mqb-original-number-mask" aria-hidden="true" style={{width:`${maskPercent(numberingMask.numberWidth,6)}%`,height:`${maskPercent(numberingMask.numberHeight,6)}%`}}/>}
+ {dimensions&&coverOriginalFooter&&<div className="mqb-original-total-mask" aria-hidden="true" style={{height:`${maskPercent(numberingMask.footerHeight,7)}%`}}/>}
  </div>;
 }
 function VisualSelection({src,crop,onChange}:{src:string;crop:Crop;onChange:(c:Crop)=>void}){
