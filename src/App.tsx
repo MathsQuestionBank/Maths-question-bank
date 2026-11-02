@@ -262,6 +262,14 @@ const filtered=useMemo(()=>questions.filter(q=>
  return a.topic.localeCompare(b.topic);
 }),[questions,tier,topic,skill,ao,grade,challenge,series,calc,paperNumber,versionFilter,tags,match,query,sort]);
 const chosenAll=useMemo(()=>buildAssessmentGroups(questions,selected),[questions,selected]);
+useEffect(()=>{
+ if(!chosenAll.length)return;
+ const tiers=new Set(chosenAll.map(group=>group.question.tier));
+ if(tiers.size!==1)return;
+ const onlyTier=chosenAll[0].question.tier;
+ if(onlyTier==="Foundation"&&orderSortGrade>5)setOrderSortGrade(5);
+ else if(onlyTier==="Higher"&&orderSortGrade<4)setOrderSortGrade(8);
+},[chosenAll,orderSortGrade]);
 const readyShadowSets=[...new Set(questions.filter(shadowIsReady).map(q=>q.shadowSet).filter((value):value is string=>!!value))].sort();
 const chosen=chosenAll.filter(group=>((builderTier==="Any"||builderTier==="Crossover")||group.question.tier===builderTier)&&(builderCalc==="Any"||(builderCalc==="Calculator"?group.question.calculator:!group.question.calculator)));
 const excluded=chosenAll.length-chosen.length;
