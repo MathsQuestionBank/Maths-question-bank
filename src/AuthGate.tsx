@@ -7,6 +7,32 @@ export function useAccountRole(): AccountRole { return useContext(AccountContext
 
 type Status = "loading" | "signed-out" | "pending" | "owner" | "teacher" | "setup";
 
+/** Keep the logged-out experience visually aligned with the signed-in site, without exposing navigation. */
+function AuthShell({children,wide=false}:{children:ReactNode;wide?:boolean}){
+ return <div className="auth-site">
+  <header className="auth-masthead">
+   <svg className="auth-masthead-lines" viewBox="0 0 1200 160" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+    <g stroke="#ae7795" strokeWidth="1.3" fill="none">
+     <path d="M0 129 L120 0 L295 160 L430 0 L565 160 L742 0 L908 160 L1070 0 L1200 120"/>
+     <path d="M0 15 L182 160 L312 0 L520 160 L775 0 L1015 160 L1170 0"/>
+     <path d="M90 0 L210 160 L410 0 L630 160 L825 0 L1020 160"/>
+     <path d="M0 76 L1200 45 M0 146 L1200 109"/>
+    </g>
+   </svg>
+   <div className="auth-masthead-inner">
+    <div className="auth-brand-wrap">
+     <h1 className="auth-wordmark">Maths <em>Question Bank</em></h1>
+     <span className="auth-brand-tagline">MADE FOR MATHEMATICS TEACHERS</span>
+    </div>
+    <span className="auth-masthead-note">Find questions. Build better assessments.</span>
+   </div>
+  </header>
+  <div className="auth-nav-edge" aria-hidden="true"/>
+  <main className={wide?"auth-page auth-page-wide":"auth-page auth-page-compact"}>{children}</main>
+  <footer className="auth-footer">Maths Question Bank · Restricted staff access</footer>
+ </div>;
+}
+
 export default function AuthGate({children}:{children:ReactNode}){
  const [status,setStatus]=useState<Status>("loading");
  const [email,setEmail]=useState("");
@@ -61,24 +87,52 @@ export default function AuthGate({children}:{children:ReactNode}){
   finally{setBusy(false);}
  };
 
- if(status==="loading")return <main className="auth-page"><div className="auth-card"><h1>Maths Question Bank</h1><p>Checking secure access…</p></div></main>;
- if(status==="setup")return <main className="auth-page"><div className="auth-card"><h1>Set your password</h1><form onSubmit={async e=>{e.preventDefault();setBusy(true);const {error}=await supabase.auth.updateUser({password:newPassword});setBusy(false);if(error)setMessage(error.message);else window.location.replace(window.location.origin)}}><label>New password<input required type="password" minLength={12} value={newPassword} onChange={e=>setNewPassword(e.target.value)}/></label><button disabled={busy}>Save password</button></form>{message&&<p role="alert">{message}</p>}</div></main>;
- if(status==="signed-out")return <main className="auth-page"><div className="auth-card">
-  <div className="auth-logo">∑</div><h1>Maths Question Bank</h1>
-  <p>{register?"Create an account for the departmental teacher pilot. Accounts require email verification and owner approval.":"Sign in to view your available question bank and saved assessments."}</p>
-  <form onSubmit={submit}>
-   <label>Email address<input required type="email" autoComplete="username" value={email} onChange={e=>setEmail(e.target.value)}/></label>
-   <label>Password<input required type="password" minLength={register?12:undefined} autoComplete={register?"new-password":"current-password"} value={password} onChange={e=>setPassword(e.target.value)}/></label>
-   {register&&<label>Confirm password<input required type="password" minLength={12} autoComplete="new-password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)}/></label>}
-   <button className="primary full" disabled={busy}>{busy?"Working…":register?"Create teacher account":"Sign in"}</button>
+ if(status==="loading")return <AuthShell><section className="auth-card auth-status-card" aria-live="polite"><h2>Checking access</h2><p>Verifying your account and permissions…</p></section></AuthShell>;
+ if(status==="setup")return <AuthShell><section className="auth-card auth-status-card">
+  <span className="auth-kicker">ACCOUNT SECURITY</span><h2>Set your password</h2>
+  <p>Choose a password to finish setting up your account.</p>
+  <form onSubmit={async e=>{e.preventDefault();setBusy(true);const {error}=await supabase.auth.updateUser({password:newPassword});setBusy(false);if(error)setMessage(error.message);else window.location.replace(window.location.origin)}}>
+   <label>New password<input required type="password" minLength={12} autoComplete="new-password" value={newPassword} onChange={e=>setNewPassword(e.target.value)}/></label>
+   <button className="auth-submit" disabled={busy}>{busy?"Saving…":"Save password"}</button>
   </form>
-  {message&&<p role="status" className={message.startsWith("Unable")?"auth-error":""}>{message}</p>}
-  <button className="auth-switch" type="button" onClick={()=>{setRegister(!register);setMessage("");setPassword("");setConfirmPassword("");}}>{register?"Already have an account? Sign in":"New teacher? Create an account"}</button>
-  <p className="hint">Pilot accounts only. We use your email address for authentication and access approval; do not upload pupil personal data. Approved teachers can access eligible recent Edexcel questions; older papers and owner-only sources remain restricted.</p>
- </div></main>;
- if(status==="pending")return <main className="auth-page"><div className="auth-card">
-  <h1>Account awaiting approval</h1><p>Your email is signed in, but teacher access has not yet been approved. Please ask the Maths Question Bank owner to approve your account for the departmental pilot.</p>
-  <button className="secondary" onClick={()=>void supabase.auth.signOut()}>Sign out</button>
- </div></main>;
+  {message&&<p role="alert" className="auth-error">{message}</p>}
+ </section></AuthShell>;
+ if(status==="signed-out")return <AuthShell wide>
+  <div className="auth-introduction">
+   <span className="auth-kicker auth-kicker-intro">YOUR DEPARTMENT'S QUESTION BANK</span>
+   <h2>Find the right questions.<br/>Build better assessments.</h2>
+   <p className="auth-intro-copy">Search GCSE maths questions by topic, skill and grade, then turn them into ready-to-use worksheets and assessments.</p>
+   <div className="auth-capabilities">
+    <div><span className="auth-capability-line"/><p><strong>Find</strong> questions using enhanced skills mapping.</p></div>
+    <div><span className="auth-capability-line"/><p><strong>Build</strong> assessments with questions and mark schemes.</p></div>
+    <div><span className="auth-capability-line"/><p><strong>Save</strong> worksheets to your own private account.</p></div>
+   </div>
+   <p className="auth-intro-footnote">A resource for approved school staff — not a public question bank.</p>
+  </div>
+  <section className="auth-card auth-signin-card" aria-label={register?"Teacher registration":"Staff sign in"}>
+   <span className="auth-kicker">{register?"REQUEST ACCESS":"STAFF ACCESS"}</span>
+   <h2>{register?"Create your account":"Welcome back"}</h2>
+   <p className="auth-card-description">{register?"Register using your school email. Your account will need email verification and manual approval before you can access the bank.":"Sign in to access your question bank and saved assessments."}</p>
+   <form onSubmit={submit}>
+    <label>Email address<input required type="email" autoComplete="username" placeholder="you@school.org.uk" value={email} onChange={e=>setEmail(e.target.value)}/></label>
+    <label>Password<input required type="password" minLength={register?12:undefined} autoComplete={register?"new-password":"current-password"} value={password} onChange={e=>setPassword(e.target.value)}/></label>
+    {register&&<label>Confirm password<input required type="password" minLength={12} autoComplete="new-password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)}/></label>}
+    <button className="auth-submit" disabled={busy}>{busy?"Working…":register?"Create teacher account":"Sign in"}</button>
+   </form>
+   {message&&<p role="status" className="auth-feedback">{message}</p>}
+   <div className="auth-switch-section">
+    <p>{register?"Already have an account?":"New to Maths Question Bank?"}</p>
+    <button className="auth-switch" type="button" onClick={()=>{setRegister(!register);setMessage("");setPassword("");setConfirmPassword("");}}>{register?"Already have an account? Sign in":"New teacher? Create an account"}</button>
+   </div>
+   <p className="auth-privacy-note">Restricted to approved school staff. Do not upload pupil personal data. Eligible Edexcel papers are available to approved accounts; older material remains restricted.</p>
+  </section>
+ </AuthShell>;
+ if(status==="pending")return <AuthShell><section className="auth-card auth-status-card">
+  <span className="auth-kicker">ACCESS REQUEST</span>
+  <h2>Account awaiting approval</h2>
+  <p>Your email is signed in, but teacher access has not yet been approved. Please ask the Maths Question Bank owner to approve your account for the departmental pilot.</p>
+  <div className="auth-status-detail">Your account is secure. The question bank will be available once access has been approved.</div>
+  <button className="auth-secondary" onClick={()=>void supabase.auth.signOut()}>Sign out</button>
+ </section></AuthShell>;
  return <AccountContext.Provider value={status==="owner"?"owner":"teacher"}>{children}</AccountContext.Provider>;
 }
