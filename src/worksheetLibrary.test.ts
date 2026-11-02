@@ -59,6 +59,14 @@ describe("saved worksheet library",()=>{
   const twice=mergeWorksheetBackup(restored.assessments,[],makeWorksheetBackup([{...current[0],minutes:75}],[],"2026-10-27"));
   expect(twice.assessments[2].name).toBe("Year 10 Assessment (Restored 2)");
  });
+ it("preserves student renumbering and image cover positions across saved assessment backups",()=>{
+  const original=normaliseAssessments([{...legacy,renumberStudentQuestions:true,replaceSourceTotals:true,numberingMasks:{"EDX-H-JUNE2023-2H-Q02":{numberWidth:12,numberHeight:8,footerHeight:11}}}])[0];
+  const backup=makeWorksheetBackup([original],[],"2026-11-02");
+  const restored=parseWorksheetBackup(backup).assessments[0];
+  expect(restored.renumberStudentQuestions).toBe(true);
+  expect(restored.replaceSourceTotals).toBe(true);
+  expect(restored.numberingMasks?.["EDX-H-JUNE2023-2H-Q02"]).toEqual({numberWidth:12,numberHeight:8,footerHeight:11});
+ });
  it("ignores damaged entries rather than crashing the library",()=>{
   expect(normaliseAssessments([null,{},legacy])).toHaveLength(1);
  });
