@@ -16,7 +16,7 @@ async function signInAsFixture(page:import("@playwright/test").Page,approved:boo
   if(url.pathname.startsWith("/rest/v1/questions"))return reply(approved?[{
    id:"33333333-3333-4333-8333-333333333333",question_number:"1",topic:"Algebra",skill:"Solving linear equations",assessment_objective:"AO1",marks:2,question_storage_path:null,mark_scheme_storage_path:null,
    metadata:{content_rights:"original",demo:true,id:"ORIGINAL-PRACTICE-01",tier:"Foundation",series:"Original practice",prompt:"Solve 3x + 7 = 25.",answer:"x = 6",calculator:false,tags:["Algebra"]}
-  ]:[]);
+  }]:[]);
   return reply([]);
  });
 }
