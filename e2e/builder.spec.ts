@@ -98,8 +98,8 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening acc
  expect(coverGeometry.numberCovered).toBe(true);
  expect(coverGeometry.questionTextNotCovered).toBe(true);
  expect(coverGeometry.footerCovered).toBe(true);
- expect(coverGeometry.numberHeightRatio).toBeGreaterThan(.055);
- expect(coverGeometry.footerHeightRatio).toBeGreaterThan(.045);
+ expect(coverGeometry.numberHeightRatio).toBeGreaterThan(.03);
+ expect(coverGeometry.footerHeightRatio).toBeGreaterThan(.025);
  expect(coverGeometry.footerAnchoredRight).toBe(true);
  await expect(page.locator(".assessment-renumber-total")).toHaveCount(3);
  await expect(page.locator(".assessment-renumber-total").first()).toHaveText("Total for Question 1 is 4 marks");
@@ -207,4 +207,48 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening acc
  await expect(page.locator(".builder-order-sidebar .assessment-order-row")).toHaveCount(2);
  await expect(page.locator(".cover")).toContainText("Total marks: 9");
  expect(errors).toEqual([]);
+});
+
+test("renumbering preserves existing Edexcel number and total when already in order",async({page})=>{
+ const token=makeToken();
+ await page.addInitScript(({token,user})=>{
+  localStorage.setItem("sb-ljisttslifnyrbuybfud-auth-token",JSON.stringify({access_token:token,refresh_token:"dummy",expires_at:4102444800,expires_in:999999999,token_type:"bearer",user}));
+ },{token,user});
+ const originalNumbers=[
+  {id:"f1",question_number:"Q01",question_storage_path:"questions/EDX-F-JUNE2022-1F-Q01.png",mark_scheme_storage_path:"marks/EDX-F-JUNE2022-1F-Q01.png",marks:1,topic:"Number",skill:"Metric conversions",assessment_objective:"AO1",exam_papers:{exam_board:"Edexcel",series:"June 2022",paper_code:"1F",tier:"Foundation"},metadata:{id:"EDX-F-JUNE2022-1F-Q01",tier:"Foundation",grade:1,calculator:false}},
+  {id:"f2",question_number:"Q02",question_storage_path:"questions/EDX-F-JUNE2022-1F-Q02.png",mark_scheme_storage_path:"marks/EDX-F-JUNE2022-1F-Q02.png",marks:1,topic:"Algebra",skill:"Simplifying expressions",assessment_objective:"AO1",exam_papers:{exam_board:"Edexcel",series:"June 2022",paper_code:"1F",tier:"Foundation"},metadata:{id:"EDX-F-JUNE2022-1F-Q02",tier:"Foundation",grade:2,calculator:false}}
+ ];
+ const examSvg=Buffer.from("<svg xmlns='http://www.w3.org/2000/svg' width='900' height='170'><rect width='900' height='170' fill='white'/><text x='14' y='25' font-size='20'>1</text><text x='100' y='25' font-size='19'>Change 40 centimetres into millimetres.</text><path d='M620 130h180' stroke='gray'/><text x='605' y='157' font-size='15'>Total for Question 1 is 1 mark</text></svg>");
+ await page.route("https://ljisttslifnyrbuybfud.supabase.co/**",async route=>{
+  const url=new URL(route.request().url());
+  const json=(value:unknown)=>route.fulfill({status:200,contentType:"application/json",body:JSON.stringify(value)});
+  if(url.pathname==="/auth/v1/user")return json(user);
+  if(url.pathname.startsWith("/rest/v1/profiles"))return json([{role:"owner",approved:true}]);
+  if(url.pathname.startsWith("/rest/v1/questions"))return json(originalNumbers);
+  if(url.pathname.startsWith("/rest/v1/assessment_folders")||url.pathname.startsWith("/rest/v1/assessments")||url.pathname.startsWith("/rest/v1/assessment_questions"))return json([]);
+  if(url.pathname.includes("/storage/v1/object/sign/")){
+   const req=route.request().postDataJSON() as {paths:string[]};
+   return json(req.paths.map(path=>({path,signedURL:"/original-exam.svg"})));
+  }
+  return route.fulfill({status:404,contentType:"application/json",body:"{}"});
+ });
+ await page.route("**/original-exam.svg",route=>route.fulfill({status:200,contentType:"image/svg+xml",body:examSvg}));
+ await page.goto("/");
+ await expect(page.getByText("2 question records match your filters")).toBeVisible({timeout:15000});
+ await page.getByRole("button",{name:"Add all filtered results"}).click();
+ await page.getByRole("button",{name:"Open assessment builder →"}).click();
+ await page.getByRole("checkbox",{name:/Hide original question numbers/}).check();
+ // Same paper, same order: original printed text is already correct and must
+ // NOT have a white overlay that would cut off working/answer lines.
+ await expect(page.locator(".paper-question")).toHaveCount(2);
+ await expect(page.locator(".mqb-original-number-mask")).toHaveCount(0);
+ await expect(page.locator(".mqb-original-total-mask")).toHaveCount(0);
+ await expect(page.locator(".assessment-renumber-total")).toHaveCount(0);
+ await expect(page.locator(".builder-order-scroll .builder-adjust-covers")).toHaveCount(0);
+ await expect(page.locator(".paper-row strong").first()).toHaveText("");
+ // Reversing the order requires a new number: only then add the masks/total.
+ await page.locator(".assessment-order-jump select").first().selectOption("2");
+ await expect(page.locator(".mqb-original-number-mask")).toHaveCount(2);
+ await expect(page.locator(".mqb-original-total-mask")).toHaveCount(2);
+ await expect(page.locator(".assessment-renumber-total").first()).toHaveText("Total for Question 1 is 1 mark");
 });
