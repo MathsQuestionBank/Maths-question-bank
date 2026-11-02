@@ -300,3 +300,14 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
  .site .site-nav{display:none!important}
  .site .site-masthead{display:none!important}
 }
+
+/* Departmental pilot: original practice and owner-only teacher approvals. */
+.site .pilot-explainer{padding:12px 15px;border:1px solid #d5dfe7;background:#f5f7f9;border-radius:6px;color:#405366;font-size:13px;line-height:1.5;margin:0 0 16px}
+.site .teacher-approvals{border-top:1px solid #dfe5e9;padding-top:22px;margin-top:26px}
+.site .teacher-approval-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 4px;border-bottom:1px solid #e3e7ec}
+.site .teacher-approval-row strong{overflow-wrap:anywhere}
+.site .teacher-approval-row p{margin:5px 0 0}
+.site .original-preview{border:1px solid #dce4e9;padding:20px 24px;background:#fff;font-size:18px;line-height:1.7;white-space:pre-wrap}
+.site .v62-result-card .v62-pills span{background:#f1f4f6;color:#33475c}
+@media(max-width:620px){.site .teacher-approval-row{align-items:stretch;flex-direction:column}}
+@media print{.site .pilot-explainer,.site .teacher-approvals{display:none!important}}
