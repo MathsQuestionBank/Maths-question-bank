@@ -12,7 +12,7 @@ export function originalPrintedNumber(group:AssessmentGroup):number|null {
  const q=group.question;
  if(q.shadowPaperId||q.shadowOfQuestionId||!q.questionUrl)return null;
  if(q.examBoard?.toLowerCase()!=="edexcel")return null;
- const match=q.sourceId?.match(/(?:^|[-_])Q0*(\d{1,3})(?:[a-z])?$/i);
+ const match=q.sourceId?.match(/^(?:EDX-[FH]-(?:JUNE|NOVEMBER)20\d{2}-[123][FH]|20\d{2}_[123][FH])[-_]Q0*(\d{1,3})(?:[a-z])?$/i);
  if(!match)return null;
  const n=Number(match[1]);
  return Number.isInteger(n)&&n>0&&n<=100?n:null;
