@@ -11,7 +11,7 @@ import type { AssessmentGroup } from "./assessmentGroups";
 export function originalPrintedNumber(group:AssessmentGroup):number|null {
  const q=group.question;
  if(q.shadowPaperId||q.shadowOfQuestionId||!q.questionUrl)return null;
- if(q.examBoard.toLowerCase()!=="edexcel")return null;
+ if(q.examBoard?.toLowerCase()!=="edexcel")return null;
  const match=q.sourceId?.match(/(?:^|[-_])Q0*(\d{1,3})(?:[a-z])?$/i);
  if(!match)return null;
  const n=Number(match[1]);
