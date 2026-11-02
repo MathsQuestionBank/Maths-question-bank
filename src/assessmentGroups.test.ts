@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { buildAssessmentGroups, calculateAssessmentMarks, checkAssessmentExport, getAssessmentGroupKey, moveAssessmentGroupIds, removeAssessmentGroupIds, sortAssessmentGroupIdsByGrade, sortAssessmentGroupIds, appendAssessmentGroupIds } from "./assessmentGroups";
 import type { BankQuestion } from "./questionData";
 import { weightedGradePerformance, averageQuestionPerformance } from "./teacherQuestionStats";
+import {originalPrintedNumber,canReuseOriginalPrintedQuestion} from "./assessmentNumbering";
 
 const make=(id:string,sourceId:string,marks:number,image=false):BankQuestion=>({
  id,sourceId,marks,questionUrl:image?"signed-question-url":undefined,markSchemeUrl:image?"signed-mark-url":undefined,
@@ -205,5 +206,40 @@ describe("full builder sort options",()=>{
   const incomplete=graded.map(q=>q.id==="c"?{...q,gradePerformance:{}}:q);
   expect(sortAssessmentGroupIds(incomplete,allIds,"average-highest").slice(-1)).toEqual(["c"]);
   expect(sortAssessmentGroupIds(incomplete,allIds,"average-lowest").slice(-1)).toEqual(["c"]);
+ });
+});
+
+describe("paper renumbering preserves question working space",()=>{
+ const edexcel=(id:string,sourceId:string,number:string)=>{
+  return {...make(id,sourceId,1,true),examBoard:"Edexcel",questionNumber:number,tier:"Foundation" as const};
+ };
+ const q1=edexcel("f1","EDX-F-JUNE2022-1F-Q01","Q01");
+ const q2=edexcel("f2","EDX-F-JUNE2022-1F-Q02","Q02");
+ const q3=edexcel("f3","EDX-F-JUNE2022-1F-Q03","Q03");
+ const groups=buildAssessmentGroups([q1,q2,q3],["f1","f2","f3"]);
+ it("keeps original source number and printed total when it already matches each new position",()=>{
+  expect(groups.map((g,i)=>canReuseOriginalPrintedQuestion(g,i+1))).toEqual([true,true,true]);
+  expect(originalPrintedNumber(groups[0])).toBe(1);
+ });
+ it("requires a clean replacement number and footer when paper questions are reordered",()=>{
+  const reordered=buildAssessmentGroups([q1,q2,q3],["f3","f1","f2"]);
+  expect(reordered.map((g,i)=>canReuseOriginalPrintedQuestion(g,i+1))).toEqual([false,false,false]);
+ });
+ it("does not trust imported shadow, missing images, non-Edexcel IDs or invalid references",()=>{
+  const shadow={...q1,shadowPaperId:"some-shadow",shadowOfQuestionId:"f1"};
+  const missing={...q1,questionUrl:undefined};
+  const aqa={...q1,examBoard:"AQA"};
+  const unknown={...q1,sourceId:"CUSTOM-Q01"};
+  for(const row of [shadow,missing,aqa,unknown]){
+   expect(canReuseOriginalPrintedQuestion(buildAssessmentGroups([row],[row.id])[0],1)).toBe(false);
+  }
+ });
+ it("recognises multipart paper question numbers as their parent, without splitting them",()=>{
+  const partA=edexcel("a","EDX-F-JUNE2022-1F-Q08A","Q08a");
+  const partB=edexcel("b","EDX-F-JUNE2022-1F-Q08B","Q08b");
+  const [group]=buildAssessmentGroups([partA,partB],["b"]);
+  expect(originalPrintedNumber(group)).toBe(8);
+  expect(canReuseOriginalPrintedQuestion(group,8)).toBe(true);
+  expect(canReuseOriginalPrintedQuestion(group,7)).toBe(false);
  });
 });
