@@ -147,7 +147,7 @@ const saveToAccount=async(asNew=false)=>{
 };
 const openCloudForEdit=(entry:CloudAssessment)=>{
  if(entry.revision===undefined){setCloudWriteStatus("Cloud revision unavailable. Reload after upgrading the database.");return}
- setEditingCloud({cloudId:entry.cloudId,revision:entry.revision});openSavedAssessment(entry.item);
+ openSavedAssessment(entry.item);setEditingCloud({cloudId:entry.cloudId,revision:entry.revision});
 };
 const modifyCloudEntry=async(entry:CloudAssessment,patch:Partial<SavedAssessment>)=>{
  if(entry.revision===undefined){setCloudWriteStatus("Reload cloud assessments before editing.");return}
