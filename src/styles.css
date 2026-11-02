@@ -230,3 +230,73 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
 .shadow-builder-actions label{margin-bottom:10px}
 .shadow-builder-actions .hint{margin:10px 0 0;font-size:12px}
 @media print{.shadow-question-actions,.shadow-builder-actions{display:none!important}}
+
+
+/* Pink masthead and full-width workspace — branding stays above the work area. */
+.site{min-height:100vh;background:#f7f8fa;color:#283542}
+.site .site-masthead{position:relative;isolation:isolate;min-height:115px;background:#f6e5ed;border-bottom:1px solid #dec5d1;overflow:hidden}
+.site .masthead-lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.38;z-index:-1}
+.site .site-masthead .header-inner{max-width:none;min-height:115px;margin:0;padding:18px clamp(18px,2.5vw,45px);gap:24px}
+.site .site-masthead .brand{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:8px;text-align:left;min-width:0;line-height:1}
+.site .site-masthead .brand>span{font-family:Georgia,"Times New Roman",serif;font-size:clamp(29px,3.6vw,47px);letter-spacing:-1.5px;font-weight:500;color:#3a2d36;white-space:nowrap}
+.site .site-masthead .brand em{font-style:italic;font-weight:400;color:#804662}
+.site .site-masthead .brand small{font-family:Inter,system-ui,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:#68505c}
+.site .site-masthead .header-note{font-size:13px;font-weight:600;color:#6a5360;text-align:right}
+.site .site-nav{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));background:#efd9e3;border-bottom:1px solid #d6bbca}
+.site .site-nav button{appearance:none;border:0;border-right:1px solid #d6bbca;border-radius:0;background:transparent;color:#55404c;padding:13px 8px;min-height:45px;font-size:13px;font-weight:650;white-space:nowrap}
+.site .site-nav button:last-child{border-right:0}
+.site .site-nav button:hover{background:#e5cbd8}
+.site .site-nav button[aria-current="page"]{background:#824760;color:white}
+.site .site-nav button:focus-visible{outline:3px solid #263c4b;outline-offset:-4px;position:relative;z-index:1}
+.site .main{width:100%;max-width:none;margin:0;padding:25px clamp(16px,2vw,42px) 45px}
+.site .page-top{margin-bottom:17px}
+.site .page-top h1{font-size:28px;letter-spacing:-.6px;margin:9px 0 0;color:#263746}
+.site .page-top .back-link{font-size:13px;color:#34516a}
+.site .panel,.site .question-card,.site .paper{background:#fff;border-color:#dfe4e9;border-radius:8px}
+.site .wide-filters{padding:22px 25px}
+.site .wide-filters h2{font-size:21px;margin:0 0 18px;color:#273849}
+.site .wide-filters select,.site .wide-filters input:not([type=checkbox]),.site .filters select,.site .filters input:not([type=checkbox]){border-color:#d1dae2;border-radius:5px;min-width:0;outline-color:#34566e}
+.site .advanced-filter{background:#f7f8fa;border:1px solid #e1e6eb;border-radius:6px}
+.site .advanced-filter h3{color:#2b3a49}
+.site .topic-checks input,.site .check input{accent-color:#29495f}
+.site .primary{background:#263c4b;color:#fff;border-color:#263c4b;border-radius:5px}
+.site .primary:hover{background:#1c303d}
+.site .secondary{background:#fff;color:#29485e;border-color:#cedae2;border-radius:5px}
+.site .secondary:hover{background:#f0f4f7}
+.site .added{background:#edf2f5;color:#28485c;border-color:#d9e2e9}
+.site .count{background:#edf1f4;color:#34516a}
+.site .v62-bank-layout{grid-template-columns:minmax(0,1fr) minmax(265px,305px);gap:18px;align-items:start;margin-top:20px}
+.site .v62-result-card{border-radius:7px;border-color:#e0e5e9}
+.site .v62-result-card h3{color:#2c3d4e}
+.site .v62-basket{top:16px;border-radius:8px}
+.site .v62-performance span.target{background:#edf1f4;border-color:#6e8291;color:#223949}
+.site .v62-stats>div{background:#f7f8fa;border-color:#e0e6eb}
+.site .insights-stats{margin-top:18px}
+.site .builder-question-performance{background:#f3f6f8;border-color:#d3dfe6;border-left-color:#496679}
+.site .shadow-builder-actions{background:#f6f8fa;border-color:#dce5ea}
+.site .account-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:20px}
+.owner-banner{background:#f7f8fa!important;color:#64717c!important;border-bottom:1px solid #e2e6e9;padding:6px clamp(16px,2vw,42px)!important;font-size:11px!important}
+.owner-banner button{background:transparent;color:#344b5d;border:1px solid #d0dbe2;border-radius:4px;padding:5px 10px}
+@media(max-width:900px){
+ .site .v62-bank-layout{grid-template-columns:1fr}
+ .site .v62-basket{position:static;max-height:none}
+ .site .site-nav{display:flex;overflow-x:auto;scrollbar-width:thin}
+ .site .site-nav button{flex:0 0 auto;padding:12px 17px}
+}
+@media(max-width:600px){
+ .site .site-masthead,.site .site-masthead .header-inner{min-height:94px}
+ .site .site-masthead .header-inner{padding:16px}
+ .site .site-masthead .brand>span{font-size:clamp(26px,7vw,35px)}
+ .site .site-masthead .brand small{font-size:9px;letter-spacing:1.2px}
+ .site .main{padding:18px 12px 32px}
+ .site .wide-filters{padding:17px 14px}
+ .site .page-top h1{font-size:24px}
+ .site .v62-result-card{grid-template-columns:minmax(0,1fr)}
+ .site .v62-card-actions{flex-direction:row;flex-wrap:wrap}
+ .site .v62-card-actions>button{width:auto;flex:1}
+ .site .account-actions{flex-direction:column;align-items:stretch}
+}
+@media print{
+ .site .site-nav{display:none!important}
+ .site .site-masthead{display:none!important}
+}
