@@ -18,14 +18,14 @@ for each row execute function public.create_pilot_profile();
 
 -- A changed email address must require fresh staff approval.
 create or replace function public.refresh_pilot_profile_email()
-returns trigger language plpgsql security definer set search_path='' as $
+returns trigger language plpgsql security definer set search_path='' as $$
 begin
  update public.profiles
  set email=new.email, approved=case when role='member' then false else approved end
  where user_id=new.id;
  return new;
 end;
-$;
+$$;
 revoke all on function public.refresh_pilot_profile_email() from public,anon,authenticated;
 create trigger refresh_mqb_pilot_profile_email after update of email on auth.users
 for each row when (old.email is distinct from new.email)
