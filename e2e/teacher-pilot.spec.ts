@@ -65,7 +65,7 @@ test("approved teacher sees eligible Edexcel question images and builds a worksh
  await page.route("**/fixture-image.png",route=>route.fulfill({status:200,contentType:"image/png",body:png}));
  await page.goto("/");
  await expect(page.getByText("1 question records match your filters")).toBeVisible({timeout:15000});
- await expect(page.getByText(/June 2024/).first()).toBeVisible();
+ await expect(page.locator(".v62-result-card").first()).toContainText("June 2024");
  await page.getByRole("button",{name:"Preview"}).click();
  await expect(page.getByRole("img",{name:/EDX-H-JUNE2024-1H-Q07 question/})).toBeVisible({timeout:15000});
  await page.getByRole("button",{name:"Mark scheme"}).click();
