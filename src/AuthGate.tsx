@@ -31,11 +31,16 @@ export default function AuthGate({children}:{children:ReactNode}){
    setStatus(!error&&data?.approved===true?(data.role==="owner"?"owner":data.role==="member"?"teacher":"pending"):"pending");
   };
   void check();
+  // Approval and revocation are enforced by RLS immediately. Check active sessions
+  // periodically as well so a disabled teacher loses the UI without a reload.
+  const timer=window.setInterval(()=>{void check();},60000);
+  const onVisible=()=>{if(document.visibilityState==="visible")void check();};
+  document.addEventListener("visibilitychange",onVisible);
   const {data:{subscription}}=supabase.auth.onAuthStateChange((event)=>{
    if(event==="PASSWORD_RECOVERY"){setStatus("setup");return;}
    if(!setup)void check();
   });
-  return()=>{active=false;subscription.unsubscribe()};
+  return()=>{active=false;window.clearInterval(timer);document.removeEventListener("visibilitychange",onVisible);subscription.unsubscribe()};
  },[]);
 
  const submit=async(e:FormEvent)=>{
@@ -69,7 +74,7 @@ export default function AuthGate({children}:{children:ReactNode}){
   </form>
   {message&&<p role="status" className={message.startsWith("Unable")?"auth-error":""}>{message}</p>}
   <button className="auth-switch" type="button" onClick={()=>{setRegister(!register);setMessage("");setPassword("");setConfirmPassword("");}}>{register?"Already have an account? Sign in":"New teacher? Create an account"}</button>
-  <p className="hint">Pilot accounts only. We use your email address for authentication and access approval; do not upload pupil personal data. Original practice questions only are available to teachers until appropriate exam-board rights are confirmed.</p>
+  <p className="hint">Pilot accounts only. We use your email address for authentication and access approval; do not upload pupil personal data. Approved teachers can access eligible recent Edexcel questions; older papers and owner-only sources remain restricted.</p>
  </div></main>;
  if(status==="pending")return <main className="auth-page"><div className="auth-card">
   <h1>Account awaiting approval</h1><p>Your email is signed in, but teacher access has not yet been approved. Please ask the Maths Question Bank owner to approve your account for the departmental pilot.</p>

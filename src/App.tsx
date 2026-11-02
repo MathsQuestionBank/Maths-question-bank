@@ -38,14 +38,15 @@ const [loadStatus,setLoadStatus]=useState("Not started");
 const [diagnostics,setDiagnostics]=useState("");
 const [checking,setChecking]=useState(false);
 const requestVersion=useRef(0);
+const lastQuestionRefreshAt=useRef(0);
 const reloadQuestions=async()=>{
  const version=++requestVersion.current;
  setQuestionError("");setLoadingQuestions(true);setLoadStatus("Loading records…");
  for(let attempt=0;attempt<5;attempt++){
   try{
-   const data=await loadBankQuestions(withImages=>{if(version===requestVersion.current)setQuestions(withImages)});
+   const data=await loadBankQuestions(withImages=>{if(version===requestVersion.current)setQuestions(withImages)},isOwner?3600:900);
    if(version!==requestVersion.current)return;
-   if(data.length>0){setQuestions(data);setQuestionError("");setLoadStatus(`${data.length} records loaded`);setLoadingQuestions(false);return;}
+   if(data.length>0){lastQuestionRefreshAt.current=Date.now();setQuestions(data);setQuestionError("");setLoadStatus(`${data.length} records loaded`);setLoadingQuestions(false);return;}
    if(attempt===4){setQuestionError("No question records returned from the database. Please check the connection.");setLoadStatus("No visible records");setLoadingQuestions(false);return;}
   }catch(e){
    if(version!==requestVersion.current)return;
@@ -61,6 +62,17 @@ useEffect(()=>{
  if(page==="bank"||page==="builder"||page==="saved"||(isOwner&&(page==="review"||page==="insights")))void reloadQuestions();
  return()=>{requestVersion.current++};
 },[page]);
+// Teacher image links have a short lifetime; refresh them during longer planning sessions.
+// Revoked accounts cannot obtain new links because both the database and storage enforce RLS.
+useEffect(()=>{
+ if(isOwner||!["bank","builder","saved"].includes(page))return;
+ const maybeRefresh=()=>{
+  if(document.visibilityState==="visible" && Date.now()-lastQuestionRefreshAt.current>11*60*1000)void reloadQuestions();
+ };
+ const timer=window.setInterval(maybeRefresh,60*1000);
+ document.addEventListener("visibilitychange",maybeRefresh);
+ return()=>{window.clearInterval(timer);document.removeEventListener("visibilitychange",maybeRefresh)};
+},[page,isOwner]);
 const [tier,setTier]=useState("All");
 const [topic,setTopic]=useState("All");
 const [skill,setSkill]=useState("All");
@@ -320,7 +332,7 @@ return <div className="site">
 <main className="main">
 {page==="home"?<><section className="hero"><span className="eyebrow">MATHS QUESTION BANK</span><h1>Find questions. Build better assessments.</h1><p>Choose a tool to get started.</p></section><h2 className="dashboard-title">What would you like to do?</h2><div className="dashboard-grid">{tiles.map(t=><button className="dashboard-tile" key={t.page} onClick={()=>navigate(t.page)}><span className="tile-icon">{t.icon}</span><strong>{t.name}</strong><span>{t.desc}</span><span className="tile-arrow">Explore →</span></button>)}</div><div className="notice"><strong>Early preview:</strong> The mapped exam-question metadata is now in your private Supabase database. Import your existing V6.2 ZIP using the owner-only Import Exam Papers tool to add question images and mark schemes securely.</div><section className="owner-info"><h2>Owner tools</h2><div className="dashboard-grid"><button className="dashboard-tile" onClick={()=>navigate("import")}><span className="tile-icon">⇧</span><strong>Import Exam Papers</strong><span>Upload your V6.2 ZIP securely to private storage.</span><span className="tile-arrow">Open →</span></button><button className="dashboard-tile" onClick={()=>navigate("review")}><span className="tile-icon">✓</span><strong>Review image crops</strong><span>Check imported question images and mark schemes.</span><span className="tile-arrow">Open →</span></button><button className="dashboard-tile" onClick={()=>navigate("insights")}><span className="tile-icon">▥</span><strong>Question Bank Insights</strong><span>Review mapping coverage and question bank performance — in development.</span><span className="tile-arrow">Open →</span></button></div></section></>:
 <><div className="page-top">{page!=="bank"&&<button className="back-link" onClick={()=>navigate("bank")}>← Question Bank</button>}<h1>{page==="bank"?"Question Bank":page==="builder"?"Assessment Builder":page==="saved"?"My Worksheets":page==="qualifications"?"More Qualifications":page==="further"?"Further Maths":page==="statistics"?"GCSE Statistics":page==="account"?"Account":page==="import"?"Import Exam Papers":page==="review"?"Review image crops":"Question Bank Insights"}</h1></div>
-{page==="bank"&&<>{!isOwner&&<p className="pilot-explainer">Departmental pilot: original practice questions are available. Pearson Edexcel past-paper images remain restricted while school-use permissions are confirmed.</p>}<div className="panel wide-filters"><h2>Find questions</h2><div className="filter-grid">
+{page==="bank"&&<><div className="panel wide-filters"><h2>Find questions</h2><div className="filter-grid">
 <label>Tier<select value={tier} onChange={e=>{const selectedTier=e.target.value;setTier(selectedTier);if(grade!=="Any"&&!gradesForTier(selectedTier).includes(Number(grade))){setGrade("Any");setChallenge("Any")}}}>{options(["All","Foundation","Higher"])}</select></label>
 <label>Topic<select value={topic} onChange={e=>setTopic(e.target.value)}>{options(["All",...groups])}</select></label>
 <label>Skill<select value={skill} onChange={e=>setSkill(e.target.value)}>{options(["All",...new Set(questions.map(q=>q.skill))])}</select></label>
