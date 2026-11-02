@@ -16,6 +16,21 @@ revoke all on function public.create_pilot_profile() from public,anon,authentica
 create trigger create_mqb_pilot_profile after insert on auth.users
 for each row execute function public.create_pilot_profile();
 
+-- A changed email address must require fresh staff approval.
+create or replace function public.refresh_pilot_profile_email()
+returns trigger language plpgsql security definer set search_path='' as $
+begin
+ update public.profiles
+ set email=new.email, approved=case when role='member' then false else approved end
+ where user_id=new.id;
+ return new;
+end;
+$;
+revoke all on function public.refresh_pilot_profile_email() from public,anon,authenticated;
+create trigger refresh_mqb_pilot_profile_email after update of email on auth.users
+for each row when (old.email is distinct from new.email)
+execute function public.refresh_pilot_profile_email();
+
 create or replace function public.is_approved_teacher()
 returns boolean language sql stable security definer set search_path='' as $$
  select exists(select 1 from public.profiles where user_id=auth.uid() and role='member' and approved=true)
