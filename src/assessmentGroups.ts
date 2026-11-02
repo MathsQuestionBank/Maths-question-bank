@@ -89,7 +89,7 @@ export type ExportReadiness = {ready:boolean; missingQuestions:string[]; missing
  *  The print page must not quietly substitute incomplete metadata or marking notes.
  */
 export function checkAssessmentExport(groups:ReadonlyArray<AssessmentGroup>,mode:AssessmentExportMode):ExportReadiness{
- const missingQuestions=mode==="marks"?[]:groups.filter(g=>!g.question.questionUrl).map(g=>g.label);
- const missingMarks=mode==="questions"?[]:groups.filter(g=>!g.question.markSchemeUrl).map(g=>g.label);
+ const missingQuestions=mode==="marks"?[]:groups.filter(g=>!g.question.questionUrl&&!(g.question.originalContent&&g.question.prompt.trim())).map(g=>g.label);
+ const missingMarks=mode==="questions"?[]:groups.filter(g=>!g.question.markSchemeUrl&&!(g.question.originalContent&&g.question.answer.trim())).map(g=>g.label);
  return {ready:groups.length>0&&missingQuestions.length===0&&missingMarks.length===0,missingQuestions,missingMarks};
 }
