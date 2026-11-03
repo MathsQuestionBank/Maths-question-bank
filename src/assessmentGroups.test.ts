@@ -92,7 +92,7 @@ describe("assessment PDF export readiness",()=>{
   const partial={...make("x","2022_1H_Q30",4),questionUrl:"signed-question-url"};
   const assessment=buildAssessmentGroups([...all,partial],["a","x"]);
   expect(checkAssessmentExport(assessment,"both").ready).toBe(false);
-  expect(checkAssessmentExport(assessment,"both").missingMarks).toEqual(["2022_1H_Q30"]);
+  expect(checkAssessmentExport(assessment,"both").missingMarks).toEqual(["November 2022 1H - Q30 - Substitution"]);
  });
  it("cannot print an empty assessment in any export mode",()=>{
   for(const mode of ["questions","marks","both"] as const)expect(checkAssessmentExport([],mode).ready).toBe(false);
@@ -241,5 +241,37 @@ describe("paper renumbering preserves question working space",()=>{
   expect(originalPrintedNumber(group)).toBe(8);
   expect(canReuseOriginalPrintedQuestion(group,8)).toBe(true);
   expect(canReuseOriginalPrintedQuestion(group,7)).toBe(false);
+ });
+});
+
+describe("readable exam-question labels in basket and Assessment Builder",()=>{
+ const q10a={...make("q10a","2020_2H_Q10a",1,true),series:"November 2020",paperCode:"2H",questionNumber:"Q10a",skill:"Simplify and manipulate algebraic expressions and fractions"};
+ const q10b={...make("q10b","2020_2H_Q10b",1,true),series:"November 2020",paperCode:"2H",questionNumber:"Q10b",skill:q10a.skill};
+ const q10c={...make("q10c","2020_2H_Q10c",2,true),series:"November 2020",paperCode:"2H",questionNumber:"Q10c",skill:q10a.skill};
+ const allParts=[q10a,q10b,q10c];
+ it("displays the exact selected part and skill instead of the internal group code",()=>{
+  const [group]=buildAssessmentGroups(allParts,["q10c"]);
+  expect(group.label).toBe("November 2020 2H - Q10c - Simplify And Manipulate Algebraic Expressions And Fractions");
+  expect(group.parts).toHaveLength(3);
+  expect(group.marks).toBe(4);
+  expect(group.key).toBe("2020_2H_Q10");
+ });
+ it("keeps readable selected-part labels and group count after bulk add and saved selection",()=>{
+  const ids=appendAssessmentGroupIds(allParts,[],["q10c","q10a","q10b"]);
+  expect(ids).toEqual(["q10c"]);
+  const [group]=buildAssessmentGroups(allParts,ids);
+  expect(group.label).toContain("Q10c - Simplify And Manipulate");
+  expect(calculateAssessmentMarks([group])).toBe(4);
+ });
+ it("formats Enhanced Mapping IDs without showing EDX codes",()=>{
+  const question={...make("edx","EDX-H-NOVEMBER2018-2H-Q16A",2,true),series:"November 2018",paperCode:"2H",skill:"Conditional probability"};
+  const [group]=buildAssessmentGroups([question],["edx"]);
+  expect(group.label).toBe("November 2018 2H - Q16a - Conditional Probability");
+ });
+ it("keeps shadow-set identity but uses the original question's readable title",()=>{
+  const shadow={...q10c,id:"shadow-q10c",shadowPaperId:"shadowpaper-1",shadowOfQuestionId:"q10c",shadowSet:"A"};
+  const [group]=buildAssessmentGroups([...allParts,shadow],["shadow-q10c"]);
+  expect(group.label).toBe("Shadow A · November 2020 2H - Q10c - Simplify And Manipulate Algebraic Expressions And Fractions");
+  expect(group.key).toBe("shadowpaper-1:2020_2H_Q10");
  });
 });
