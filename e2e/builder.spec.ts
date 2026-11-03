@@ -56,6 +56,9 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening acc
  await expect(page.getByText("4 question records match your filters")).toBeVisible({timeout:12000});
  await page.getByRole("button",{name:"Add all filtered results"}).click();
  await page.getByRole("button",{name:"Add all filtered results"}).click(); // idempotent, never duplicates multipart groups
+ const basket=page.locator(".v62-basket");
+ await expect(basket).toContainText(/November 2022 1H - Q02[ab] - Fractions/);
+ await expect(basket).not.toContainText("EDX-H-JUNE2022-1H-Q02");
  await page.getByRole("button",{name:"Open assessment builder →"}).click();
  await expect(page.getByRole("heading",{name:"Assessment preview"})).toBeVisible();
  await expect(page.getByRole("heading",{name:"Put your assessment together"})).toBeVisible();
@@ -65,6 +68,8 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening acc
  await expect(page.locator(".builder-overview-stats")).toContainText("13");
  const order=page.locator(".assessment-order-row");
  await expect(order).toHaveCount(3);
+ await expect(order.first()).toContainText(/November 2022 1H - Q02[ab] - Fractions/);
+ await expect(order.first()).not.toContainText("EDX-H-JUNE2022-1H-Q02");
  await expect(page.locator(".paper-question")).toHaveCount(3);
  await expect(page.locator(".teacher-stats-question").first()).toContainText("Q02");
  await expect(page.locator(".teacher-stats-question").first()).toContainText("Combined:");
