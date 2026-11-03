@@ -1,4 +1,5 @@
 import type { BankQuestion } from "./questionData";
+import { formatQuestionTitle } from "./questionDisplay";
 import { weightedGradePerformance, averageQuestionPerformance, compareOriginalQuestionNumber } from "./teacherQuestionStats";
 
 export type AssessmentGroup = {
@@ -43,9 +44,12 @@ export function buildAssessmentGroups(all:BankQuestion[], selectedIds:string[]):
   const parts=(parents.get(key)||[q]).slice().sort((a,b)=>(a.questionNumber||a.sourceId||"").localeCompare(b.questionNumber||b.sourceId||"",undefined,{numeric:true}));
   const representative=parts.find(p=>p.questionUrl)||q;
   const marks=parts.reduce((sum,p)=>sum+p.marks,0);
+  // Display the same readable title as the question card, while retaining
+  // the stable internal key and all sibling parts for grouping and marks.
+  // The selected part determines the title (e.g. Q10c when that part was added).
   const label=q.shadowPaperId
-   ?`Shadow ${q.shadowSet||"set"} · ${(byId.get(q.shadowOfQuestionId||"")?.sourceId)||q.questionNumber||"Question"}`
-   :parts.length>1?`${key} (${parts.map(p=>p.questionNumber||p.sourceId||p.id).join(", ")})`:q.sourceId||q.id;
+   ?`Shadow ${q.shadowSet||"set"} · ${formatQuestionTitle(byId.get(q.shadowOfQuestionId||"")||q)}`
+   :formatQuestionTitle(q);
   output.push({key,question:representative,parts,marks,label});
  }
  return output;
