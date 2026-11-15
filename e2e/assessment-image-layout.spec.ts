@@ -2,6 +2,7 @@ import {test,expect} from "@playwright/test";
 import {writeFile} from "node:fs/promises";
 import {createCanvas} from "@napi-rs/canvas";
 import {getDocument} from "pdfjs-dist/legacy/build/pdf.mjs";
+import {numberingFixture} from "./numbering-fixture";
 
 test("tall cropped question and marking images retain both ends on A4",async({page},testInfo)=>{
  test.skip(testInfo.project.name!=="chromium","Actual PDF layout runs once on desktop Chromium");
@@ -10,7 +11,7 @@ test("tall cropped question and marking images retain both ends on A4",async({pa
  const encode=(value:object)=>Buffer.from(JSON.stringify(value)).toString("base64url");
  const token=`${encode({alg:"HS256",typ:"JWT"})}.${encode({exp:4102444800,sub:uid,role:"authenticated",aud:"authenticated"})}.signature`;
  const crop={top:10,right:10,bottom:10,left:10};
- const row={id:"tall-question",question_number:"Q01",marks:4,topic:"Algebra",skill:"Equations",assessment_objective:"AO1",question_storage_path:"questions/tall.svg",mark_scheme_storage_path:"marks/tall.svg",exam_papers:{exam_board:"Edexcel",series:"June 2023",paper_code:"1H",tier:"Higher"},metadata:{id:"EDX-H-JUNE2023-1H-Q01",tier:"Higher",image_crops:{question:crop,mark:crop}}};
+ const row={id:"tall-question",question_number:"Q01",marks:4,topic:"Algebra",skill:"Equations",assessment_objective:"AO1",question_storage_path:"questions/tall.svg",mark_scheme_storage_path:"marks/tall.svg",exam_papers:{exam_board:"Edexcel",series:"June 2023",paper_code:"1H",tier:"Higher"},metadata:{id:"EDX-H-JUNE2023-1H-Q01",tier:"Higher",numbering_positions:{question:numberingFixture(600,1800,1,null),mark:numberingFixture(600,1800,1,null)},image_crops:{question:crop,mark:crop}}};
  await page.addInitScript(({token,user})=>localStorage.setItem("sb-ljisttslifnyrbuybfud-auth-token",JSON.stringify({access_token:token,refresh_token:"dummy",expires_at:4102444800,expires_in:999999999,token_type:"bearer",user})),{token,user});
  await page.route("https://ljisttslifnyrbuybfud.supabase.co/**",async route=>{
   const url=new URL(route.request().url());
@@ -20,7 +21,7 @@ test("tall cropped question and marking images retain both ends on A4",async({pa
   if(url.pathname.startsWith("/rest/v1/questions"))return reply([row]);
   if(url.pathname.startsWith("/rest/v1/assessment_folders"))return reply([]);
   if(url.pathname.startsWith("/rest/v1/assessment_questions"))return reply([{assessment_id:"saved-tall",question_id:row.id,position:0}]);
-  if(url.pathname.startsWith("/rest/v1/assessments"))return reply([{id:"saved-tall",title:"Tall image regression",created_at:"2026-11-15T10:00:00Z",revision:1,configuration:{id:"tall",folder:"Unfiled",minutes:15,cover:false,nameBox:false,exportMode:"both",renumberStudentQuestions:false}}]);
+  if(url.pathname.startsWith("/rest/v1/assessments"))return reply([{id:"saved-tall",title:"Tall image regression",created_at:"2026-11-15T10:00:00Z",revision:1,configuration:{id:"tall",folder:"Unfiled",minutes:15,cover:false,nameBox:false,exportMode:"both",renumberStudentQuestions:true}}]);
   if(url.pathname.includes("/storage/v1/object/sign/"))return reply((route.request().postDataJSON().paths as string[]).map(path=>({path,signedURL:`/tall-fixture.svg?asset=${encodeURIComponent(path)}`})));
   return route.fulfill({status:404,contentType:"application/json",body:"{}"});
  });

@@ -2,6 +2,8 @@ import { metadataWithChangedCrop } from "./legacyImageMetadata";
 import { useRef, useState, type CSSProperties } from "react";
 import { supabase } from "./supabase";
 import { defaultNumberingMask, isNumberingMaskReviewed, normaliseNumberingMask, type NumberingMask } from "./numberingMasks";
+import NumberingOverlay from "./NumberingOverlay";
+import type { AutomaticNumberingLayout } from "./automaticNumbering";
 export { defaultNumberingMask, type NumberingMask } from "./numberingMasks";
 
 export type Crop = { top:number; right:number; bottom:number; left:number };
@@ -14,26 +16,29 @@ export function validCrop(value:unknown):Crop {
  if(Object.values(c).some(n=>!Number.isFinite(n)||n<0||n>95)||c.top+c.bottom>=95||c.left+c.right>=95)return {...empty};
  return c;
 }
-type CroppedImageProps={src:string;crop:Crop;alt:string;coverOriginalNumber?:boolean;coverOriginalFooter?:boolean;numberingMask?:NumberingMask;showCoverGuides?:boolean};
+type CroppedImageProps={src:string;crop:Crop;alt:string;coverOriginalNumber?:boolean;coverOriginalFooter?:boolean;numberingMask?:NumberingMask;showCoverGuides?:boolean;automaticNumbering?:AutomaticNumberingLayout;replacementNumber?:string;replacementMarks?:number;replaceAutomaticTotals?:boolean};
 export function CroppedImage(props:CroppedImageProps){
  // A changed source starts with fresh state before the image mounts. A passive
  // reset effect can run after a cached image's onLoad and leave it loading forever.
  return <SourceCroppedImage key={props.src} {...props}/>;
 }
-function SourceCroppedImage({src,crop,alt,coverOriginalNumber=false,coverOriginalFooter=false,numberingMask=defaultNumberingMask,showCoverGuides=false}:CroppedImageProps){
+function SourceCroppedImage({src,crop,alt,coverOriginalNumber=false,coverOriginalFooter=false,numberingMask=defaultNumberingMask,showCoverGuides=false,automaticNumbering,replacementNumber,replacementMarks,replaceAutomaticTotals=true}:CroppedImageProps){
  const [dimensions,setDimensions]=useState<{w:number;h:number}|null>(null);
  const [error,setError]=useState(false);
  const [attempt,setAttempt]=useState(0);
  const mask=normaliseNumberingMask(numberingMask);
  const canCover=showCoverGuides||isNumberingMaskReviewed(mask,src,crop,coverOriginalFooter);
+ const automaticMatches=!!automaticNumbering&&!!dimensions&&automaticNumbering.imageWidth===dimensions.w&&automaticNumbering.imageHeight===dimensions.h;
  const horizontal=100-crop.left-crop.right,vertical=100-crop.top-crop.bottom;
  const style:CSSProperties=dimensions?{position:"relative",width:"100%",aspectRatio:String((dimensions.w*horizontal)/(dimensions.h*vertical)),"--mqb-crop-ratio":(dimensions.w*horizontal)/(dimensions.h*vertical),overflow:"hidden",containerType:"inline-size"} as CSSProperties:{width:"100%",position:"relative",containerType:"inline-size"};
  if(error)return <div role="alert" data-image-state="error" style={{padding:20,border:"1px solid #cc8c8c"}}><p>Image failed to load. The original file may still exist in private storage.</p><button className="secondary small" onClick={()=>{setError(false);setDimensions(null);setAttempt(x=>x+1)}}>Retry image</button></div>;
- return <div className="mqb-cropped-image" data-image-state={dimensions?"ready":"loading"} style={style}>
+ return <div className="mqb-cropped-image" data-image-state={dimensions?"ready":"loading"} data-numbering-state={automaticNumbering&&dimensions?(automaticMatches?"ready":"invalid"):undefined} style={style}>
  {!dimensions&&<p role="status" style={{padding:16}}>Loading image…</p>}
  <img key={src+"-"+attempt} src={src} alt={alt} onLoad={e=>{const {naturalWidth:w,naturalHeight:h}=e.currentTarget;if(w>0&&h>0)setDimensions({w,h});else setError(true)}} onError={()=>setError(true)} style={dimensions?{position:"absolute",maxWidth:"none",width:`${10000/horizontal}%`,height:"auto",left:`-${crop.left/horizontal*100}%`,top:`-${crop.top/vertical*100}%`}:{width:"100%",height:"auto",display:"none"}}/>
- {coverOriginalNumber&&canCover&&mask.numberEnabled&&<div className={`mqb-original-number-mask${showCoverGuides?" is-adjusting":""}`} aria-hidden="true" style={{width:`${mask.numberWidth}%`,height:`${mask.numberHeight}cqw`,top:`${mask.numberTop}cqw`,left:`${mask.numberLeft}%`,...(showCoverGuides?{background:"rgba(255,196,0,.25)",border:"1px dashed #996300"}:{})}}/>}
- {coverOriginalFooter&&canCover&&mask.footerEnabled&&<div className={`mqb-original-total-mask${showCoverGuides?" is-adjusting":""}`} aria-hidden="true" style={{height:`${mask.footerHeight}cqw`,bottom:`${mask.footerBottom}cqw`,width:`${mask.footerWidth}%`,left:`${mask.footerLeft}%`,right:"auto",...(showCoverGuides?{background:"rgba(255,196,0,.25)",border:"1px dashed #996300"}:{})}}/>}
+ {!automaticNumbering&&coverOriginalNumber&&canCover&&mask.numberEnabled&&<div className={`mqb-original-number-mask${showCoverGuides?" is-adjusting":""}`} aria-hidden="true" style={{width:`${mask.numberWidth}%`,height:`${mask.numberHeight}cqw`,top:`${mask.numberTop}cqw`,left:`${mask.numberLeft}%`,...(showCoverGuides?{background:"rgba(255,196,0,.25)",border:"1px dashed #996300"}:{})}}/>}
+ {!automaticNumbering&&coverOriginalFooter&&canCover&&mask.footerEnabled&&<div className={`mqb-original-total-mask${showCoverGuides?" is-adjusting":""}`} aria-hidden="true" style={{height:`${mask.footerHeight}cqw`,bottom:`${mask.footerBottom}cqw`,width:`${mask.footerWidth}%`,left:`${mask.footerLeft}%`,right:"auto",...(showCoverGuides?{background:"rgba(255,196,0,.25)",border:"1px dashed #996300"}:{})}}/>}
+ {automaticNumbering&&automaticMatches&&replacementNumber&&<NumberingOverlay layout={automaticNumbering} crop={crop} number={replacementNumber} marks={replacementMarks} replaceTotals={replaceAutomaticTotals}/>}
+ {automaticNumbering&&dimensions&&!automaticMatches&&<p role="alert">Automatic numbering positions do not match this image. Refresh the question before exporting.</p>}
  </div>;
 }
 function VisualSelection({src,crop,onChange}:{src:string;crop:Crop;onChange:(c:Crop)=>void}){

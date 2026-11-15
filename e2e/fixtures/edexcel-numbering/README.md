@@ -1,0 +1,11 @@
+# Real Edexcel numbering test excerpts
+
+These 16 PNG excerpts are rendered from authentic Pearson Edexcel GCSE Mathematics examination papers publicly linked by [Physics & Maths Tutor](https://www.physicsandmathstutor.com/past-papers/gcse-maths/edexcel-paper-1/). They are examination excerpts for this numbering regression, not synthetic illustrations. Pearson retains copyright; these files are not claimed to carry an open licence. Whole question paper PDFs are not bundled.
+
+`provenance.json` records each public PDF URL, SHA-256 and PDF metadata. `layouts.json` records the question number, actual printed total marks, PDF page and exact source slice, image dimensions and PDF text rectangles. Each crop retains the full page width, starts 16 PDF points above its leading question number, ends 30 points below its total statement and is rendered at scale 1.4. Positions are normalized from 0 to 1 in the uncropped PNG; browser `image_crops` are applied afterwards.
+
+The set covers Foundation and Higher, June and November, 2022–2024, single and double digit numbers, short and tall images, and multipart questions. November 2024 Foundation Paper 1 Q14 is the reported two-cuboid question with 5 total marks. Its leading 14 is around 7.14% of the full width, so a 3.5% left mask misses it. Its total statement is above the lower frame, so the previous cover anchored to the bottom hit that line.
+
+The source coordinates here are test reference data derived from real PDF text. No production question data, source image or saved assessment was changed. These documented test crops are not asserted to be byte-identical to every private published crop. Real OCR cases omit stored positions and exercise the legacy image path; source position cases use exact metadata rectangles. Additional crop variants test markers that are clipped or already absent. PNG metadata cases exercise source positions carried in a new immutable image without a database migration or OCR.
+
+The browser suite saves original and renumbered previews and actual PDFs. It compares raster pixels outside the two detected print regions, so changes to mathematical content, diagrams, labels, answer rules or working space fail the regression. Source images remain at their original resolution in the PDF.

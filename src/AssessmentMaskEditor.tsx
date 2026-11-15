@@ -22,7 +22,7 @@ export default function AssessmentMaskEditor({asset,mask:input,replaceSourceTota
  ] as const;
  return <section className="builder-mask-editor" aria-label={`Original print covers for ${asset.label}`}>
   <div className="builder-mask-editor-title"><strong>Adjust covers — {asset.label}</strong><button type="button" className="secondary small" onClick={onClose} aria-label="Close cover adjustments">Close</button></div>
-  <p>Check the shaded areas against the original print. Move, resize or disable a cover if it overlaps mathematical content, part labels, diagrams, marks, answer lines or working space. These covers affect this assessment only.</p>
+  <p>Check the shaded areas against the original print. Move, resize or disable a cover if it overlaps mathematical content, part labels, diagrams, marks, answer lines or working space. Your correction will be saved with this assessment and reused for this image.</p>
   <div className="mask-editor-layout"><div className="mask-editor-preview" onLoadCapture={event=>{const img=event.target as HTMLImageElement;setImageReady(img.naturalWidth>0&&img.naturalHeight>0)}} onErrorCapture={()=>setImageReady(false)}>
    <CroppedImage key={asset.key+asset.src} src={asset.src} crop={asset.crop} alt={`Cover adjustment preview for ${asset.label}`} coverOriginalNumber coverOriginalFooter={replaceSourceTotals} numberingMask={mask} showCoverGuides/>
   </div>

@@ -3,15 +3,17 @@ import {useAccountRole} from "./AuthGate";
 import {paperNumberFromCode,compareOriginalQuestionNumber,weightedGradePerformance,averageQuestionPerformance} from "./teacherQuestionStats";
 import TeacherGradePerformance from "./TeacherGradePerformance";
 import AssessmentPaper from "./AssessmentPaper";
+import { useAutomaticNumbering } from "./useAutomaticNumbering";
+import { numberingMaskProposal } from "./numberingProcessing";
 import AssessmentMaskEditor from "./AssessmentMaskEditor";
-import { assessmentPrintAssets, unreviewedPrintAssets, prepareAssessmentImages } from "./assessmentExport";
+import { assessmentPrintAssets, prepareAssessmentImages } from "./assessmentExport";
 import type { ExportMode, TeacherSourceMode } from "./worksheetLibrary";
 import ShadowQuestionActions from "./ShadowQuestionActions";
 import {formatQuestionTitle} from "./questionDisplay";
 import { buildAssessmentGroups, calculateAssessmentMarks, checkAssessmentExport, moveAssessmentGroupIds, removeAssessmentGroupIds, sortAssessmentGroupIds, appendAssessmentGroupIds, type AssessmentSortMode } from "./assessmentGroups";
 import { ASSESSMENTS_KEY, normaliseAssessments, type SavedAssessment } from "./worksheetLibrary";
 import CropReviewQueue from "./CropReviewQueue";
-import { CroppedImage, defaultNumberingMask, type NumberingMask, type Crop } from "./CropEditor";
+import { CroppedImage, type NumberingMask, type Crop } from "./CropEditor";
 import ZipImporter from "./ZipImporter";
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./styles.css";
@@ -316,7 +318,8 @@ const createShadowCopy=()=>{
 const total=calculateAssessmentMarks(chosen);
 const exportReadiness=checkAssessmentExport(chosen,exportMode);
 const printAssets=assessmentPrintAssets(chosen,exportMode,renumberStudentQuestions);
-const pendingPrintReviews=unreviewedPrintAssets(printAssets,numberingMasks,replaceSourceTotals);
+const numbering=useAutomaticNumbering(printAssets,numberingMasks,replaceSourceTotals);
+const pendingPrintReviews=numbering.unsupported;
 const editingMaskAsset=printAssets.find(asset=>asset.maskKey===maskEditorGroupKey);
 useEffect(()=>{
  if(!maskEditorGroupKey)return;
@@ -329,13 +332,13 @@ useEffect(()=>{
  if(page!=="builder")return;
  const paper=document.querySelector<HTMLElement>("#assessment-preview .paper");
  if(!paper)return;
- const update=()=>setPaperImagesReady(!paper.querySelector('[data-image-state="loading"],[data-image-state="error"]')&&paper.querySelectorAll('img').length===printAssets.length);
+ const update=()=>setPaperImagesReady(!paper.querySelector('[data-image-state="loading"],[data-image-state="error"],[data-numbering-state="invalid"]')&&paper.querySelectorAll('img').length===printAssets.length);
  update();
  const observer=new MutationObserver(update);
- observer.observe(paper,{subtree:true,childList:true,attributes:true,attributeFilter:["data-image-state"]});
+ observer.observe(paper,{subtree:true,childList:true,attributes:true,attributeFilter:["data-image-state","data-numbering-state"]});
  return()=>observer.disconnect();
 },[page,printAssetIdentity]);
-const exportReady=exportReadiness.ready&&pendingPrintReviews.length===0&&unavailableSelected.length===0&&paperImagesReady;
+const exportReady=exportReadiness.ready&&pendingPrintReviews.length===0&&numbering.pending.length===0&&unavailableSelected.length===0&&paperImagesReady;
 const printAssessment=async()=>{
  if(!exportReady||printing)return;
  setPrinting(true);setPrintError("");
@@ -413,16 +416,17 @@ return <div className="site">
  <div className="builder-numbering-options"><h4>Question numbering</h4>
   <label className="check"><input type="checkbox" checked={renumberStudentQuestions} onChange={e=>setRenumberStudentQuestions(e.target.checked)}/> Hide original question numbers and use the assessment order</label>
   <label className="check"><input type="checkbox" disabled={!renumberStudentQuestions} checked={replaceSourceTotals} onChange={e=>setReplaceSourceTotals(e.target.checked)}/> Replace original total lines with updated question numbers and marks</label>
-  <p className="hint">Unticked: retain original question numbers. Ticked: number complete questions from 1 in your assessment order. Review each image that needs replacement print. Suggested covers are applied only after you confirm they avoid content; turn covers off if the original print is already cropped out. Mark schemes are reviewed separately.</p>
+  <p className="hint">Sequential numbering automatically locates the printed number and total statement. Verified positions are reused across assessments. Images are processed privately in your browser. Advanced adjustment is available for layouts that cannot be identified safely.</p>
  </div></div><div className="builder-section"><h3>Print & export</h3><fieldset className="builder-choice"><legend>Export format</legend><div className="builder-choice-options export-mode-options">{([{id:"questions",label:"Questions only"},{id:"teacher",label:"Teacher copy"},{id:"marks",label:"Mark scheme only"},{id:"both",label:"Questions + mark scheme"}] as const).map(mode=><button type="button" key={mode.id} className={exportMode===mode.id?"primary small":"secondary small"} aria-pressed={exportMode===mode.id} onClick={()=>setExportMode(mode.id)}>{mode.label}</button>)}</div></fieldset><p className="hint">Questions only creates a student paper. Questions + mark scheme places the matching marking pages after the student paper.</p>
  {exportMode==="teacher"&&<label>Teacher source references<select aria-label="Teacher source references" value={teacherSourceMode} onChange={event=>setTeacherSourceMode(event.target.value as TeacherSourceMode)}><option value="inline">With each question</option><option value="sheet">Separate reference sheet</option><option value="none">Exclude source references</option></select></label>}
  <button className="primary full" disabled={!exportReady||printing} onClick={()=>void printAssessment()}>{printing?"Preparing PDF…":exportMode==="teacher"?"Print teacher copy / save PDF":exportMode==="questions"?"Print questions / save PDF":exportMode==="marks"?"Print mark scheme / save PDF":"Print questions + mark scheme / save PDF"}</button>
  {printError&&<p role="alert" className="export-warning">{printError}</p>}
+ {renumberStudentQuestions&&printAssets.some(asset=>asset.needsReview)&&<p className="automatic-numbering-status hint" role="status">{numbering.pending.length>0?`Locating original print on ${numbering.pending.length} image(s)… New images are processed once; export becomes available automatically.`:numbering.unsupported.length>0?`${numbering.unsupported.length} image(s) need an advanced adjustment or original numbering.`:Object.values(numbering.results).some(result=>result.status==="manual")?"Numbering ready. Saved adjustments will be reused.":"Automatic numbering ready. Saved positions will be reused."}</p>}
  {!exportReady&&(chosen.length>0||unavailableSelected.length>0)&&<div className="export-warning" role="alert"><strong>PDF not ready</strong>
  {(!exportReadiness.ready||!paperImagesReady)&&<p>Some selected question images or mark schemes are unavailable. Wait for the images to finish loading, or check the source records before printing.</p>}
  {exportReadiness.missingQuestions.length>0&&<p>Missing question images: {exportReadiness.missingQuestions.join("; ")}</p>}{exportReadiness.missingMarks.length>0&&<p>Missing mark schemes: {exportReadiness.missingMarks.join("; ")}</p>}
  {unavailableSelected.length>0&&<p>{unavailableSelected.length} saved question reference(s) are unavailable. Refresh the Question Bank before exporting. The saved selection is retained.</p>}
- {pendingPrintReviews.length>0&&<><p>Review original print on {pendingPrintReviews.length} image(s) before exporting. Confirm that each cover hides only the original number or total, leaving mathematical content, parts, diagrams and working space visible.</p><button className="secondary small" onClick={()=>setMaskEditorGroupKey(pendingPrintReviews[0].maskKey)}>Review next image</button></>}
+ {pendingPrintReviews.length>0&&<><p>Automatic numbering could not safely identify original print on {pendingPrintReviews.length} image(s). Use original numbering or adjust this layout once; the correction will be reused.</p>{pendingPrintReviews.map(asset=><p key={asset.maskKey}>{asset.label}: {numbering.results[asset.maskKey].status==="unsupported"?(numbering.results[asset.maskKey] as {reason:string}).reason:""}</p>)}<button className="secondary small" onClick={()=>setMaskEditorGroupKey(pendingPrintReviews[0].maskKey)}>Advanced numbering adjustment</button></>}
  </div>}</div><div className="builder-section builder-save-section"><h3>Save your work</h3>
  <p className="builder-section-copy">Keep your assessment in My Worksheets so you can reopen it from another device.</p>
  <button className="primary full builder-save-button" disabled={!chosen.length||cloudBusy} onClick={()=>void saveToAccount()}>{cloudBusy?"Saving…":editingCloud?"Save changes to my account":"Save to my account"}</button>
@@ -430,9 +434,9 @@ return <div className="site">
  {cloudWriteStatus&&<p role="status" className="builder-save-status">{cloudWriteStatus}</p>}
  <button className="secondary full builder-new-button" onClick={()=>{setEditingCloud(null);setCurrentAssessmentId(null);setAssessmentTitle("Mathematics Assessment");setSelected([]);setMinutes(45);setIncludeName(true);setIncludeClass(false);setBuilderTier("Any");setBuilderCalc("Any");setCover(true);setRenumberStudentQuestions(false);setReplaceSourceTotals(true);setNumberingMasks({});setMaskEditorGroupKey(null);setExportMode("questions");setTeacherSourceMode("inline");setPrintError("");setPerformanceGrade("All grades");setPrintTeacherStats(false);setShadowParentId(null);setShadowAssessmentSet(null);setShadowMessage("")}}>Start new assessment</button>
 </div></section>
- {editingMaskAsset&&<AssessmentMaskEditor key={editingMaskAsset.maskKey+editingMaskAsset.src} asset={{...editingMaskAsset,key:editingMaskAsset.maskKey}} mask={numberingMasks[editingMaskAsset.maskKey]||defaultNumberingMask} replaceSourceTotals={replaceSourceTotals&&editingMaskAsset.kind==="question"} onChange={mask=>setNumberingMasks(previous=>({...previous,[editingMaskAsset.maskKey]:mask}))} onClose={()=>setMaskEditorGroupKey(null)}/>}
+ {editingMaskAsset&&<AssessmentMaskEditor key={editingMaskAsset.maskKey+editingMaskAsset.src} asset={{...editingMaskAsset,key:editingMaskAsset.maskKey}} mask={numberingMasks[editingMaskAsset.maskKey]||numberingMaskProposal(editingMaskAsset,numbering.results[editingMaskAsset.maskKey])} replaceSourceTotals={replaceSourceTotals&&editingMaskAsset.kind==="question"} onChange={mask=>{const corrected=numbering.acceptManual(editingMaskAsset,mask);setNumberingMasks(previous=>({...previous,[editingMaskAsset.maskKey]:corrected}))}} onClose={()=>setMaskEditorGroupKey(null)}/>}
 <div className="layout builder-layout">
-<section className="results builder-preview-section" id="assessment-preview"><div className="section-heading builder-preview-head print-hide"><div><span className="builder-eyebrow">LIVE PAPER PREVIEW</span><h2>Assessment preview</h2><p>{chosen.length} distinct questions · {total} marks · {builderTier==="Any"?"Mixed tiers":builderTier} · {builderCalc==="Any"?"Mixed calculator":builderCalc}</p></div><button className="secondary small" onClick={()=>navigate("bank")}>+ Add questions</button></div> <AssessmentPaper groups={chosen} allQuestions={questions} mode={exportMode} sequential={renumberStudentQuestions} cover={cover} title={assessmentTitle} minutes={minutes} total={total} tier={builderTier} calculator={builderCalc} includeName={includeName} includeClass={includeClass} replaceSourceTotals={replaceSourceTotals} masks={numberingMasks} onReview={asset=>setMaskEditorGroupKey(asset.maskKey)} onRemove={removeGroup} teacherSourceMode={teacherSourceMode} performanceGrade={performanceGrade} printTeacherStats={printTeacherStats}/>
+<section className="results builder-preview-section" id="assessment-preview"><div className="section-heading builder-preview-head print-hide"><div><span className="builder-eyebrow">LIVE PAPER PREVIEW</span><h2>Assessment preview</h2><p>{chosen.length} distinct questions · {total} marks · {builderTier==="Any"?"Mixed tiers":builderTier} · {builderCalc==="Any"?"Mixed calculator":builderCalc}</p></div><button className="secondary small" onClick={()=>navigate("bank")}>+ Add questions</button></div> <AssessmentPaper groups={chosen} allQuestions={questions} mode={exportMode} sequential={renumberStudentQuestions} cover={cover} title={assessmentTitle} minutes={minutes} total={total} tier={builderTier} calculator={builderCalc} includeName={includeName} includeClass={includeClass} replaceSourceTotals={replaceSourceTotals} numberingResults={numbering.results} masks={numberingMasks} onReview={asset=>setMaskEditorGroupKey(asset.maskKey)} onRemove={removeGroup} teacherSourceMode={teacherSourceMode} performanceGrade={performanceGrade} printTeacherStats={printTeacherStats}/>
  </section><aside className="panel builder-order-sidebar print-hide" aria-label="Question order">
  <div className="builder-order-head">
   <span className="builder-eyebrow">QUESTION ORDER</span>

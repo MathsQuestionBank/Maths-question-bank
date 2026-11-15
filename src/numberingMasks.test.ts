@@ -92,3 +92,13 @@ describe("cropped image cover safety",()=>{
   expect(render(withoutFooter)).not.toContain("mqb-original-number-mask");
  });
 });
+
+describe("content-bound reusable manual corrections",()=>{
+ it("preserves source hashes without changing the reviewed geometry",()=>{
+  const reviewed=reviewNumberingMask(defaultNumberingMask,src,crop);
+  const withHash={...reviewed,imageHash:"a".repeat(64)};
+  expect(normaliseNumberingMasks({question:withHash}).question.imageHash).toBe("a".repeat(64));
+  expect(isNumberingMaskReviewed(withHash,src,crop)).toBe(true);
+  expect(normaliseNumberingMasks({question:{...withHash,imageHash:"corrupt"}}).question.imageHash).toBeUndefined();
+ });
+});
