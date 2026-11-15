@@ -9,13 +9,22 @@ const rows=[
  ["a","EDX-H-JUNE2022-1H-Q02A",2],["b","EDX-H-JUNE2022-1H-Q02B",2],["c","2021_2H_Q11",6],["d","2020_3H_Q07",3]
 ].map(([id,sourceId,marks])=>({
  id,topic:"Number",skill:"Fractions",marks,assessment_objective:"AO1",
- question_storage_path:`questions/${sourceId}.png`,mark_scheme_storage_path:`marks/${sourceId}.png`,
+ question_storage_path:`questions/${String(sourceId).replace(/Q02[AB]$/,"Q02")}.png`,mark_scheme_storage_path:`marks/${String(sourceId).replace(/Q02[AB]$/,"Q02")}.png`,
  metadata:{id:sourceId,tier:"Higher",calculator:false,series:"November 2022",grade:6,prompt:"Example question",answer:"Example answer",tags:["Number"],g6:55,g8:id==="a"?40:id==="b"?80:id==="c"?30:70}
 }));
 const makeToken=()=>{
  const b64=(o:object)=>Buffer.from(JSON.stringify(o)).toString("base64url");
  return `${b64({alg:"HS256",typ:"JWT"})}.${b64({exp:4102444800,sub:uid,role:"authenticated",aud:"authenticated"})}.signature`;
 };
+
+async function reviewAllImages(page:import("@playwright/test").Page){
+ const pending=page.locator(".assessment-mask-review").getByRole("button",{name:/Review original print/});
+ for(let limit=0;limit<40&&await pending.count()>0;limit++){
+  await pending.first().click();
+  await page.getByRole("button",{name:"Confirm covers avoid question content",exact:true}).click();
+ }
+ await expect(pending).toHaveCount(0);
+}
 
 test("owner Assessment Builder: multipart, reordering, exports and reopening account assessment",async ({page,browserName})=>{
  test.setTimeout(90000); // image masks, PDF rendering and save/reopen are all verified in this extended end-to-end flow
@@ -80,6 +89,9 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening acc
  await expect(page.getByRole("checkbox",{name:/Hide original question numbers/})).not.toBeChecked();
  await expect(page.locator(".mqb-original-number-mask")).toHaveCount(0);
  await page.getByRole("checkbox",{name:/Hide original question numbers/}).check();
+ await expect(page.locator(".mqb-original-number-mask")).toHaveCount(0);
+ await expect(page.getByRole("button",{name:/Print .*save PDF/})).toBeDisabled();
+ await reviewAllImages(page);
  await expect(page.locator(".mqb-original-number-mask")).toHaveCount(3);
  await expect(page.locator(".mqb-original-total-mask")).toHaveCount(3);
  // Verify the white covers actually span the original image lettering on a
@@ -110,16 +122,18 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening acc
  await expect(page.locator(".assessment-renumber-total").first()).toHaveText("Total for Question 1 is 4 marks");
  await expect(page.locator(".paper-question").first()).toContainText("EDX-H-JUNE2022-1H-Q02");
  await page.getByRole("button",{name:"Adjust original print covers for question 1"}).click();
- await page.getByRole("spinbutton",{name:"Footer cover depth for question 1"}).fill("12");
+ await page.getByRole("spinbutton",{name:"Footer cover depth for question 1"}).fill("4");
  await page.getByRole("spinbutton",{name:"Footer cover up for question 1"}).fill("1");
  await page.getByRole("spinbutton",{name:"Number cover down for question 1"}).fill("1");
- await expect(page.locator(".mqb-original-total-mask").first()).toHaveCSS("bottom",/\d+px/);
- await expect(page.locator(".mqb-original-number-mask").first()).toHaveClass(/is-adjusting/);
- await expect(page.locator(".mqb-original-total-mask").first()).toHaveCSS("height",/\d+px/);
+ await expect(page.locator(".builder-mask-editor .mqb-original-total-mask")).toHaveCSS("bottom",/\d+px/);
+ await expect(page.locator(".builder-mask-editor .mqb-original-number-mask")).toHaveClass(/is-adjusting/);
+ await expect(page.getByRole("button",{name:/Print .*save PDF/})).toBeDisabled();
+ await page.getByRole("button",{name:"Confirm covers avoid question content",exact:true}).click();
  await page.getByRole("checkbox",{name:/Replace original total lines/}).uncheck();
  await expect(page.locator(".mqb-original-total-mask")).toHaveCount(0);
  await expect(page.locator(".assessment-renumber-total")).toHaveCount(0);
  await page.getByRole("checkbox",{name:/Replace original total lines/}).check();
+ await reviewAllImages(page);
  await expect(page.locator(".assessment-renumber-total")).toHaveCount(3);
 
  await expect(page.getByText("13 marks").first()).toBeVisible();
@@ -164,6 +178,7 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening acc
   await page.getByRole("button",{name:label,exact:true}).click();
   await expect(page.locator(".paper-question")).toHaveCount(expectQuestions);
   await expect(page.locator(".mark-scheme-item")).toHaveCount(expectMarks);
+  await reviewAllImages(page);
   const printButton=page.getByRole("button",{name:/Print .*save PDF/});
   await expect(printButton).toBeEnabled({timeout:12000});
   const pdf=await page.pdf({format:"A4",printBackground:true,preferCSSPageSize:true});
@@ -250,9 +265,11 @@ test("renumbering preserves existing Edexcel number and total when already in or
  await expect(page.locator(".mqb-original-total-mask")).toHaveCount(0);
  await expect(page.locator(".assessment-renumber-total")).toHaveCount(0);
  await expect(page.locator(".builder-order-scroll .builder-adjust-covers")).toHaveCount(0);
- await expect(page.locator(".paper-row strong").first()).toHaveText("");
- // Reversing the order requires a new number: only then add the masks/total.
+ await expect(page.locator(".paper-question .assessment-question-number").first()).toHaveText("Question 1");
+ // Reversing the order requires a new number and explicit content review before masking.
  await page.locator(".assessment-order-jump select").first().selectOption("2");
+ await expect(page.locator(".mqb-original-number-mask")).toHaveCount(0);
+ await reviewAllImages(page);
  await expect(page.locator(".mqb-original-number-mask")).toHaveCount(2);
  await expect(page.locator(".mqb-original-total-mask")).toHaveCount(2);
  await expect(page.locator(".assessment-renumber-total").first()).toHaveText("Total for Question 1 is 1 mark");

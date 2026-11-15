@@ -21,4 +21,17 @@ describe("safe account migration",()=>{
   const result=reconcileAssessments([local],[]);
   expect(result.browserOnly).toEqual([local]);
  });
+ it.each([
+  {renumberStudentQuestions:true},{replaceSourceTotals:false},{exportMode:"teacher" as const},
+  {teacherSourceMode:"sheet" as const},{performanceGrade:"8"},{printTeacherStats:true},
+  {numberingMasks:{q1:{numberWidth:4,numberHeight:4,footerHeight:3,numberTop:2,numberLeft:4}}}
+ ])("reports a conflict when a saved printable setting differs: %o",patch=>{
+  const result=reconcileAssessments([{...local,...patch}],[remote(local,local.id)]);
+  expect(result.conflicts).toHaveLength(1);
+  expect(result.alreadySynced).toHaveLength(0);
+ });
+ it("compares legacy original-numbering defaults equally to explicit defaults",()=>{
+  const result=reconcileAssessments([{...local,renumberStudentQuestions:false,replaceSourceTotals:true,teacherSourceMode:"inline",performanceGrade:"All grades",printTeacherStats:false,numberingMasks:{}}],[remote(local,local.id)]);
+  expect(result.alreadySynced).toHaveLength(1);
+ });
 });

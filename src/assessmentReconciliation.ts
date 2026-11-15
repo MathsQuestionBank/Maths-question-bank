@@ -1,4 +1,4 @@
-import type { SavedAssessment } from "./worksheetLibrary";
+import { assessmentSettingsSignature, type SavedAssessment } from "./worksheetLibrary";
 
 export type CloudSnapshot = {
  cloudId:string;
@@ -6,14 +6,9 @@ export type CloudSnapshot = {
  createdAt:string;
 };
 
-/** Stable signature excludes browser/cloud-generated IDs and presentation-only names. */
+/** Stable signature excludes browser/cloud-generated IDs, retaining all print settings. */
 export function assessmentSignature(item:SavedAssessment):string {
- return JSON.stringify({
-  name:item.name,folder:item.folder,ids:item.ids,minutes:item.minutes,
-  nameBox:item.nameBox??true,classBox:item.classBox??false,
-  paperTier:item.paperTier??"Any",paperCalc:item.paperCalc??"Any",
-  cover:item.cover??true,exportMode:item.exportMode??(item.answers?"both":"questions")
- });
+ return JSON.stringify({name:item.name,settings:assessmentSettingsSignature(item)});
 }
 
 export type Reconciliation = {

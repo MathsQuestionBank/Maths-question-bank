@@ -1,7 +1,10 @@
-export type ExportMode="questions"|"marks"|"both";
+import { normalizeNumberingMasks, type NumberingMask } from "./numberingMasks";
+
+export type ExportMode="questions"|"teacher"|"marks"|"both";
+export type TeacherSourceMode="inline"|"sheet"|"none";
 export type SavedAssessment={
  id:string;name:string;ids:string[];minutes:number;folder:string;
- nameBox?:boolean;classBox?:boolean;paperTier?:string;paperCalc?:string;cover?:boolean;answers?:boolean;exportMode?:ExportMode;performanceGrade?:string;printTeacherStats?:boolean;renumberStudentQuestions?:boolean;replaceSourceTotals?:boolean;numberingMasks?:Record<string,{numberWidth:number;numberHeight:number;footerHeight:number}>;linkedOriginalAssessmentId?:string;shadowSet?:string;
+ nameBox?:boolean;classBox?:boolean;paperTier?:string;paperCalc?:string;cover?:boolean;answers?:boolean;exportMode?:ExportMode;teacherSourceMode?:TeacherSourceMode;performanceGrade?:string;printTeacherStats?:boolean;renumberStudentQuestions?:boolean;replaceSourceTotals?:boolean;numberingMasks?:Record<string,NumberingMask>;linkedOriginalAssessmentId?:string;shadowSet?:string;
 };
 export type LegacyAssessment=Omit<SavedAssessment,"id"|"folder">&{id?:string;folder?:string};
 export const ASSESSMENTS_KEY="mqb-draft-assessments";
@@ -16,7 +19,12 @@ export function normaliseAssessments(input:unknown):SavedAssessment[]{
    ...a,id:typeof a.id==="string"&&a.id?a.id:`legacy-${index}`,
    folder:typeof a.folder==="string"&&a.folder.trim()?a.folder.trim():"Unfiled",
    name:typeof a.name==="string"&&a.name?a.name:"Untitled assessment",
-   ids:[...a.ids],minutes:typeof a.minutes==="number"&&Number.isFinite(a.minutes)?a.minutes:45
+   ids:[...a.ids],minutes:typeof a.minutes==="number"&&Number.isFinite(a.minutes)?a.minutes:45,
+   exportMode:a.exportMode&&["questions","teacher","marks","both"].includes(a.exportMode)?a.exportMode:(a.answers?"both":"questions"),
+   teacherSourceMode:a.teacherSourceMode&&["inline","sheet","none"].includes(a.teacherSourceMode)?a.teacherSourceMode:"inline",
+   renumberStudentQuestions:a.renumberStudentQuestions===true,
+   replaceSourceTotals:a.replaceSourceTotals!==false,
+   numberingMasks:normalizeNumberingMasks(a.numberingMasks)
   } as SavedAssessment];
  });
 }
@@ -31,6 +39,23 @@ export function moveAssessmentToFolder(saved:SavedAssessment[],id:string,folder:
 }
 export function renameAssessment(saved:SavedAssessment[],id:string,name:string):SavedAssessment[]{
  return saved.map(a=>a.id===id?{...a,name:name.trim()||a.name}:a);
+}
+
+/** Compare the complete printable configuration, including teacher-only options.
+ * Stable ordering of mask keys avoids conflicts caused only by object key order.
+ */
+export function assessmentSettingsSignature(a:SavedAssessment):string {
+ const masks=normalizeNumberingMasks(a.numberingMasks);
+ return JSON.stringify({
+  folder:a.folder,ids:a.ids,minutes:a.minutes,
+  nameBox:a.nameBox??true,classBox:a.classBox??false,
+  paperTier:a.paperTier??"Any",paperCalc:a.paperCalc??"Any",cover:a.cover??true,
+  exportMode:a.exportMode??(a.answers?"both":"questions"),teacherSourceMode:a.teacherSourceMode??"inline",
+  renumberStudentQuestions:a.renumberStudentQuestions??false,replaceSourceTotals:a.replaceSourceTotals??true,
+  numberingMasks:Object.fromEntries(Object.keys(masks).sort().map(key=>[key,masks[key]])),
+  performanceGrade:a.performanceGrade??"All grades",printTeacherStats:a.printTeacherStats??false,
+  linkedOriginalAssessmentId:a.linkedOriginalAssessmentId??null,shadowSet:a.shadowSet??null
+ });
 }
 
 export type WorksheetBackup={format:"maths-question-bank-worksheets";version:1;exportedAt:string;assessments:SavedAssessment[];folders:string[]};
@@ -52,10 +77,9 @@ export function mergeWorksheetBackup(existing:SavedAssessment[],existingFolders:
  const names=new Set(existing.map(a=>a.name.toLowerCase()));
  const merged=[...existing];
  let counter=0,skipped=0;
- const signature=(a:SavedAssessment)=>JSON.stringify({folder:a.folder,ids:a.ids,minutes:a.minutes,nameBox:a.nameBox??true,classBox:a.classBox??false,paperTier:a.paperTier??"Any",paperCalc:a.paperCalc??"Any",cover:a.cover??true,exportMode:a.exportMode??(a.answers?"both":"questions"),renumberStudentQuestions:a.renumberStudentQuestions??false,replaceSourceTotals:a.replaceSourceTotals??true,numberingMasks:a.numberingMasks??{}});
  for(const a of backup.assessments){
   // Same name and same content/settings means restoring would add an indistinguishable duplicate.
-  if(merged.some(item=>item.name===a.name&&signature(item)===signature(a))){skipped++;continue;}
+  if(merged.some(item=>item.name===a.name&&assessmentSettingsSignature(item)===assessmentSettingsSignature(a))){skipped++;continue;}
   let name=a.name;
   if(names.has(name.toLowerCase())){
    name=`${a.name} (Restored)`;

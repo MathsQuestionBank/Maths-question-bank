@@ -65,7 +65,31 @@ describe("saved worksheet library",()=>{
   const restored=parseWorksheetBackup(backup).assessments[0];
   expect(restored.renumberStudentQuestions).toBe(true);
   expect(restored.replaceSourceTotals).toBe(true);
-  expect(restored.numberingMasks?.["EDX-H-JUNE2023-2H-Q02"]).toEqual({numberWidth:12,numberHeight:8,footerHeight:11});
+  expect(restored.numberingMasks?.["EDX-H-JUNE2023-2H-Q02"]).toMatchObject({numberWidth:12,numberHeight:8,footerHeight:11});
+ });
+ it.each([true,false])("reopens %s sequential numbering and the complete reviewed print configuration",renumberStudentQuestions=>{
+  const item=normaliseAssessments([{
+   ...legacy,id:"saved-order",ids:["q3","q1","q2"],renumberStudentQuestions,
+   exportMode:"teacher",teacherSourceMode:"sheet",performanceGrade:"8",printTeacherStats:true,
+   numberingMasks:{q3:{numberWidth:4,numberHeight:3,numberTop:2,numberLeft:5,footerHeight:3,footerWidth:40,footerBottom:1,footerLeft:50,numberEnabled:true,footerEnabled:false,reviewedFor:"source-and-crop-fingerprint"}}
+  }])[0];
+  const restored=parseWorksheetBackup(JSON.parse(JSON.stringify(makeWorksheetBackup([item],[],"2026-11-15")))).assessments[0];
+  expect(restored).toEqual(item);
+  expect(restored).toMatchObject({ids:["q3","q1","q2"],renumberStudentQuestions,exportMode:"teacher",teacherSourceMode:"sheet",performanceGrade:"8",printTeacherStats:true});
+  expect(restored.numberingMasks?.q3).toMatchObject({numberTop:2,numberLeft:5,footerBottom:1,footerLeft:50,numberEnabled:true,footerEnabled:false,reviewedFor:"source-and-crop-fingerprint"});
+ });
+ it("keeps legacy original numbering and supplies safe defaults for damaged print settings",()=>{
+  const restored=normaliseAssessments([{...legacy,exportMode:"unknown",teacherSourceMode:"unknown",numberingMasks:[] }])[0];
+  expect(restored).toMatchObject({exportMode:"both",teacherSourceMode:"inline",renumberStudentQuestions:false,numberingMasks:{}});
+ });
+ it.each([
+  {renumberStudentQuestions:true},{replaceSourceTotals:false},{exportMode:"teacher" as const},
+  {teacherSourceMode:"sheet" as const},{performanceGrade:"8"},{printTeacherStats:true},
+  {numberingMasks:{q1:{numberWidth:4,numberHeight:4,footerHeight:3,numberLeft:6}}}
+ ])("does not discard changed print settings as an identical backup: %o",patch=>{
+  const current=normaliseAssessments([legacy]);
+  const changed=makeWorksheetBackup([{...current[0],...patch}],[],"2026-11-15");
+  expect(mergeWorksheetBackup(current,[],changed).added).toBe(1);
  });
  it("ignores damaged entries rather than crashing the library",()=>{
   expect(normaliseAssessments([null,{},legacy])).toHaveLength(1);

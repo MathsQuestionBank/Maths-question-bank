@@ -1,6 +1,8 @@
+import { stableImageUrl } from "./imageIdentity";
 import type { BankQuestion } from "./questionData";
 import { formatQuestionTitle } from "./questionDisplay";
 import { weightedGradePerformance, averageQuestionPerformance, compareOriginalQuestionNumber } from "./teacherQuestionStats";
+import type { Crop, CropKind } from "./CropEditor";
 
 export type AssessmentGroup = {
  key:string;
@@ -14,7 +16,7 @@ export type AssessmentGroup = {
 export function getAssessmentGroupKey(q:Pick<BankQuestion,"id"|"sourceId">):string {
  // Real imported sources include EDX-F-JUNE2022-1F-Q08A / Q08B as well
  // as older 2022_1H_Q02a / Q02b identifiers.
- return q.sourceId?.match(/^(.+[-_]Q\d+)[a-z]$/i)?.[1]||q.id;
+ return q.sourceId?.match(/^(.+[-_]Q\d+)[a-z]+$/i)?.[1]||q.id;
 }
 /** A shadow group's parent is its original question, not its shadow image filename. */
 function keyForQuestion(q:BankQuestion,byId:ReadonlyMap<string,BankQuestion>):string{
@@ -181,14 +183,70 @@ export function sortAssessmentGroupIds(
  return [...order.flatMap(({group})=>selectedByGroup.get(group.key)||[]),...stale];
 }
 
-export type AssessmentExportMode = "questions"|"marks"|"both";
+export type AssessmentGroupImage = {
+ question:BankQuestion;
+ src:string;
+ crop:Crop;
+ key:string;
+ partLabel?:string;
+};
+
+/** Signed URL tokens expire, but do not turn a shared whole-question image into
+ * several images. Crops are part of the identity: two regions of one page may
+ * contain different parts and must both survive export.
+ */
+function imageIdentity(question:BankQuestion,kind:CropKind):string|null {
+ const path=kind==="question"?question.questionPath:question.markSchemePath;
+ const src=kind==="question"?question.questionUrl:question.markSchemeUrl;
+ if(!path&&!src)return null;
+ // V6.2 duplicated the SAME complete-question PNG under each mapped part's
+ // directory. Keep that documented legacy representation as one image while
+ // preserving separate crops and all modern per-part assets.
+ let resource=path?.replace(/^(v6\.2\/20\d{2}\/[123]H\/Q\d+)[a-z][a-z0-9]*(\/(?:question|mark)\.png)$/i,"$1$2");
+ if(!resource&&src)resource=stableImageUrl(src);
+ const crop=question.imageCrops[kind];
+ return `${kind}:${resource}:${crop.top},${crop.right},${crop.bottom},${crop.left}`;
+}
+
+/** Export every distinct multipart asset once, in part order. Question and
+ * marking images are chosen independently; their first available parts need
+ * not be the same row.
+ */
+export function assessmentGroupImages(group:AssessmentGroup,kind:CropKind):AssessmentGroupImage[]{
+ const output:AssessmentGroupImage[]=[];
+ const seen=new Set<string>();
+ for(const question of group.parts){
+  const src=kind==="question"?question.questionUrl:question.markSchemeUrl;
+  const key=imageIdentity(question,kind);
+  if(!src||!key||seen.has(key))continue;
+  seen.add(key);
+  output.push({question,src,crop:question.imageCrops[kind],key,partLabel:question.questionNumber||undefined});
+ }
+ return output;
+}
+
+function groupImagesReady(group:AssessmentGroup,kind:CropKind):boolean {
+ const images=assessmentGroupImages(group,kind);
+ const available=new Set(images.map(image=>image.key));
+ // Known assets must all load. Legacy imports often attach a complete question
+ // image to just one sibling; an absent sibling path does not imply another file.
+ if(group.parts.some(question=>{
+  const identity=imageIdentity(question,kind);
+  return identity!==null&&!available.has(identity);
+ }))return false;
+ if(images.length>0)return true;
+ return group.parts.every(question=>question.originalContent&&
+  (kind==="question"?question.prompt:question.answer).trim().length>0);
+}
+
+export type AssessmentExportMode = "questions"|"teacher"|"marks"|"both";
 export type ExportReadiness = {ready:boolean; missingQuestions:string[]; missingMarks:string[]};
 
 /** Block PDF output until every selected question has the required image(s).
  *  The print page must not quietly substitute incomplete metadata or marking notes.
  */
 export function checkAssessmentExport(groups:ReadonlyArray<AssessmentGroup>,mode:AssessmentExportMode):ExportReadiness{
- const missingQuestions=mode==="marks"?[]:groups.filter(g=>!g.question.questionUrl&&!(g.question.originalContent&&g.question.prompt.trim())).map(g=>g.label);
- const missingMarks=mode==="questions"?[]:groups.filter(g=>!g.question.markSchemeUrl&&!(g.question.originalContent&&g.question.answer.trim())).map(g=>g.label);
+ const missingQuestions=mode==="marks"?[]:groups.filter(g=>!groupImagesReady(g,"question")).map(g=>g.label);
+ const missingMarks=mode==="questions"||mode==="teacher"?[]:groups.filter(g=>!groupImagesReady(g,"mark")).map(g=>g.label);
  return {ready:groups.length>0&&missingQuestions.length===0&&missingMarks.length===0,missingQuestions,missingMarks};
 }
