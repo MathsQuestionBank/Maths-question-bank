@@ -2,7 +2,10 @@ import {gradesForTier} from "./gradeBands";
 import {useAccountRole} from "./AuthGate";
 import {paperNumberFromCode,compareOriginalQuestionNumber,weightedGradePerformance,averageQuestionPerformance} from "./teacherQuestionStats";
 import TeacherGradePerformance from "./TeacherGradePerformance";
-import {canReuseOriginalPrintedQuestion} from "./assessmentNumbering";
+import AssessmentPaper from "./AssessmentPaper";
+import AssessmentMaskEditor from "./AssessmentMaskEditor";
+import { assessmentPrintAssets, unreviewedPrintAssets, prepareAssessmentImages } from "./assessmentExport";
+import type { ExportMode, TeacherSourceMode } from "./worksheetLibrary";
 import ShadowQuestionActions from "./ShadowQuestionActions";
 import {formatQuestionTitle} from "./questionDisplay";
 import { buildAssessmentGroups, calculateAssessmentMarks, checkAssessmentExport, moveAssessmentGroupIds, removeAssessmentGroupIds, sortAssessmentGroupIds, appendAssessmentGroupIds, type AssessmentSortMode } from "./assessmentGroups";
@@ -107,7 +110,11 @@ const [renumberStudentQuestions,setRenumberStudentQuestions]=useState(false);
 const [replaceSourceTotals,setReplaceSourceTotals]=useState(true);
 const [numberingMasks,setNumberingMasks]=useState<Record<string,NumberingMask>>({});
 const [maskEditorGroupKey,setMaskEditorGroupKey]=useState<string|null>(null);
-const [exportMode,setExportMode]=useState<"questions"|"marks"|"both">("questions");
+const [exportMode,setExportMode]=useState<ExportMode>("questions");
+const [teacherSourceMode,setTeacherSourceMode]=useState<TeacherSourceMode>("inline");
+const [printing,setPrinting]=useState(false);
+const [paperImagesReady,setPaperImagesReady]=useState(false);
+const [printError,setPrintError]=useState("");
 const [includeName,setIncludeName]=useState(true);
 const [includeClass,setIncludeClass]=useState(false);
 const [builderTier,setBuilderTier]=useState<"Any"|"Higher"|"Foundation"|"Crossover">("Any");
@@ -144,7 +151,7 @@ const [editingCloud,setEditingCloud]=useState<{cloudId:string;revision:number}|n
 const [cloudWriteStatus,setCloudWriteStatus]=useState("");
 const saveToAccount=async(asNew=false)=>{
  if(cloudBusy)return;
- const item:SavedAssessment={id:asNew?"assessment-"+Date.now():currentAssessmentId||"assessment-"+Date.now(),folder:editingCloud?cloudItems.find(x=>x.cloudId===editingCloud.cloudId)?.item.folder||"Unfiled":saved.find(x=>x.id===currentAssessmentId)?.folder||"Unfiled",name:assessmentTitle.trim()||"Untitled assessment",ids:appendAssessmentGroupIds(questions,[],selected),minutes,nameBox:includeName,classBox:includeClass,paperTier:builderTier,paperCalc:builderCalc,cover,answers:exportMode!=="questions",exportMode,performanceGrade,printTeacherStats,renumberStudentQuestions,replaceSourceTotals,numberingMasks,linkedOriginalAssessmentId:shadowParentId||undefined,shadowSet:shadowAssessmentSet||undefined};
+ const item:SavedAssessment={id:asNew?"assessment-"+Date.now():currentAssessmentId||"assessment-"+Date.now(),folder:editingCloud?cloudItems.find(x=>x.cloudId===editingCloud.cloudId)?.item.folder||"Unfiled":saved.find(x=>x.id===currentAssessmentId)?.folder||"Unfiled",name:assessmentTitle.trim()||"Untitled assessment",ids:appendAssessmentGroupIds(questions,selected,[]),minutes,nameBox:includeName,classBox:includeClass,paperTier:builderTier,paperCalc:builderCalc,cover,answers:exportMode==="marks"||exportMode==="both",exportMode,teacherSourceMode,performanceGrade,printTeacherStats,renumberStudentQuestions,replaceSourceTotals,numberingMasks,linkedOriginalAssessmentId:shadowParentId||undefined,shadowSet:shadowAssessmentSet||undefined};
  setCloudBusy(true);setCloudWriteStatus("Saving to your account…");
  try{const result=await saveVersionedAssessment(item,asNew?undefined:editingCloud??undefined);setEditingCloud(result);setCloudWriteStatus("Saved to your account");await refreshCloud()}
  catch(e){setCloudWriteStatus(e instanceof Error?e.message:"Save failed. Your open assessment has not been discarded.")}
@@ -308,6 +315,38 @@ const createShadowCopy=()=>{
 };
 const total=calculateAssessmentMarks(chosen);
 const exportReadiness=checkAssessmentExport(chosen,exportMode);
+const printAssets=assessmentPrintAssets(chosen,exportMode,renumberStudentQuestions);
+const pendingPrintReviews=unreviewedPrintAssets(printAssets,numberingMasks,replaceSourceTotals);
+const editingMaskAsset=printAssets.find(asset=>asset.maskKey===maskEditorGroupKey);
+useEffect(()=>{
+ if(!maskEditorGroupKey)return;
+ const frame=requestAnimationFrame(()=>document.querySelector(".builder-mask-editor")?.scrollIntoView({block:"start",behavior:"smooth"}));
+ return()=>cancelAnimationFrame(frame);
+},[maskEditorGroupKey]);
+const unavailableSelected=selected.filter(id=>!questions.some(question=>question.id===id));
+const printAssetIdentity=printAssets.map(asset=>asset.key+asset.src).join("|");
+useEffect(()=>{
+ if(page!=="builder")return;
+ const paper=document.querySelector<HTMLElement>("#assessment-preview .paper");
+ if(!paper)return;
+ const update=()=>setPaperImagesReady(!paper.querySelector('[data-image-state="loading"],[data-image-state="error"]')&&paper.querySelectorAll('img').length===printAssets.length);
+ update();
+ const observer=new MutationObserver(update);
+ observer.observe(paper,{subtree:true,childList:true,attributes:true,attributeFilter:["data-image-state"]});
+ return()=>observer.disconnect();
+},[page,printAssetIdentity]);
+const exportReady=exportReadiness.ready&&pendingPrintReviews.length===0&&unavailableSelected.length===0&&paperImagesReady;
+const printAssessment=async()=>{
+ if(!exportReady||printing)return;
+ setPrinting(true);setPrintError("");
+ try{
+  const paper=document.querySelector<HTMLElement>("#assessment-preview .paper");
+  if(!paper)throw new Error("Assessment preview unavailable.");
+  await prepareAssessmentImages(paper);
+  window.print();
+ }catch(error){setPrintError(error instanceof Error?error.message:String(error))}
+ finally{setPrinting(false)}
+};
 const toggle=(id:string)=>setSelected(current=>{
  const group=buildAssessmentGroups(questions,[id])[0];
  if(!group)return current;
@@ -318,7 +357,7 @@ const toggle=(id:string)=>setSelected(current=>{
 });
 const navigate=(p:Page)=>{if(p==="builder"&&page!=="builder")setEditingCloud(null);setPage(p);window.scrollTo(0,0)};
 const openSavedAssessment=(item:SavedAssessment)=>{
- setCurrentAssessmentId(item.id);setAssessmentTitle(item.name);setSelected(appendAssessmentGroupIds(questions,[],item.ids));setMinutes(item.minutes);
+ setCurrentAssessmentId(item.id);setAssessmentTitle(item.name);setSelected([...item.ids]);setMinutes(item.minutes);
  setIncludeName(item.nameBox??true);setIncludeClass(item.classBox??false);
  setBuilderTier(item.paperTier==="Higher"||item.paperTier==="Foundation"||item.paperTier==="Crossover"?item.paperTier:"Any");
  setBuilderCalc(item.paperCalc==="Calculator"||item.paperCalc==="Non-calculator"?item.paperCalc:"Any");
@@ -330,7 +369,8 @@ const openSavedAssessment=(item:SavedAssessment)=>{
  setPrintTeacherStats(item.printTeacherStats===true);
  setShadowParentId(item.linkedOriginalAssessmentId||null);
  setShadowAssessmentSet(item.shadowSet||null);
- setExportMode(item.exportMode==="questions"||item.exportMode==="marks"||item.exportMode==="both"?item.exportMode:(item.answers?"both":"questions"));
+ setExportMode(item.exportMode==="questions"||item.exportMode==="marks"||item.exportMode==="both"||item.exportMode==="teacher"?item.exportMode:(item.answers?"both":"questions"));
+ setTeacherSourceMode(item.teacherSourceMode==="none"||item.teacherSourceMode==="sheet"?item.teacherSourceMode:"inline");setPrintError("");
  navigate("builder");
 };
 const reset=()=>{setTier("All");setTopic("All");setSkill("All");setAo("All");setGrade("Any");setChallenge("Any");setSeries("All");setCalc("All");setPaperNumber("All");setVersionFilter("Original questions");setTags([]);setQuery("");setSort("Selected grade: highest % first");void reloadQuestions()};
@@ -369,24 +409,31 @@ return <div className="site">
 {excluded>0&&<div className="builder-filter-alert print-hide" role="status">{excluded} selected {excluded===1?"question is":"questions are"} excluded by the current paper tier or calculator settings. Change the settings below to include them.</div>}
 <section className="panel filters builder-settings builder-config"><div className="builder-settings-head"><span className="builder-eyebrow">PAPER SETTINGS</span><h2>Configure your paper</h2></div>
 <div className="builder-section"><h3>Assessment details</h3><label>Assessment title<input value={assessmentTitle} onChange={e=>setAssessmentTitle(e.target.value)}/></label><label>Time allowance (minutes)<input type="number" min="1" value={minutes} onChange={e=>setMinutes(Math.max(1,Number(e.target.value)||1))}/></label></div><div className="builder-section"><h3>Paper options</h3><fieldset className="builder-choice"><legend>Paper tier</legend><div className="builder-choice-options">{(["Any","Higher","Foundation","Crossover"] as const).map(value=><button type="button" key={value} className={builderTier===value?"primary small":"secondary small"} aria-pressed={builderTier===value} onClick={()=>setBuilderTier(value)}>{value==="Any"?"Mixed":value}</button>)}</div></fieldset><fieldset className="builder-choice"><legend>Calculator requirement</legend><div className="builder-choice-options">{(["Any","Calculator","Non-calculator"] as const).map(value=><button type="button" key={value} className={builderCalc===value?"primary small":"secondary small"} aria-pressed={builderCalc===value} onClick={()=>setBuilderCalc(value)}>{value==="Any"?"Mixed":value}</button>)}</div></fieldset></div><div className="builder-section"><h3>Teacher information</h3>{readyShadowSets.length>0&&<div className="shadow-builder-actions print-hide"><label>Official shadow set<select value={readyShadowSets.includes(shadowSetChoice)?shadowSetChoice:readyShadowSets[0]} onChange={e=>setShadowSetChoice(e.target.value)}>{readyShadowSets.map(name=><option key={name} value={name}>{name}</option>)}</select></label><button className="secondary full" type="button" disabled={!chosenAll.length} onClick={createShadowCopy}>Create Shadow Assessment</button><p className="hint">Creates a separate editable copy and preserves the original. Only fully reviewed linked shadow questions are substituted.</p>{shadowMessage&&<p role="status">{shadowMessage}</p>}</div>}
-<label className="print-hide">Historic performance by GCSE grade<select value={performanceGrade} onChange={e=>setPerformanceGrade(e.target.value)}>{options(["All grades",...Array.from({length:9},(_,i)=>String(i+1))])}</select></label><label className="check print-hide"><input type="checkbox" checked={printTeacherStats} onChange={e=>setPrintTeacherStats(e.target.checked)}/> Include historic performance on teacher printout</label><details className="builder-info-help print-hide"><summary>About the grade statistics</summary><p>Off by default. When enabled, historic performance prints with Questions only, or with the marking pages for Mark scheme / Questions + mark scheme. Untick for student copies.</p><p>Percentages show average available marks earned by pupils who achieved that final grade, not the proportion achieving full marks.</p></details></div><div className="builder-section"><h3>Student paper</h3><label className="check"><input type="checkbox" checked={includeName} onChange={e=>setIncludeName(e.target.checked)}/> Include student name box</label><label className="check"><input type="checkbox" checked={includeClass} onChange={e=>setIncludeClass(e.target.checked)}/> Include class box</label><label className="check"><input type="checkbox" checked={cover} onChange={e=>setCover(e.target.checked)}/> Include cover page</label>
+<label className="print-hide">Historic performance by GCSE grade<select value={performanceGrade} onChange={e=>setPerformanceGrade(e.target.value)}>{options(["All grades",...Array.from({length:9},(_,i)=>String(i+1))])}</select></label><label className="check print-hide"><input type="checkbox" checked={printTeacherStats} onChange={e=>setPrintTeacherStats(e.target.checked)}/> Include historic performance on teacher printout</label><details className="builder-info-help print-hide"><summary>About the grade statistics</summary><p>Off by default. When enabled, historic performance prints on the teacher copy or marking pages. Student question pages stay clean.</p><p>Percentages show average available marks earned by pupils who achieved that final grade, not the proportion achieving full marks.</p></details></div><div className="builder-section"><h3>Student paper</h3><label className="check"><input type="checkbox" checked={includeName} onChange={e=>setIncludeName(e.target.checked)}/> Include student name box</label><label className="check"><input type="checkbox" checked={includeClass} onChange={e=>setIncludeClass(e.target.checked)}/> Include class box</label><label className="check"><input type="checkbox" checked={cover} onChange={e=>setCover(e.target.checked)}/> Include cover page</label>
  <div className="builder-numbering-options"><h4>Question numbering</h4>
   <label className="check"><input type="checkbox" checked={renumberStudentQuestions} onChange={e=>setRenumberStudentQuestions(e.target.checked)}/> Hide original question numbers and use the assessment order</label>
   <label className="check"><input type="checkbox" disabled={!renumberStudentQuestions} checked={replaceSourceTotals} onChange={e=>setReplaceSourceTotals(e.target.checked)}/> Replace original total lines with updated question numbers and marks</label>
-  <p className="hint">Original paper references remain visible in the teacher's ordering sidebar. When a question is already in its original numbered position, its existing printed number and total are kept intact to protect working space. The source image is never changed. Check the preview before printing. Number and total-line positions vary between papers; use the settings icon beside each question to see and adjust the covered areas.</p>
- </div></div><div className="builder-section"><h3>Print & export</h3><fieldset className="builder-choice"><legend>Export format</legend><div className="builder-choice-options export-mode-options">{([{id:"questions",label:"Questions only"},{id:"marks",label:"Mark scheme only"},{id:"both",label:"Questions + mark scheme"}] as const).map(mode=><button type="button" key={mode.id} className={exportMode===mode.id?"primary small":"secondary small"} aria-pressed={exportMode===mode.id} onClick={()=>setExportMode(mode.id)}>{mode.label}</button>)}</div></fieldset><button className="primary full" disabled={!exportReadiness.ready} onClick={()=>window.print()}>{exportMode==="questions"?"Print questions / save PDF":exportMode==="marks"?"Print mark scheme / save PDF":"Print questions + mark scheme / save PDF"}</button>{!exportReadiness.ready&&chosen.length>0&&<div className="export-warning" role="alert"><strong>PDF not ready</strong><p>Some selected question images or mark schemes are unavailable. Wait for the images to finish loading, or check the source records before printing.</p>{exportReadiness.missingQuestions.length>0&&<p>Missing question images: {exportReadiness.missingQuestions.join("; ")}</p>}{exportReadiness.missingMarks.length>0&&<p>Missing mark schemes: {exportReadiness.missingMarks.join("; ")}</p>}</div>}</div><div className="builder-section builder-save-section"><h3>Save your work</h3>
+  <p className="hint">Unticked: retain original question numbers. Ticked: number complete questions from 1 in your assessment order. Review each image that needs replacement print. Suggested covers are applied only after you confirm they avoid content; turn covers off if the original print is already cropped out. Mark schemes are reviewed separately.</p>
+ </div></div><div className="builder-section"><h3>Print & export</h3><fieldset className="builder-choice"><legend>Export format</legend><div className="builder-choice-options export-mode-options">{([{id:"questions",label:"Questions only"},{id:"teacher",label:"Teacher copy"},{id:"marks",label:"Mark scheme only"},{id:"both",label:"Questions + mark scheme"}] as const).map(mode=><button type="button" key={mode.id} className={exportMode===mode.id?"primary small":"secondary small"} aria-pressed={exportMode===mode.id} onClick={()=>setExportMode(mode.id)}>{mode.label}</button>)}</div></fieldset><p className="hint">Questions only creates a student paper. Questions + mark scheme places the matching marking pages after the student paper.</p>
+ {exportMode==="teacher"&&<label>Teacher source references<select aria-label="Teacher source references" value={teacherSourceMode} onChange={event=>setTeacherSourceMode(event.target.value as TeacherSourceMode)}><option value="inline">With each question</option><option value="sheet">Separate reference sheet</option><option value="none">Exclude source references</option></select></label>}
+ <button className="primary full" disabled={!exportReady||printing} onClick={()=>void printAssessment()}>{printing?"Preparing PDF…":exportMode==="teacher"?"Print teacher copy / save PDF":exportMode==="questions"?"Print questions / save PDF":exportMode==="marks"?"Print mark scheme / save PDF":"Print questions + mark scheme / save PDF"}</button>
+ {printError&&<p role="alert" className="export-warning">{printError}</p>}
+ {!exportReady&&(chosen.length>0||unavailableSelected.length>0)&&<div className="export-warning" role="alert"><strong>PDF not ready</strong>
+ {(!exportReadiness.ready||!paperImagesReady)&&<p>Some selected question images or mark schemes are unavailable. Wait for the images to finish loading, or check the source records before printing.</p>}
+ {exportReadiness.missingQuestions.length>0&&<p>Missing question images: {exportReadiness.missingQuestions.join("; ")}</p>}{exportReadiness.missingMarks.length>0&&<p>Missing mark schemes: {exportReadiness.missingMarks.join("; ")}</p>}
+ {unavailableSelected.length>0&&<p>{unavailableSelected.length} saved question reference(s) are unavailable. Refresh the Question Bank before exporting. The saved selection is retained.</p>}
+ {pendingPrintReviews.length>0&&<><p>Review original print on {pendingPrintReviews.length} image(s) before exporting. Confirm that each cover hides only the original number or total, leaving mathematical content, parts, diagrams and working space visible.</p><button className="secondary small" onClick={()=>setMaskEditorGroupKey(pendingPrintReviews[0].maskKey)}>Review next image</button></>}
+ </div>}</div><div className="builder-section builder-save-section"><h3>Save your work</h3>
  <p className="builder-section-copy">Keep your assessment in My Worksheets so you can reopen it from another device.</p>
  <button className="primary full builder-save-button" disabled={!chosen.length||cloudBusy} onClick={()=>void saveToAccount()}>{cloudBusy?"Saving…":editingCloud?"Save changes to my account":"Save to my account"}</button>
  {(editingCloud||currentAssessmentId)&&<button className="secondary full" disabled={cloudBusy||!chosen.length} onClick={()=>void saveToAccount(true)}>Save as new assessment</button>}
  {cloudWriteStatus&&<p role="status" className="builder-save-status">{cloudWriteStatus}</p>}
- <button className="secondary full builder-new-button" onClick={()=>{setEditingCloud(null);setCurrentAssessmentId(null);setAssessmentTitle("Mathematics Assessment");setSelected([]);setMinutes(45);setIncludeName(true);setIncludeClass(false);setBuilderTier("Any");setBuilderCalc("Any");setCover(true);setRenumberStudentQuestions(false);setReplaceSourceTotals(true);setNumberingMasks({});setMaskEditorGroupKey(null);setExportMode("questions");setPerformanceGrade("All grades");setPrintTeacherStats(false);setShadowParentId(null);setShadowAssessmentSet(null);setShadowMessage("")}}>Start new assessment</button>
+ <button className="secondary full builder-new-button" onClick={()=>{setEditingCloud(null);setCurrentAssessmentId(null);setAssessmentTitle("Mathematics Assessment");setSelected([]);setMinutes(45);setIncludeName(true);setIncludeClass(false);setBuilderTier("Any");setBuilderCalc("Any");setCover(true);setRenumberStudentQuestions(false);setReplaceSourceTotals(true);setNumberingMasks({});setMaskEditorGroupKey(null);setExportMode("questions");setTeacherSourceMode("inline");setPrintError("");setPerformanceGrade("All grades");setPrintTeacherStats(false);setShadowParentId(null);setShadowAssessmentSet(null);setShadowMessage("")}}>Start new assessment</button>
 </div></section>
+ {editingMaskAsset&&<AssessmentMaskEditor key={editingMaskAsset.maskKey+editingMaskAsset.src} asset={{...editingMaskAsset,key:editingMaskAsset.maskKey}} mask={numberingMasks[editingMaskAsset.maskKey]||defaultNumberingMask} replaceSourceTotals={replaceSourceTotals&&editingMaskAsset.kind==="question"} onChange={mask=>setNumberingMasks(previous=>({...previous,[editingMaskAsset.maskKey]:mask}))} onClose={()=>setMaskEditorGroupKey(null)}/>}
 <div className="layout builder-layout">
-<section className="results builder-preview-section" id="assessment-preview"><div className="section-heading builder-preview-head print-hide"><div><span className="builder-eyebrow">LIVE PAPER PREVIEW</span><h2>Assessment preview</h2><p>{chosen.length} distinct questions · {total} marks · {builderTier==="Any"?"Mixed tiers":builderTier} · {builderCalc==="Any"?"Mixed calculator":builderCalc}</p></div><button className="secondary small" onClick={()=>navigate("bank")}>+ Add questions</button></div> <div className={`paper${printTeacherStats?` teacher-stats-print export-${exportMode}`:""}`}>{exportMode!=="marks"&&cover&&<div className="cover"><div className="paper-brand">MATHS QUESTION BANK</div><h2>{assessmentTitle}</h2><p className="cover-paper-type">{builderTier==="Any"?"Mixed Tier":builderTier+" Tier"} · {builderCalc==="Any"?"Mixed Calculator / Non-calculator":builderCalc+" Paper"}</p><p>Time allowed: {minutes} minutes</p><p>Total marks: {total}</p><div className="paper-student-fields">{includeName&&<div className="name-line">Name: __________________________________</div>}{includeClass&&<div className="name-line">Class: __________________________________</div>}</div><p className="paper-instructions">Answer all questions. Show your working clearly.</p></div>}{exportMode!=="marks"&&!cover&&(includeName||includeClass)&&<div className="paper-student-fields paper-inline-fields">{includeName&&<div className="name-line">Name: __________________________________</div>}{includeClass&&<div className="name-line">Class: __________________________________</div>}</div>}{!chosen.length?<div className="empty"><h3>Your assessment is empty</h3><p>Visit the Enhanced Skills Mapped Question Bank to add questions.</p></div>:exportMode==="marks"?null:chosen.map((group,i)=><div className="paper-question" key={group.key}><TeacherGradePerformance parts={group.parts} tier={group.question.tier} selectedGrade={performanceGrade} className="teacher-stats-question"/><div className="paper-row"><strong>{renumberStudentQuestions&&canReuseOriginalPrintedQuestion(group,i+1)?"":`${i+1}.`}</strong><span>
- {group.question.questionUrl?<CroppedImage key={group.key} src={group.question.questionUrl} crop={group.question.imageCrops.question} alt={`Question ${i+1}`} coverOriginalNumber={renumberStudentQuestions&&!canReuseOriginalPrintedQuestion(group,i+1)} coverOriginalFooter={renumberStudentQuestions&&replaceSourceTotals&&!canReuseOriginalPrintedQuestion(group,i+1)} numberingMask={numberingMasks[group.key]||defaultNumberingMask} showCoverGuides={maskEditorGroupKey===group.key}/>:group.question.prompt}
- {renumberStudentQuestions&&replaceSourceTotals&&!canReuseOriginalPrintedQuestion(group,i+1)&&<div className="assessment-renumber-total">Total for Question {i+1} is {group.marks} {group.marks===1?"mark":"marks"}</div>}
- <span className="hint print-hide">Included parts: {group.parts.map(p=>p.sourceId).join(", ")}</span></span>
- <span className="marks">{renumberStudentQuestions&&replaceSourceTotals?"":`(${group.marks} marks)`}</span></div><div className="working-space"/><button className="remove print-hide" onClick={()=>removeGroup(group.key)}>Remove</button></div>)}{exportMode!=="questions"&&chosen.length>0&&<div className={`mark-scheme${exportMode==="marks"?" mark-scheme-only":""}`}><h2>Mark scheme</h2>{chosen.map((group,i)=><div className="mark-scheme-item" key={group.key}><strong>{i+1}.</strong><TeacherGradePerformance parts={group.parts} tier={group.question.tier} selectedGrade={performanceGrade} className="teacher-stats-mark"/> {group.question.markSchemeUrl?<CroppedImage src={group.question.markSchemeUrl} crop={group.question.imageCrops.mark} alt={`Mark scheme ${i+1}`}/>:group.question.answer}<span>({group.marks} marks)</span></div>)}</div>}</div></section><aside className="panel builder-order-sidebar print-hide" aria-label="Question order">
+<section className="results builder-preview-section" id="assessment-preview"><div className="section-heading builder-preview-head print-hide"><div><span className="builder-eyebrow">LIVE PAPER PREVIEW</span><h2>Assessment preview</h2><p>{chosen.length} distinct questions · {total} marks · {builderTier==="Any"?"Mixed tiers":builderTier} · {builderCalc==="Any"?"Mixed calculator":builderCalc}</p></div><button className="secondary small" onClick={()=>navigate("bank")}>+ Add questions</button></div> <AssessmentPaper groups={chosen} allQuestions={questions} mode={exportMode} sequential={renumberStudentQuestions} cover={cover} title={assessmentTitle} minutes={minutes} total={total} tier={builderTier} calculator={builderCalc} includeName={includeName} includeClass={includeClass} replaceSourceTotals={replaceSourceTotals} masks={numberingMasks} onReview={asset=>setMaskEditorGroupKey(asset.maskKey)} onRemove={removeGroup} teacherSourceMode={teacherSourceMode} performanceGrade={performanceGrade} printTeacherStats={printTeacherStats}/>
+ </section><aside className="panel builder-order-sidebar print-hide" aria-label="Question order">
  <div className="builder-order-head">
   <span className="builder-eyebrow">QUESTION ORDER</span>
   <h3>Arrange questions <span className="builder-order-count">{chosenAll.length}</span></h3>
@@ -401,13 +448,8 @@ return <div className="site">
   <button className="secondary full" disabled={chosenAll.length<2} onClick={sortAssessmentByGrade}>Sort questions</button>
   <p className="hint">Grade sorting uses the average % of available marks at your selected grade. Overall average sorting uses the mean of available grade-group percentages, not the proportion of all pupils getting the question right. Multipart scores are weighted by marks; missing data goes last.</p>
  </div>
- {renumberStudentQuestions&&maskEditorGroupKey&&chosenAll.filter(item=>item.key===maskEditorGroupKey).map(group=>{const index=chosenAll.findIndex(item=>item.key===group.key);return <div className="builder-mask-editor" key={group.key}>
-  <div className="builder-mask-editor-title"><strong>Adjust covers — Question {index+1}</strong><button type="button" className="secondary small" onClick={()=>setMaskEditorGroupKey(null)} aria-label="Close cover adjustments">Close</button></div>
-  <p>The outlined areas show where the original number and total line are covered. Adjust the dimensions and vertical position until old print is hidden without obscuring question content. The original image stays intact.</p>
-  {([{key:"numberWidth",label:"Number cover width"},{key:"numberHeight",label:"Number cover depth"},{key:"numberTop",label:"Number cover down"},{key:"footerHeight",label:"Footer cover depth"},{key:"footerBottom",label:"Footer cover up"},{key:"footerWidth",label:"Footer cover width"}] as const).filter(field=>replaceSourceTotals||!field.key.startsWith("footer")).map(field=><label key={field.key}>{field.label}
-  <input aria-label={`${field.label} for question ${index+1}`} type="number" min={field.key==="footerWidth"?25:0} max={field.key==="footerWidth"?100:25} step="1" value={(numberingMasks[group.key]||defaultNumberingMask)[field.key]??0} onChange={e=>{const raw=Number(e.target.value)||0;const value=Math.max(field.key==="footerWidth"?25:0,Math.min(field.key==="footerWidth"?100:25,raw));setNumberingMasks(previous=>({...previous,[group.key]:{...(previous[group.key]||defaultNumberingMask),[field.key]:value}}))}}/>%</label>)}
-  <button type="button" className="secondary small" onClick={()=>setNumberingMasks(previous=>{const next={...previous};delete next[group.key];return next})}>Reset covers for this question</button>
- </div>})}
+
+
  <ol className="assessment-order-list builder-order-scroll">
  {chosenAll.map((group,index)=>{const pct=weightedGradePerformance(group.parts,orderSortGrade);const avg=averageQuestionPerformance(group.parts,group.question.tier);return <li key={group.key} className={`assessment-order-row${dropTargetKey===group.key?" is-drop-target":""}${chosen.some(c=>c.key===group.key)?"":" is-excluded"}`}
   draggable
@@ -419,7 +461,7 @@ return <div className="site">
   <span className="builder-order-item-text"><strong>{index+1}. {group.label}</strong><small>{group.marks} {group.marks===1?"mark":"marks"} · Grade {orderSortGrade}: {pct===null?"No data":`${pct}%`} · Avg: {avg===null?"No data":`${avg}%`}{chosen.some(c=>c.key===group.key)?"":" · Filtered out"}</small></span>
   <label className="assessment-order-jump"><span className="visually-hidden">Move question {index+1} to position</span><select aria-label={`Move question ${index+1} to position`} value={index+1} onChange={event=>moveAssessmentGroup(index,Number(event.target.value)-1)}>{chosenAll.map((_,position)=><option key={position} value={position+1}>{position+1}</option>)}</select></label>
   <button type="button" className="builder-order-remove" draggable={false} title={`Remove question ${index+1} from assessment`} aria-label={`Remove question ${index+1} from assessment: ${group.label}`} onDragStart={event=>{event.preventDefault();event.stopPropagation()}} onClick={()=>removeGroup(group.key)}><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m5 4v6m4-6v6"/></svg></button>
-  {renumberStudentQuestions&&!canReuseOriginalPrintedQuestion(group,index+1)&&<button type="button" className="builder-adjust-covers" draggable={false} aria-label={`Adjust original print covers for question ${index+1}`} title="Adjust original print covers" onClick={()=>setMaskEditorGroupKey(maskEditorGroupKey===group.key?null:group.key)}>⚙</button>}
+  {printAssets.filter(asset=>asset.needsReview&&asset.groupKey===group.key).slice(0,1).map(asset=><button type="button" key={asset.maskKey} className="builder-adjust-covers" draggable={false} aria-label={`Adjust original print covers for question ${index+1}`} title="Adjust original print covers" onClick={()=>setMaskEditorGroupKey(asset.maskKey)}>⚙</button>)}
  </li>})}
  </ol>
  {!chosenAll.length&&<p className="builder-order-empty">Add questions from the Question Bank to arrange your paper.</p>}

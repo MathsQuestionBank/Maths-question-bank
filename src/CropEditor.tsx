@@ -1,6 +1,8 @@
 import { metadataWithChangedCrop } from "./legacyImageMetadata";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useRef, useState, type CSSProperties } from "react";
 import { supabase } from "./supabase";
+import { defaultNumberingMask, isNumberingMaskReviewed, normaliseNumberingMask, type NumberingMask } from "./numberingMasks";
+export { defaultNumberingMask, type NumberingMask } from "./numberingMasks";
 
 export type Crop = { top:number; right:number; bottom:number; left:number };
 export type CropKind = "question" | "mark";
@@ -12,28 +14,26 @@ export function validCrop(value:unknown):Crop {
  if(Object.values(c).some(n=>!Number.isFinite(n)||n<0||n>95)||c.top+c.bottom>=95||c.left+c.right>=95)return {...empty};
  return c;
 }
-/** Cover dimensions are percentages of the displayed CROPPED IMAGE WIDTH.
- * Using its height is unreliable: a short one-mark question can make a 7%
- * footer mask only a few pixels tall, leaving Edexcel's original footer visible.
- * Optional offsets support atypical source crops without changing the originals.
- */
-export type NumberingMask = {numberWidth:number;numberHeight:number;footerHeight:number;numberTop?:number;footerBottom?:number;footerWidth?:number};
-export const defaultNumberingMask:NumberingMask={numberWidth:3.5,numberHeight:3.5,footerHeight:2.8,numberTop:0,footerBottom:0,footerWidth:55};
-const maskPercent=(value:number,defaultValue:number)=>Number.isFinite(value)?Math.max(0,Math.min(25,value)):defaultValue;
-export function CroppedImage({src,crop,alt,coverOriginalNumber=false,coverOriginalFooter=false,numberingMask=defaultNumberingMask,showCoverGuides=false}:{src:string;crop:Crop;alt:string;coverOriginalNumber?:boolean;coverOriginalFooter?:boolean;numberingMask?:NumberingMask;showCoverGuides?:boolean}){
+type CroppedImageProps={src:string;crop:Crop;alt:string;coverOriginalNumber?:boolean;coverOriginalFooter?:boolean;numberingMask?:NumberingMask;showCoverGuides?:boolean};
+export function CroppedImage(props:CroppedImageProps){
+ // A changed source starts with fresh state before the image mounts. A passive
+ // reset effect can run after a cached image's onLoad and leave it loading forever.
+ return <SourceCroppedImage key={props.src} {...props}/>;
+}
+function SourceCroppedImage({src,crop,alt,coverOriginalNumber=false,coverOriginalFooter=false,numberingMask=defaultNumberingMask,showCoverGuides=false}:CroppedImageProps){
  const [dimensions,setDimensions]=useState<{w:number;h:number}|null>(null);
  const [error,setError]=useState(false);
  const [attempt,setAttempt]=useState(0);
+ const mask=normaliseNumberingMask(numberingMask);
+ const canCover=showCoverGuides||isNumberingMaskReviewed(mask,src,crop,coverOriginalFooter);
  const horizontal=100-crop.left-crop.right,vertical=100-crop.top-crop.bottom;
- const style:CSSProperties=dimensions?{position:"relative",width:"100%",aspectRatio:String((dimensions.w*horizontal)/(dimensions.h*vertical)),overflow:"hidden",containerType:"inline-size"}:{width:"100%",position:"relative",containerType:"inline-size"};
- // A new question must not inherit the previous image's dimensions or load state.
- useEffect(()=>{setDimensions(null);setError(false);setAttempt(0)},[src]);
- if(error)return <div role="alert" style={{padding:20,border:"1px solid #cc8c8c"}}><p>Image failed to load. The original file may still exist in private storage.</p><button className="secondary small" onClick={()=>{setError(false);setDimensions(null);setAttempt(x=>x+1)}}>Retry image</button></div>;
- return <div style={style}>
+ const style:CSSProperties=dimensions?{position:"relative",width:"100%",aspectRatio:String((dimensions.w*horizontal)/(dimensions.h*vertical)),"--mqb-crop-ratio":(dimensions.w*horizontal)/(dimensions.h*vertical),overflow:"hidden",containerType:"inline-size"} as CSSProperties:{width:"100%",position:"relative",containerType:"inline-size"};
+ if(error)return <div role="alert" data-image-state="error" style={{padding:20,border:"1px solid #cc8c8c"}}><p>Image failed to load. The original file may still exist in private storage.</p><button className="secondary small" onClick={()=>{setError(false);setDimensions(null);setAttempt(x=>x+1)}}>Retry image</button></div>;
+ return <div className="mqb-cropped-image" data-image-state={dimensions?"ready":"loading"} style={style}>
  {!dimensions&&<p role="status" style={{padding:16}}>Loading image…</p>}
  <img key={src+"-"+attempt} src={src} alt={alt} onLoad={e=>{const {naturalWidth:w,naturalHeight:h}=e.currentTarget;if(w>0&&h>0)setDimensions({w,h});else setError(true)}} onError={()=>setError(true)} style={dimensions?{position:"absolute",maxWidth:"none",width:`${10000/horizontal}%`,height:"auto",left:`-${crop.left/horizontal*100}%`,top:`-${crop.top/vertical*100}%`}:{width:"100%",height:"auto",display:"none"}}/>
- {coverOriginalNumber&&<div className={`mqb-original-number-mask${showCoverGuides?" is-adjusting":""}`} aria-hidden="true" style={{width:`${maskPercent(numberingMask.numberWidth,3.5)}%`,height:`${maskPercent(numberingMask.numberHeight,3.5)}cqw`,top:`${maskPercent(numberingMask.numberTop??0,0)}cqw`}}/>}
- {coverOriginalFooter&&<div className={`mqb-original-total-mask${showCoverGuides?" is-adjusting":""}`} aria-hidden="true" style={{height:`${maskPercent(numberingMask.footerHeight,2.8)}cqw`,bottom:`${maskPercent(numberingMask.footerBottom??0,0)}cqw`,width:`${Math.max(25,Math.min(100,Number.isFinite(numberingMask.footerWidth??55)?(numberingMask.footerWidth??55):70))}%`}}/>}
+ {coverOriginalNumber&&canCover&&mask.numberEnabled&&<div className={`mqb-original-number-mask${showCoverGuides?" is-adjusting":""}`} aria-hidden="true" style={{width:`${mask.numberWidth}%`,height:`${mask.numberHeight}cqw`,top:`${mask.numberTop}cqw`,left:`${mask.numberLeft}%`,...(showCoverGuides?{background:"rgba(255,196,0,.25)",border:"1px dashed #996300"}:{})}}/>}
+ {coverOriginalFooter&&canCover&&mask.footerEnabled&&<div className={`mqb-original-total-mask${showCoverGuides?" is-adjusting":""}`} aria-hidden="true" style={{height:`${mask.footerHeight}cqw`,bottom:`${mask.footerBottom}cqw`,width:`${mask.footerWidth}%`,left:`${mask.footerLeft}%`,right:"auto",...(showCoverGuides?{background:"rgba(255,196,0,.25)",border:"1px dashed #996300"}:{})}}/>}
  </div>;
 }
 function VisualSelection({src,crop,onChange}:{src:string;crop:Crop;onChange:(c:Crop)=>void}){

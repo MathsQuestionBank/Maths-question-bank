@@ -648,3 +648,51 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
   outline:0!important;
  }
 }
+
+/* Shared student, teacher and marking layouts preserve the source image pixels. */
+.assessment-question-heading{display:flex;justify-content:space-between;align-items:baseline;gap:16px;margin-bottom:12px;break-after:avoid}
+.assessment-question-number{font-size:16px}
+.assessment-question-content{display:block;width:100%;min-width:0}
+.assessment-source{font-size:12px;line-height:1.5;color:#43505c;overflow-wrap:anywhere;margin:0 0 14px}
+.assessment-image-block{break-inside:avoid;margin-bottom:10px}
+.assessment-text{white-space:pre-wrap;line-height:1.6}
+.assessment-mask-review{margin:8px 0}
+.teacher-source-sheet{break-before:page;padding-top:12px}
+.teacher-source-sheet>div{break-inside:avoid;margin:20px 0}
+.mask-editor-preview{padding:8px;background:white;border:1px solid #d6dfe5;margin-bottom:12px}
+.site .builder-mask-editor label.check{justify-content:flex-start;align-items:flex-start;line-height:1.5}
+.site .builder-mask-editor label.check input{width:auto;flex:none}
+.site .builder-mask-editor .mask-editor-actions button{width:100%;margin-top:8px}
+.paper-row>.assessment-question-content{flex:1}
+.paper .mqb-cropped-image>img{max-width:none!important}
+@media print{
+ /* A page margin is repeated on every sheet; padding on a long paper is not. */
+ @page{size:A4 portrait;margin:15mm}
+ /* Screen viewport height includes the area outside the printable page margins.
+    Retaining 100vh makes a short assessment spill onto an empty second sheet. */
+ .site{min-height:0!important}
+ .site .builder-preview-section>.paper{padding:0!important}
+ .cover{height:266mm!important;min-height:0!important;padding:25mm 0 0!important;margin:0!important;break-after:page}
+ .paper-inline-fields{break-after:avoid;margin-bottom:6mm}
+ .paper-inline-fields h2{font-size:20px;margin:0 0 3mm}
+ .paper-inline-fields>p{margin:0 0 3mm}
+ .paper-inline-fields .name-line{margin-top:8mm}
+ .assessment-image-block{break-inside:avoid;page-break-inside:avoid}
+ /* Keep a tall crop on A4 with its aspect ratio intact. Native pixels go to PDF. */
+ .paper .mqb-cropped-image{width:min(100%,calc(180mm * var(--mqb-crop-ratio,1)))!important;margin-inline:auto}
+ .paper .mqb-cropped-image>img{max-width:none!important;object-fit:fill}
+ .paper-question,.mark-scheme-item{overflow:visible}
+ .working-space{height:18mm}
+ .assessment-question-heading{break-after:avoid;margin-bottom:3mm}
+ .teacher-source-sheet h2,.mark-scheme h2{break-after:avoid}
+ .paper.teacher-stats-print.export-questions .teacher-stats-question{display:none!important}
+ .paper.teacher-stats-print.export-teacher .teacher-stats-question{display:block!important}
+}
+
+/* Review source print at a readable size before committing a cover. */
+.site .builder-workspace>.builder-mask-editor{margin:0 0 20px;padding:20px;border:1px solid #cad6df;border-radius:8px;scroll-margin-top:16px}
+.mask-editor-layout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:22px;align-items:start}
+.site .builder-mask-editor .mask-editor-preview{min-width:0;margin:0}
+.site .builder-mask-editor .mask-editor-controls p{font-size:12px;line-height:1.5}
+.site .builder-mask-editor .mask-editor-controls label{font-size:12px}
+@media(max-width:780px){.mask-editor-layout{grid-template-columns:minmax(0,1fr)}}
