@@ -1,0 +1,40 @@
+{
+  "id": "november-2022-3h-q14-legacy",
+  "image": "november-2022-3h-q14-legacy.png",
+  "series": "November 2022",
+  "paper": "3H",
+  "tier": "Higher",
+  "originalNumber": 14,
+  "marks": 5,
+  "multipart": true,
+  "sourceIds": [
+    "2022_3H_Q14a",
+    "2022_3H_Q14b"
+  ],
+  "layout": {
+    "version": 1,
+    "originalNumber": 14,
+    "imageWidth": 1050,
+    "imageHeight": 1063,
+    "numberRects": [
+      {
+        "left": 0.014323040190197173,
+        "top": 0.043315431697124145,
+        "width": 0.022857142857142857,
+        "height": 0.031247409020295595
+      }
+    ],
+    "totalRects": [
+      {
+        "rect": {
+          "left": 0.5741486467633928,
+          "top": 0.9571257597527634,
+          "width": 0.33106044224330355,
+          "height": 0.03124735877969191
+        },
+        "marks": 5
+      }
+    ],
+    "method": "pdf-text"
+  }
+}

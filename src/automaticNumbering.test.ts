@@ -48,6 +48,13 @@ describe("source-derived assessment numbering",()=>{
   expect(layout.numberRects[0].left+layout.numberRects[0].width).toBeLessThan(.088);
   expect(detectAutomaticNumbering([{...number,symbols:undefined},word("Work",125,25,32),...footer],options).status).toBe("unsupported");
  });
+ it("accepts a multipart heading whose label gap is smaller than later prose/formula gaps",()=>{
+  const tight=[word("14",16.4,53.8,22.3,95,17.7),word("(a)",52.5,55.1,24.9,95,19.7),word("Simplify",89.25,54.5,82.7,95,22.3),word("fully",179.8,54.5,44,92,21.7),word("(3x^5y^6)^4",238.9,53.2,68.9,20,23),word("(b)",52.5,356.3,27,93,21),word("Expand",88.6,356.3,72.8,96,22.3),...footer];
+  const layout=ready(tight);
+  expect(layout.numberRects[0].left+layout.numberRects[0].width).toBeLessThan(52.5/options.width);
+  expect(layout.totalRects[0].marks).toBe(5);
+  expect(detectAutomaticNumbering(tight.map(w=>w.text==="(a)"?{...w,confidence:20}:w),options).status).toBe("unsupported");
+ });
  it("supports narrow single-digit labels despite their tall aspect ratio",()=>{
   const words=[word("1",70,25,5,60),word("Write",110,25,40),...footer.map(w=>w.text==="14"?{...w,text:"1"}:w)];
   expect(ready(words,{...options,originalNumber:1}).numberRects).toHaveLength(1);

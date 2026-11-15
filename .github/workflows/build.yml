@@ -25,5 +25,6 @@ jobs:
           path: |
             test-results/
             docs/assessment-export.md
+            docs/multipart-numbering-followup.md
           if-no-files-found: ignore
           retention-days: 14
