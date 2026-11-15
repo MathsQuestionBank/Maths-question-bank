@@ -1,12 +1,12 @@
 import { assessmentGroupImages, type AssessmentExportMode, type AssessmentGroup } from "./assessmentGroups";
-import { canReuseOriginalPrintedQuestion } from "./assessmentNumbering";
+import { assessmentQuestionNumber, canReuseOriginalPrintedQuestion } from "./assessmentNumbering";
 import { isNumberingMaskReviewed, type NumberingMask } from "./numberingMasks";
 
 export function assessmentPrintAssets(groups:AssessmentGroup[],mode:AssessmentExportMode,sequential:boolean){
  return groups.flatMap((group,index)=>(["question","mark"] as const).flatMap(kind=>{
   if(kind==="question"&&mode==="marks"||kind==="mark"&&(mode==="questions"||mode==="teacher"))return [];
   return assessmentGroupImages(group,kind).map((asset,imageIndex)=>({
-   ...asset,kind,groupKey:group.key,
+   ...asset,kind,groupKey:group.key,originalNumber:Number(assessmentQuestionNumber(group,index+1,false))||null,marks:group.marks,
    maskKey:kind==="question"&&imageIndex===0?group.key:`${group.key}:${kind}:${asset.key}`,
    label:`${kind==="question"?"question":"mark scheme"} ${index+1}${imageIndex?` image ${imageIndex+1}`:""}`,
    needsReview:sequential&&!canReuseOriginalPrintedQuestion(group,index+1)

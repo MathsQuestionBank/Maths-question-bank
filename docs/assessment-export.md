@@ -1,71 +1,48 @@
-# Assessment numbering and PDF export
+# Automatic assessment numbering and PDF export
 
-## Teacher workflow
+Select questions, arrange them, enable **Hide original question numbers and use the assessment order**, and export. Number and total replacements are located automatically; there is no per-question approval step for supported images. The first analysis of a new legacy image takes local processing time. Export becomes available automatically when required images are ready.
 
-1. Add questions to the basket and open **Assessment Builder**. Arrange complete questions by dragging, moving to a position, or using the existing sort controls. Multipart questions move together and their marks are counted once.
-2. Choose the paper tier and calculator settings. These settings can exclude selected questions; the preview and export use the same filtered assessment. Check the displayed question count and total marks.
-3. Under **Question numbering**, tick **Hide original question numbers and use the assessment order** for sequential numbering from 1. Leave it unticked to retain original numbers. Existing assessments and new assessments retain the previous default of original numbering. Cover page, name/class fields and original-total replacement remain configurable.
-4. For sequential output, use **Review next image** to inspect each source image that needs replacement print. Move or resize the shaded number/total covers until they avoid question content. Disable individual covers where needed, or select **Original number and total are already cropped out or absent**. Confirm only after checking mathematics, part labels, diagrams, marks, answer lines and working space. Mark-scheme images have their own reviews.
-5. Choose an export:
+## What changed after PR #85
 
-   | Control | Output |
-   | --- | --- |
-   | Questions only | Student question paper |
-   | Teacher copy | Same question numbering, with optional source references |
-   | Mark scheme only | Matching marking pages |
-   | Questions + mark scheme | Student paper followed by matching marking pages |
+PR #85's default covers were estimated rectangles anchored to the cropped frame. Real full-width Edexcel crops retain a left page margin; for example, a printed number around 7% into the image cannot be covered by a rectangle spanning only the first 3.5%. Total statements also sit above lower page rules rather than flush with the image bottom. Changing those defaults would merely move the error to other layouts.
 
-   A teacher copy can show sources with each question, on a separate reference sheet, or omit them. Historic performance remains optional on teacher copies and marking pages; it does not print on student question pages.
-6. Use **Print … / save PDF** and choose A4 in the browser print dialog. Inspect the print preview, particularly unusually tall source images. Save to your account to retain the selected order, numbering, cover, export/source options, and reviewed covers when reopening later.
+The new pipeline locates text in the **original image coordinate system**, then applies the actual crop and identical image scaling in preview and print. It replaces the leading numeral and the complete parenthesized total statement in place, preserving the verified marks. Mathematical expressions, multipart labels, diagrams, marks, answer lines and working space are not rewritten.
 
-## Implementation
+## Position sources and reuse
 
-- `assessmentNumbering.ts` supplies the same parent question number to student, teacher and marking output. It reads stored question references rather than changing question text or image labels. Sequential numbers reflect the current filtered assessment order after additions, removals and moves. Missing original numbering is explicitly shown as **Original unknown**.
-- Teacher references use stored board, series, tier, paper and original question number where available. Missing metadata is omitted or reported as unavailable. The display's default Higher tier is not presented as source metadata. Shadows are identified as shadows and use their explicit link to the original question; mixed original/shadow selections remain distinct.
-- `assessmentGroups.ts` retains existing whole-question grouping and mark totals. It selects question and marking assets independently, keeps distinct multipart images/crops, and deduplicates shared images. The documented V6.2 whole-question images duplicated under sibling part directories are treated as one asset. Modern distinct per-part assets are retained.
-- `AssessmentPaper.tsx` renders the shared preview and print layout. Source images pass directly to the browser print engine without application-side screenshot rasterization or downsampling. A4 print rules preserve aspect ratio, reserve working space, avoid splitting questions where possible, and separate the optional cover, marking pages and source sheet.
-- `numberingMasks.ts` and `AssessmentMaskEditor.tsx` reuse the existing crop display and assessment-local covers. Suggested and legacy masks remain proposals until reviewed. A review is tied to the source image identity, crop, cover geometry/enabled state and whether a footer cover will print. Changing any of these requires another review; renewing a signed URL for the same file preserves it. Number and total covers can be positioned horizontally and vertically and enabled independently.
-- The export path in `App.tsx`, `assessmentGroups.ts` and `assessmentExport.ts` checks the required assets, pending mask reviews and decoded images before opening the print dialog. Missing selected IDs, unavailable required assets, failed image loads and empty assessments block export instead of silently producing an incomplete paper. Unavailable saved IDs remain in the saved selection.
-- Saved settings remain in the existing assessment configuration. Backup duplicate detection and browser/account reconciliation compare the full printable configuration, including masks and teacher options. No production question data, authentication, permissions or database schema is changed by this implementation.
+1. Newly extracted PNGs can carry exact PDF-derived text rectangles in a bounded PNG metadata chunk. The existing owner publication workflow computes these positions while creating new immutable images. Image pixels and existing stored images remain unchanged. No database migration, full-PDF access for teachers, authentication or permission change is needed.
+2. Optional existing `metadata.numbering_positions` can supply validated source positions.
+3. Legacy images are recognised locally using self-hosted Tesseract workers, English data and WebAssembly. Images are not uploaded to an OCR service, and no third-party CDN is needed at runtime. The engine loads only when needed.
+4. Successful geometry is cached by SHA-256 of the actual image bytes, original reference, marks and image kind. It is independent of assessment position, so reorder/removal generates the latest numbers without scanning again. New assessments in the same browser reuse successful processing. Different image content, dimensions, question references or marks cannot inherit an old cached layout.
 
-## Manual checks and limitations
+The source recogniser requires the expected parent number and exact total-marker wording/marks, checks confidence and gutter/line relationships, and rejects ambiguous mathematics. An isolated heading skipped by page OCR can be recovered only from a verified isolated ink cluster in the detected leading gutter, with digit recognition and neighbouring-ink checks. Mark-table labels require separate parent-column evidence; multipart labels are retained.
 
-Image masking cannot establish automatically whether nearby ink is a mathematical expression or the original number. Review the suggested rectangles before confirming them; the editor does not automatically certify content safety. When an original number is already correct in a recognized archived Edexcel question at the same assessment position, the existing printed-number shortcut avoids unnecessary covers.
+## Optional advanced correction
 
-Very tall source crops are scaled proportionally to a maximum image height of 180 mm for A4. This prevents image truncation but may reduce readability; inspect the printed size and working space. Longer multipart groups may span pages when the complete group cannot fit. The source image's original resolution and crop limit PDF quality. Covers and layout cannot restore content missing from the stored image or recover an incorrect crop.
+A layout that cannot be identified safely blocks sequential export with an explicit reason. Use original numbering or **Advanced numbering adjustment** for that exceptional image. Supported images do not require this step. Detected positions seed the advanced controls when available.
 
-If no safe cover placement exists, retain original numbering or have the source crop reviewed through the existing authorized crop workflow. This assessment editor preserves the original images and does not write crop changes to question-bank records. Teacher references cannot supply missing database metadata. Browser print settings, including headers/footers and scaling, should be checked in the final preview.
+A confirmed correction is stored with the assessment and reused in the browser. New corrections include a source-content hash; a saved correction can be reused on another device when the source bytes still match. Signed-link renewal does not require another correction. Changes to the source bytes, crop, cover geometry or footer option invalidate the corresponding approval. Older URL-only saved covers remain proposals if recognition fails; they are not blindly trusted on changed images.
 
-## Regression coverage
+## Existing export features
 
-| Scenario | Automated checks |
-| --- | --- |
-| Single question; sequential starts at 1 | Numbering unit tests; single-question PDF test |
-| Different papers; identical original numbers | Numbering/grouping tests; student and teacher PDF text checks |
-| Multipart selection and marks | Grouping tests; distinct question/mark assets and combined PDF checks |
-| Reordering and removal | Grouping/numbering tests; builder and PDF order checks |
-| Save, reopen and export | Worksheet/reconciliation tests; mocked account save/reopen browser flow |
-| Original and sequential modes | Numbering tests; original and sequential PDF output |
-| Student, teacher, mark scheme and combined exports | Actual Chromium PDF text, page, content and source checks |
-| Missing source metadata; shadow/mixed selections | Source-reference unit tests; export browser fixtures |
-| Overlapping proposed covers and changed reviews | Mask unit tests; translucent editor and blocked-export browser check |
-| Missing images and stale saved IDs | Export/group readiness tests; failed-image and stale-ID browser checks |
-| Long assessments and tall images | Multipage A4 PDFs; question order, page content and blank-page checks |
+Student, teacher and marking output share the same parent numbering and assessment order. Original numbering remains available. Multipart/nested parts move together and marks are counted once. Student, teacher, mark-scheme-only and combined exports, optional covers and teacher statistics remain available. Teacher references can be inline, on a separate sheet or excluded; they come from stored metadata. Save/reopen, backups and account reconciliation preserve the existing configuration.
 
-Run the repository's required checks:
+Missing images, unavailable saved references, unsafe numbering and source-dimension mismatches block incomplete PDFs. Image decoding and fonts complete before printing. Existing A4 margin, tall-image and blank-page safeguards remain in place.
 
-```sh
-npm run build
-npm test
-npm run test:smoke
-```
+## Actual examination evidence and limits
 
-Playwright uses local mocked Supabase responses and fixture images for these flows. PDF assertions inspect Chromium-generated documents; desktop-only PDF cases are skipped in the mobile project. These fixtures do not exhaustively validate every historical examination layout. Test results and example artifacts belong in the pull request's validation report.
+The regression fixtures contain 16 authentic Edexcel question excerpts across June 2022 Foundation, November 2022 Higher, June 2023 Higher and November 2024 Foundation. They include single/double-digit numbers, multipart questions, different crop heights, total positions and both tiers. Provenance and copyright attribution are recorded in `e2e/fixtures/edexcel-numbering/README.md` and `provenance.json`; full examination PDFs are not committed.
 
-## Validation report — 15 November 2026
+Browser tests exercise all 16 legacy images with real OCR and no supplied positions or manual approvals, then reopen using cached results without loading OCR again. Separate tests cover all 16 supplied source layouts, extra crop boundaries, an already-cropped-out number, and embedded PNG geometry. Actual preview and PDF rasters are compared before/after: changed pixels outside the detected print regions are tightly bounded. The original Q14/five-mark example is visibly replaced by Q1 and `(Total for Question 1 is 5 marks)`, while diagrams, part marks, rules and working space remain intact.
 
-The unmodified baseline (`2049e58`) passed build, 96 unit tests, and 19 smoke tests with one intentional mobile skip. No pre-existing failures were found.
+This demonstrates the tested layouts, not every historical image. Low-quality scans, missing or conflicting totals/metadata, combined text/graphics, unusual mark tables and ambiguous numbering can still need the optional adjustment or original numbering. The PDF-coordinate producer safely recognised 10 of the 16 source-layout cases in a separate audit; unsupported source text formats fall back to the image recogniser, which processed all 16 tested legacy crops. No claim is made that every PDF font or image format is automatic.
 
-The completed implementation passed `npm run build` (existing bundle-size warning), all 157 unit tests across 19 files, and all 25 smoke tests with seven intentional mobile skips of desktop PDF cases. The unit suite also passed under the CI runner's Node 20. The matching export/reopen flow passed three consecutive runs with repeated cached-image reopening. An initial GitHub CI failure exposed rendering tests initializing a live Supabase client; these tests now mock that client and run without a native WebSocket or database connection.
+Caches may be unavailable under browser privacy/quota settings; that may repeat automatic processing. Very tall scans still need a printed readability check. Existing source resolution and incorrect crops cannot be repaired by numbering. Production questions were not modified and no production deployment was performed.
 
-The Build workflow publishes an **assessment-export-evidence** artifact for 14 days, containing generated PDF examples, screenshots, test diagnostics, and this guide. Open the successful run from the pull request's checks to download it. The examples use synthetic question/source fixtures, including the student paper, teacher copy, separate source sheet, matching mark scheme, reopened/reordered combined output, long A4 paper, and tall cropped images. No production examination data was used for the evidence.
+## Verification and downloadable examples
+
+Run `npm run build`, `npm test` and `npm run test:smoke`. Build/dev prepares the pinned, self-hosted OCR resources from installed dependencies into ignored `public/ocr/`; generated binaries are not committed.
+
+The Build workflow uploads **assessment-export-evidence** for 14 days. It includes before/after real-paper screenshots, original and renumbered PDFs, OCR/cache examples, crop examples, pixel comparison counts and this guide. Existing synthetic regression tests continue to cover student/teacher/marking outputs, reorder/removal, saved settings, missing images/references, shadow selections and long A4 assessments.
+
+Final local validation: build passed with the existing bundle-size warning; 200 unit tests passed across 25 files; 29 Playwright tests passed with 11 intentional mobile skips of desktop OCR/PDF cases. Development regressions caught browser SVG decoding differences and replacement glyph overhang; both were corrected before the complete passing run. The Q14 before/after comparison recorded **zero changed pixels outside the target regions** in both preview and actual PDF raster output.

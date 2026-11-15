@@ -1,6 +1,7 @@
 import { test, expect, type Page, type TestInfo } from "@playwright/test";
 import { writeFile } from "node:fs/promises";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
+import { numberingFixture } from "./numbering-fixture";
 
 const uid="11111111-1111-4111-8111-111111111111";
 const user={id:uid,aud:"authenticated",role:"authenticated",email:"owner@example.test",app_metadata:{provider:"email",providers:["email"]},user_metadata:{},created_at:"2026-01-01T00:00:00Z"};
@@ -9,11 +10,11 @@ const token=()=>{
  return `${encode({alg:"HS256",typ:"JWT"})}.${encode({exp:4102444800,sub:uid,role:"authenticated",aud:"authenticated"})}.signature`;
 };
 type Row={id:string;marks:number;metadata:Record<string,unknown>;[key:string]:unknown};
-const exam=(id:string,source:string,number:string,paper:string,marks:number):Row=>({
+const exam=(id:string,source:string,number:string,paper:string,marks:number,totalMarks=marks):Row=>({
  id,question_number:number,marks,topic:"Number",skill:"Arithmetic",assessment_objective:"AO1",
  exam_papers:{exam_board:"Edexcel",series:paper==="1H"?"June 2023":"November 2022",paper_code:paper,tier:"Higher"},
  question_storage_path:`questions/${id}.svg`,mark_scheme_storage_path:`marks/${id}.svg`,
- metadata:{id:source,tier:"Higher",calculator:false,grade:6,tags:["Number"]}
+ metadata:{id:source,tier:"Higher",calculator:false,grade:6,tags:["Number"],numbering_positions:{question:numberingFixture(900,180,Number(number.match(/\d+/)?.[0]||17),{left:8,top:7,width:26,height:22},{left:598,top:155,width:295,height:20},totalMarks),mark:numberingFixture(900,180,Number(number.match(/\d+/)?.[0]||17),{left:8,top:7,width:26,height:22})}}
 });
 const original=(id:string,index:number):Row=>({
  id,marks:2,topic:"Number",skill:"Arithmetic",assessment_objective:"AO1",question_number:String(index),
@@ -21,7 +22,7 @@ const original=(id:string,index:number):Row=>({
 });
 
 /** Every request is intercepted; tests never read or write the production bank. */
-async function openSavedFixture(page:Page,rows:Row[],ids:string[],configuration:Record<string,unknown>={},failImages=false){
+async function openSavedFixture(page:Page,rows:Row[],ids:string[],configuration:Record<string,unknown>={},failImages=false,unsupportedImage=false){
  const cloudId="33333333-3333-4333-8333-333333333333";
  let saved={id:cloudId,title:"Export regression assessment",created_at:"2026-11-15T10:00:00Z",revision:1,configuration:{id:"fixture-assessment",folder:"Unfiled",minutes:30,cover:false,nameBox:false,renumberStudentQuestions:false,...configuration}};
  let links=ids.map((question_id,position)=>({assessment_id:cloudId,question_id,position}));
@@ -50,8 +51,11 @@ async function openSavedFixture(page:Page,rows:Row[],ids:string[],configuration:
  await page.route("**/export-fixture.svg?**",async route=>{
   if(failImages)return route.fulfill({status:404,body:"Missing image"});
   const asset=decodeURIComponent(new URL(route.request().url()).searchParams.get("asset")||"");
-  const text=asset.startsWith("marks/")?`Solution for ${asset}: x = 6`:`Mathematics for ${asset}: (a) 3x + 7 = 25; (b) x squared = 36`;
-  return route.fulfill({status:200,contentType:"image/svg+xml",body:`<svg xmlns="http://www.w3.org/2000/svg" width="900" height="180"><rect width="900" height="180" fill="white"/><text x="10" y="25" font-size="20">17</text><text x="90" y="55" font-size="18">${text}</text><path d="M90 110h700" stroke="black"/><text x="600" y="170" font-size="14">${asset.startsWith("marks/")?"Award 2 marks":"Total for Question 17 is 2 marks"}</text></svg>`});
+  const row=rows.find(row=>row.question_storage_path===asset||row.mark_scheme_storage_path===asset);
+  const originalNumber=Number(String(row?.question_number||"Q17").match(/\d+/)?.[0]||17);
+  const sourceMarks=(row?.metadata.numbering_positions as {question?:{totalRects?:{marks:number}[]}}|undefined)?.question?.totalRects?.[0]?.marks||row?.marks||2;
+  const text=unsupportedImage?"17 + 3 = 20. Explain why this equation is true.":asset.startsWith("marks/")?`Solution for ${asset}: x = 6`:`Mathematics for ${asset}: (a) 3x + 7 = 25; (b) x squared = 36`;
+  return route.fulfill({status:200,contentType:"image/svg+xml",body:`<svg xmlns="http://www.w3.org/2000/svg" width="900" height="180"><rect width="900" height="180" fill="white"/>${unsupportedImage?"":`<text x="10" y="25" font-size="20">${originalNumber}</text>`}<text x="90" y="55" font-size="18">${text}</text><path d="M90 110h700" stroke="black"/><text x="600" y="170" font-size="14">${unsupportedImage?"":asset.startsWith("marks/")?`Award ${row?.marks||2} marks`:`Total for Question ${originalNumber} is ${sourceMarks} marks`}</text></svg>`});
  });
  await page.goto("/");
  await expect(page.getByRole("navigation",{name:"Main navigation"})).toBeVisible();
@@ -60,13 +64,9 @@ async function openSavedFixture(page:Page,rows:Row[],ids:string[],configuration:
  await expect(page.getByRole("heading",{name:"Assessment preview"})).toBeVisible();
  return {getSaved:()=>saved,getIds:()=>links.map(item=>item.question_id)};
 }
-async function reviewAllImages(page:Page){
- const pending=page.locator(".assessment-mask-review").getByRole("button",{name:/Review original print/});
- for(let limit=0;limit<40&&await pending.count()>0;limit++){
-  await pending.first().click();
-  await page.getByRole("button",{name:"Confirm covers avoid question content",exact:true}).click();
- }
- await expect(pending).toHaveCount(0);
+async function waitForAutomaticNumbering(page:Page){
+ await expect(page.getByRole("button",{name:/Print .*save PDF/})).toBeEnabled({timeout:15000});
+ await expect(page.locator(".assessment-mask-review")).toHaveCount(0);
 }
 async function inspectPdf(page:Page,testInfo:TestInfo,name:string){
  await expect(page.getByRole("button",{name:/Print .*save PDF/})).toBeEnabled();
@@ -102,12 +102,12 @@ test.beforeEach(async({},testInfo)=>test.skip(testInfo.project.name!=="chromium"
 
 test("matching student, teacher and marking PDFs preserve grouped content, sources and saved order",async({page},testInfo)=>{
  test.setTimeout(90000);
- const a=exam("a","EDX-H-JUNE2023-1H-Q17A","Q17a","1H",2);
- const b={...exam("b","EDX-H-JUNE2023-1H-Q17B","Q17b","1H",2),question_storage_path:"questions/a.svg"};
+ const a=exam("a","EDX-H-JUNE2023-1H-Q17A","Q17a","1H",2,4);
+ const b={...exam("b","EDX-H-JUNE2023-1H-Q17B","Q17b","1H",2,4),question_storage_path:"questions/a.svg"};
  const duplicate=exam("other-paper","EDX-H-NOVEMBER2022-2H-Q17","Q17","2H",3);
  const missing={...original("missing",5),question_number:undefined,metadata:{...original("missing",5).metadata,id:"CUSTOM-PRACTICE",series:undefined,tier:undefined}};
  const linked=exam("linked-original","EDX-H-JUNE2023-1H-Q21","Q21","1H",5);
- const shadow={...exam("shadow","OFFICIAL-SHADOW-Q21","Q21","1H",5),shadow_paper_id:"shadow-paper",shadow_of_question_id:"linked-original",shadow_papers:{shadow_set:"Set A",status:"reviewed"},metadata:{id:"OFFICIAL-SHADOW-Q21",crop_review:{question:"approved",mark:"approved"}}};
+ const shadow={...exam("shadow","OFFICIAL-SHADOW-Q21","Q21","1H",5),shadow_paper_id:"shadow-paper",shadow_of_question_id:"linked-original",shadow_papers:{shadow_set:"Set A",status:"reviewed"},metadata:{...exam("shadow","OFFICIAL-SHADOW-Q21","Q21","1H",5).metadata,id:"OFFICIAL-SHADOW-Q21",crop_review:{question:"approved",mark:"approved"}}};
  const saved=await openSavedFixture(page,[a,b,duplicate,missing,linked,shadow],["a","other-paper","missing","shadow"]);
  await expect(page.locator(".paper-question")).toHaveCount(4);
  await expect(page.locator(".paper-question .assessment-question-number")).toHaveText(["Question 17","Question 17","Question Original unknown","Question 21"]);
@@ -116,10 +116,12 @@ test("matching student, teacher and marking PDFs preserve grouped content, sourc
  expect(originalPaper.text).toContain("Question 17");
  expect(originalPaper.text).toContain("Question 21");
  await page.getByRole("checkbox",{name:/Hide original question numbers/}).check();
- await expect(page.locator(".mqb-original-number-mask")).toHaveCount(0); // no unreviewed opaque covers
- await expect(page.getByRole("button",{name:/Print .*save PDF/})).toBeDisabled();
- await reviewAllImages(page);
+ await waitForAutomaticNumbering(page);
+ await expect(page.locator(".mqb-auto-number-mask")).toHaveCount(3);
+ await expect(page.locator(".mqb-original-number-mask")).toHaveCount(0);
  await expect(page.locator(".paper-question .assessment-question-number")).toHaveText(["Question 1","Question 2","Question 3","Question 4"]);
+ await expect(page.locator(".paper-question .mqb-auto-number-text")).toHaveText(["1","2","4"]);
+ await expect(page.locator(".paper-question .mqb-auto-total-text").first()).toContainText("Total for Question 1 is 4 marks");
  const student=await inspectPdf(page,testInfo,"student-sequential");
  expect(student.text).not.toContain("Source:");
  expect(student.text).toContain("(a) 3x + 7 = 25; (b) x squared = 36");
@@ -142,7 +144,7 @@ test("matching student, teacher and marking PDFs preserve grouped content, sourc
  await page.getByLabel("Teacher source references").selectOption("none");
  await expect(page.locator(".assessment-source")).toHaveCount(0);
  await page.getByRole("button",{name:"Mark scheme only",exact:true}).click();
- await reviewAllImages(page);
+ await waitForAutomaticNumbering(page);
  await expect(page.locator(".mark-scheme-item")).toHaveCount(4);
  await expect(page.locator(".mark-scheme-item img")).toHaveCount(4); // both distinct multipart marking images
  await expect(page.locator(".mark-scheme-item .assessment-question-number")).toHaveText(["Question 1","Question 2","Question 3","Question 4"]);
@@ -166,6 +168,10 @@ test("matching student, teacher and marking PDFs preserve grouped content, sourc
  await page.getByRole("button",{name:"Open / Edit",exact:true}).click();
  await expect(page.getByRole("checkbox",{name:/Hide original question numbers/})).toBeChecked();
  await expect(page.locator(".paper-question .assessment-question-number")).toHaveText(["Question 1","Question 2","Question 3"]);
+ await waitForAutomaticNumbering(page);
+ await expect(page.locator(".paper-question .mqb-auto-number-text")).toHaveText(["1","2"]);
+ await expect(page.locator(".mark-scheme-item .mqb-auto-number-text")).toHaveText(["1","2","2"]);
+ await expect(page.locator(".paper-question .mqb-auto-total-text").first()).toContainText("Total for Question 1 is 5 marks");
  const reopened=await inspectPdf(page,testInfo,"reopened-reordered-combined");
  expect(reopened.text).not.toContain("other-paper.svg");
  expect(reopened.text.indexOf("questions/shadow.svg")).toBeLessThan(reopened.text.indexOf("questions/a.svg"));
@@ -240,10 +246,14 @@ test("missing saved references remain saved and block incomplete PDF exports",as
  await expect(page.locator(".export-warning")).toContainText("1 saved question reference(s) are unavailable");
 });
 
-test("draft covers overlapping mathematics stay transparent and block printing until reviewed",async({page},testInfo)=>{
+test("unsupported maths-only layouts offer advanced adjustment without covering expressions",async({page},testInfo)=>{
+ test.setTimeout(90000);
  const row=exam("overlap","EDX-H-JUNE2023-1H-Q17","Q17","1H",3);
- await openSavedFixture(page,[row],[row.id],{renumberStudentQuestions:true});
- await page.getByRole("button",{name:"Review original print for question 1",exact:true}).click();
+ delete row.metadata.numbering_positions;
+ await openSavedFixture(page,[row],[row.id],{renumberStudentQuestions:true},false,true);
+ await expect(page.getByRole("button",{name:"Advanced numbering adjustment",exact:true})).toBeVisible({timeout:60000});
+ await expect(page.locator(".paper .mqb-auto-number-mask,.paper .mqb-auto-total-mask")).toHaveCount(0);
+ await page.getByRole("button",{name:"Advanced numbering adjustment",exact:true}).click();
  await page.getByRole("spinbutton",{name:"Number cover width for question 1",exact:true}).fill("25");
  await page.getByRole("spinbutton",{name:"Number cover depth for question 1",exact:true}).fill("12");
  await expect(page.locator(".paper .mqb-original-number-mask")).toHaveCount(0);
@@ -251,8 +261,15 @@ test("draft covers overlapping mathematics stay transparent and block printing u
  const draftColor=await page.locator(".builder-mask-editor .mqb-original-number-mask").evaluate(node=>getComputedStyle(node).backgroundColor);
  expect(draftColor).toMatch(/^rgba\(/); // mathematics remains visible through draft guides
  await page.screenshot({path:testInfo.outputPath("manual-cover-review.png"),fullPage:true});
- await page.getByRole("button",{name:"Reset covers for this question",exact:true}).click();
+ await page.getByRole("checkbox",{name:"Original number and total are already cropped out or absent",exact:true}).check();
  await page.getByRole("button",{name:"Confirm covers avoid question content",exact:true}).click();
- await expect(page.locator(".paper .mqb-original-number-mask")).toHaveCount(1);
+ await expect(page.locator(".paper .mqb-original-number-mask")).toHaveCount(0);
  await inspectPdf(page,testInfo,"manual-covers-preserve-mathematics");
+ await expect.poll(()=>page.evaluate(()=>Object.keys(JSON.parse(localStorage.getItem("mqb-numbering-corrections-v1")||"{}")).length)).toBeGreaterThan(0);
+ await page.getByRole("button",{name:"Save changes to my account",exact:true}).click();
+ await page.reload();
+ await page.getByRole("navigation",{name:"Main navigation"}).getByRole("button",{name:"My Worksheets"}).click();
+ await page.getByRole("button",{name:"Open / Edit",exact:true}).click();
+ await waitForAutomaticNumbering(page);
+ await expect(page.locator(".paper .mqb-original-number-mask,.paper .mqb-auto-number-mask")).toHaveCount(0);
 });

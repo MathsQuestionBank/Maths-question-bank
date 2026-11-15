@@ -1,0 +1,674 @@
+[
+  {
+    "id": "june-2022-1f-q01",
+    "image": "june-2022-1f-q01.png",
+    "pdf": "june-2022-1f.pdf",
+    "pdfPage": 2,
+    "slice": {
+      "page": 2,
+      "top": 0.15007317205081402,
+      "bottom": 0.3718990688234865
+    },
+    "series": "June 2022",
+    "paper": "1F",
+    "tier": "Foundation",
+    "originalNumber": 1,
+    "marks": 1,
+    "layout": {
+      "version": 1,
+      "originalNumber": 1,
+      "imageWidth": 834,
+      "imageHeight": 263,
+      "numberRects": [
+        {
+          "left": 0.07141967763950229,
+          "top": 0.08567470744024162,
+          "width": 0.010079366397641586,
+          "height": 0.08893035547401683
+        }
+      ],
+      "totalRects": [
+        {
+          "rect": {
+            "left": 0.5830974570475487,
+            "top": 0.7504295680755301,
+            "width": 0.2740578431607771,
+            "height": 0.08893035547401683
+          },
+          "marks": 1
+        }
+      ],
+      "method": "pdf-text"
+    }
+  },
+  {
+    "id": "june-2022-1f-q02",
+    "image": "june-2022-1f-q02.png",
+    "pdf": "june-2022-1f.pdf",
+    "pdfPage": 2,
+    "slice": {
+      "page": 2,
+      "top": 0.33787087529084314,
+      "bottom": 0.5264383603950783
+    },
+    "series": "June 2022",
+    "paper": "1F",
+    "tier": "Foundation",
+    "originalNumber": 2,
+    "marks": 1,
+    "layout": {
+      "version": 1,
+      "originalNumber": 2,
+      "imageWidth": 834,
+      "imageHeight": 223,
+      "numberRects": [
+        {
+          "left": 0.07142852107773265,
+          "top": 0.10078550285677597,
+          "width": 0.010079366397641586,
+          "height": 0.10461536273038656
+        }
+      ],
+      "totalRects": [
+        {
+          "rect": {
+            "left": 0.5830881778456953,
+            "top": 0.7064118194131586,
+            "width": 0.2740577918944685,
+            "height": 0.10461536273038656
+          },
+          "marks": 1
+        }
+      ],
+      "method": "pdf-text"
+    }
+  },
+  {
+    "id": "june-2022-1f-q07",
+    "image": "june-2022-1f-q07.png",
+    "pdf": "june-2022-1f.pdf",
+    "pdfPage": 4,
+    "slice": {
+      "page": 4,
+      "top": 0.04990002822340175,
+      "bottom": 0.5294812751902741
+    },
+    "series": "June 2022",
+    "paper": "1F",
+    "tier": "Foundation",
+    "originalNumber": 7,
+    "marks": 3,
+    "layout": {
+      "version": 1,
+      "originalNumber": 7,
+      "imageWidth": 834,
+      "imageHeight": 567,
+      "numberRects": [
+        {
+          "left": 0.07142843136169262,
+          "top": 0.0396280482793372,
+          "width": 0.010079366397641586,
+          "height": 0.04113390889862126
+        }
+      ],
+      "totalRects": [
+        {
+          "rect": {
+            "left": 0.575243202241281,
+            "top": 0.8845634911295586,
+            "width": 0.28189958898775086,
+            "height": 0.041133918346684215
+          },
+          "marks": 3
+        }
+      ],
+      "method": "pdf-text"
+    }
+  },
+  {
+    "id": "june-2022-1f-q14",
+    "image": "june-2022-1f-q14.png",
+    "pdf": "june-2022-1f.pdf",
+    "pdfPage": 9,
+    "slice": {
+      "page": 9,
+      "top": 0.4805060608903399,
+      "bottom": 0.7640717183245057
+    },
+    "series": "June 2022",
+    "paper": "1F",
+    "tier": "Foundation",
+    "originalNumber": 14,
+    "marks": 2,
+    "layout": {
+      "version": 1,
+      "originalNumber": 14,
+      "imageWidth": 834,
+      "imageHeight": 335,
+      "numberRects": [
+        {
+          "left": 0.07176339260538867,
+          "top": 0.06702105248087115,
+          "width": 0.02015873279528317,
+          "height": 0.06956785963376497
+        }
+      ],
+      "totalRects": [
+        {
+          "rect": {
+            "left": 0.5654915813544026,
+            "top": 0.8047677947971145,
+            "width": 0.291979006651701,
+            "height": 0.06956773180125214
+          },
+          "marks": 2
+        }
+      ],
+      "method": "pdf-text"
+    }
+  },
+  {
+    "id": "november-2022-1h-q01",
+    "image": "november-2022-1h-q01.png",
+    "pdf": "november-2022-1h.pdf",
+    "pdfPage": 2,
+    "slice": {
+      "page": 2,
+      "top": 0.13510686686311643,
+      "bottom": 0.689532286107141
+    },
+    "series": "November 2022",
+    "paper": "1H",
+    "tier": "Higher",
+    "originalNumber": 1,
+    "marks": 3,
+    "layout": {
+      "version": 1,
+      "originalNumber": 1,
+      "imageWidth": 834,
+      "imageHeight": 654,
+      "numberRects": [
+        {
+          "left": 0.07141970327265658,
+          "top": 0.03427849472446926,
+          "width": 0.010079366397641586,
+          "height": 0.035581081185337336
+        }
+      ],
+      "totalRects": [
+        {
+          "rect": {
+            "left": 0.575243202241281,
+            "top": 0.9001468065873228,
+            "width": 0.28189958898775086,
+            "height": 0.03558101580429729
+          },
+          "marks": 3
+        }
+      ],
+      "method": "pdf-text"
+    }
+  },
+  {
+    "id": "november-2022-1h-q02",
+    "image": "november-2022-1h-q02.png",
+    "pdf": "november-2022-1h.pdf",
+    "pdfPage": 3,
+    "slice": {
+      "page": 3,
+      "top": 0.06337114288030073,
+      "bottom": 0.7389170043494343
+    },
+    "series": "November 2022",
+    "paper": "1H",
+    "tier": "Higher",
+    "originalNumber": 2,
+    "marks": 4,
+    "layout": {
+      "version": 1,
+      "originalNumber": 2,
+      "imageWidth": 834,
+      "imageHeight": 797,
+      "numberRects": [
+        {
+          "left": 0.07142843136169262,
+          "top": 0.028132610815403997,
+          "width": 0.010079366397641586,
+          "height": 0.029201639616602174
+        }
+      ],
+      "totalRects": [
+        {
+          "rect": {
+            "left": 0.5752288989411867,
+            "top": 0.9180497553485379,
+            "width": 0.2818976921343333,
+            "height": 0.02920159937257959
+          },
+          "marks": 4
+        }
+      ],
+      "method": "pdf-text"
+    }
+  },
+  {
+    "id": "november-2022-1h-q07",
+    "image": "november-2022-1h-q07.png",
+    "pdf": "november-2022-1h.pdf",
+    "pdfPage": 7,
+    "slice": {
+      "page": 7,
+      "top": 0.04967042762404776,
+      "bottom": 0.7524029040307194
+    },
+    "series": "November 2022",
+    "paper": "1H",
+    "tier": "Higher",
+    "originalNumber": 7,
+    "marks": 2,
+    "layout": {
+      "version": 1,
+      "originalNumber": 7,
+      "imageWidth": 834,
+      "imageHeight": 829,
+      "numberRects": [
+        {
+          "left": 0.07142843136169262,
+          "top": 0.027044244355756555,
+          "width": 0.010079366397641586,
+          "height": 0.028071922082061933
+        }
+      ],
+      "totalRects": [
+        {
+          "rect": {
+            "left": 0.575243202241281,
+            "top": 0.9212201648858467,
+            "width": 0.28189958898775086,
+            "height": 0.028071876947109747
+          },
+          "marks": 2
+        }
+      ],
+      "method": "pdf-text"
+    }
+  },
+  {
+    "id": "november-2022-1h-q14",
+    "image": "november-2022-1h-q14.png",
+    "pdf": "november-2022-1h.pdf",
+    "pdfPage": 14,
+    "slice": {
+      "page": 14,
+      "top": 0.0499001732190439,
+      "bottom": 0.9637891508170722
+    },
+    "series": "November 2022",
+    "paper": "1H",
+    "tier": "Higher",
+    "originalNumber": 14,
+    "marks": 3,
+    "layout": {
+      "version": 1,
+      "originalNumber": 14,
+      "imageWidth": 834,
+      "imageHeight": 1078,
+      "numberRects": [
+        {
+          "left": 0.07142843136169262,
+          "top": 0.020795599109443685,
+          "width": 0.02015873279528317,
+          "height": 0.021585829138754974
+        }
+      ],
+      "totalRects": [
+        {
+          "rect": {
+            "left": 0.5651694238712748,
+            "top": 0.9394224572374384,
+            "width": 0.2919770585319749,
+            "height": 0.021585794432354637
+          },
+          "marks": 3
+        }
+      ],
+      "method": "pdf-text"
+    }
+  },
+  {
+    "id": "november-2024-1f-q01",
+    "image": "november-2024-1f-q01.png",
+    "pdf": "november-2024-1f.pdf",
+    "pdfPage": 2,
+    "slice": {
+      "page": 2,
+      "top": 0.1519403534326776,
+      "bottom": 0.29063582619024386
+    },
+    "series": "November 2024",
+    "paper": "1F",
+    "tier": "Foundation",
+    "originalNumber": 1,
+    "marks": 1,
+    "layout": {
+      "version": 1,
+      "originalNumber": 1,
+      "imageWidth": 834,
+      "imageHeight": 164,
+      "numberRects": [
+        {
+          "left": 0.07141970327265658,
+          "top": 0.13702587713073844,
+          "width": 0.010079366397641586,
+          "height": 0.14223287509764918
+        }
+      ],
+      "totalRects": [
+        {
+          "rect": {
+            "left": 0.5830881778456953,
+            "top": 0.6008436052822163,
+            "width": 0.2740577918944685,
+            "height": 0.14223287509764918
+          },
+          "marks": 1
+        }
+      ],
+      "method": "pdf-text"
+    }
+  },
+  {
+    "id": "november-2024-1f-q02",
+    "image": "november-2024-1f-q02.png",
+    "pdf": "november-2024-1f.pdf",
+    "pdfPage": 2,
+    "slice": {
+      "page": 2,
+      "top": 0.25660763265760045,
+      "bottom": 0.5132658325454028
+    },
+    "series": "November 2024",
+    "paper": "1F",
+    "tier": "Foundation",
+    "originalNumber": 2,
+    "marks": 1,
+    "layout": {
+      "version": 1,
+      "originalNumber": 2,
+      "imageWidth": 834,
+      "imageHeight": 303,
+      "numberRects": [
+        {
+          "left": 0.07141924187587935,
+          "top": 0.07404738604484835,
+          "width": 0.010079366397641586,
+          "height": 0.0768611946236667
+        }
+      ],
+      "totalRects": [
+        {
+          "rect": {
+            "left": 0.5830881778456953,
+            "top": 0.7842999565422426,
+            "width": 0.2740577918944685,
+            "height": 0.0768611946236667
+          },
+          "marks": 1
+        }
+      ],
+      "method": "pdf-text"
+    }
+  },
+  {
+    "id": "november-2024-1f-q07",
+    "image": "november-2024-1f-q07.png",
+    "pdf": "november-2024-1f.pdf",
+    "pdfPage": 4,
+    "slice": {
+      "page": 4,
+      "top": 0.04967035512622668,
+      "bottom": 0.6348423585629134
+    },
+    "series": "November 2024",
+    "paper": "1F",
+    "tier": "Foundation",
+    "originalNumber": 7,
+    "marks": 3,
+    "layout": {
+      "version": 1,
+      "originalNumber": 7,
+      "imageWidth": 834,
+      "imageHeight": 691,
+      "numberRects": [
+        {
+          "left": 0.07142843136169262,
+          "top": 0.032477406125127804,
+          "width": 0.010079366397641586,
+          "height": 0.03371154328362686
+        }
+      ],
+      "totalRects": [
+        {
+          "rect": {
+            "left": 0.5752513535843455,
+            "top": 0.9053933124885415,
+            "width": 0.2818975896017161,
+            "height": 0.03371155102684388
+          },
+          "marks": 3
+        }
+      ],
+      "method": "pdf-text"
+    }
+  },
+  {
+    "id": "november-2024-1f-q14",
+    "image": "november-2024-1f-q14.png",
+    "pdf": "november-2024-1f.pdf",
+    "pdfPage": 11,
+    "slice": {
+      "page": 11,
+      "top": 0.04967035512622668,
+      "bottom": 0.966741479584831
+    },
+    "series": "November 2024",
+    "paper": "1F",
+    "tier": "Foundation",
+    "originalNumber": 14,
+    "marks": 5,
+    "layout": {
+      "version": 1,
+      "originalNumber": 14,
+      "imageWidth": 834,
+      "imageHeight": 1082,
+      "numberRects": [
+        {
+          "left": 0.07142843136169262,
+          "top": 0.02072344042005197,
+          "width": 0.02015873279528317,
+          "height": 0.021510928428662972
+        }
+      ],
+      "totalRects": [
+        {
+          "rect": {
+            "left": 0.5651635795120965,
+            "top": 0.9397536074565144,
+            "width": 0.29197695599935775,
+            "height": 0.021510893842690438
+          },
+          "marks": 5
+        }
+      ],
+      "method": "pdf-text"
+    }
+  },
+  {
+    "id": "june-2023-1h-q01",
+    "image": "june-2023-1h-q01.png",
+    "pdf": "june-2023-1h.pdf",
+    "pdfPage": 2,
+    "slice": {
+      "page": 2,
+      "top": 0.1374587143033416,
+      "bottom": 0.558875371750702
+    },
+    "series": "June 2023",
+    "paper": "1H",
+    "tier": "Higher",
+    "originalNumber": 1,
+    "marks": 3,
+    "layout": {
+      "version": 1,
+      "originalNumber": 1,
+      "imageWidth": 834,
+      "imageHeight": 497,
+      "numberRects": [
+        {
+          "left": 0.07141985707158233,
+          "top": 0.045097573797357245,
+          "width": 0.010079366397641586,
+          "height": 0.03744225101137473
+        }
+      ],
+      "totalRects": [
+        {
+          "rect": {
+            "left": 0.5752434073065154,
+            "top": 0.8779997981185804,
+            "width": 0.28189958898775086,
+            "height": 0.03744225101137473
+          },
+          "marks": 3
+        }
+      ],
+      "method": "pdf-text"
+    }
+  },
+  {
+    "id": "june-2023-1h-q02",
+    "image": "june-2023-1h-q02.png",
+    "pdf": "june-2023-1h.pdf",
+    "pdfPage": 2,
+    "slice": {
+      "page": 2,
+      "top": 0.5287954095539659,
+      "bottom": 0.9450101127210622
+    },
+    "series": "June 2023",
+    "paper": "1H",
+    "tier": "Higher",
+    "originalNumber": 2,
+    "marks": 3,
+    "layout": {
+      "version": 1,
+      "originalNumber": 2,
+      "imageWidth": 834,
+      "imageHeight": 491,
+      "numberRects": [
+        {
+          "left": 0.07143636482294566,
+          "top": 0.04566121442624321,
+          "width": 0.010079366397641586,
+          "height": 0.03791021352310068
+        }
+      ],
+      "totalRects": [
+        {
+          "rect": {
+            "left": 0.575243202241281,
+            "top": 0.8764750094276933,
+            "width": 0.28189958898775086,
+            "height": 0.03791021352310068
+          },
+          "marks": 3
+        }
+      ],
+      "method": "pdf-text"
+    }
+  },
+  {
+    "id": "june-2023-1h-q07",
+    "image": "june-2023-1h-q07.png",
+    "pdf": "june-2023-1h.pdf",
+    "pdfPage": 7,
+    "slice": {
+      "page": 7,
+      "top": 0.05225151770563536,
+      "bottom": 0.4509559127700417
+    },
+    "series": "June 2023",
+    "paper": "1H",
+    "tier": "Higher",
+    "originalNumber": 7,
+    "marks": 2,
+    "layout": {
+      "version": 1,
+      "originalNumber": 7,
+      "imageWidth": 834,
+      "imageHeight": 471,
+      "numberRects": [
+        {
+          "left": 0.07142826474618974,
+          "top": 0.047666564612607105,
+          "width": 0.010079366397641586,
+          "height": 0.03957517781612949
+        }
+      ],
+      "totalRects": [
+        {
+          "rect": {
+            "left": 0.5752442275674526,
+            "top": 0.8710500362644213,
+            "width": 0.28189958898775086,
+            "height": 0.03957515508694028
+          },
+          "marks": 2
+        }
+      ],
+      "method": "pdf-text"
+    }
+  },
+  {
+    "id": "june-2023-1h-q14",
+    "image": "june-2023-1h-q14.png",
+    "pdf": "june-2023-1h.pdf",
+    "pdfPage": 13,
+    "slice": {
+      "page": 13,
+      "top": 0.3990723758797429,
+      "bottom": 0.9657133879841241
+    },
+    "series": "June 2023",
+    "paper": "1H",
+    "tier": "Higher",
+    "originalNumber": 14,
+    "marks": 4,
+    "layout": {
+      "version": 1,
+      "originalNumber": 14,
+      "imageWidth": 834,
+      "imageHeight": 669,
+      "numberRects": [
+        {
+          "left": 0.07143585215985983,
+          "top": 0.03353952220664017,
+          "width": 0.02015873279528317,
+          "height": 0.02784618114724808
+        }
+      ],
+      "totalRects": [
+        {
+          "rect": {
+            "left": 0.565162656718542,
+            "top": 0.9092672147153016,
+            "width": 0.2919770585319749,
+            "height": 0.02784618114724808
+          },
+          "marks": 4
+        }
+      ],
+      "method": "pdf-text"
+    }
+  }
+]

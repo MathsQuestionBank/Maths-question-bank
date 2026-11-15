@@ -1,6 +1,8 @@
 import type {PDFDocumentProxy} from "pdfjs-dist";
 import {supabase} from "./supabase";
 import {drawSlice} from "./pdfExtraction";
+import {readNumberingLayout} from "./pdfNumbering";
+import {embedNumberingLayout} from "./pngNumberingMetadata";
 import {preparePublication,exportMappedParts} from "./paperPublication";
 import type {QuestionDraft,Slice} from "./paperExtraction";
 
@@ -25,7 +27,7 @@ function reviewMatchesStored(saved:StoredReview,drafts:QuestionDraft[],mappingFi
   });
  });
 }
-async function pngForCrop(pdf:PDFDocumentProxy,crop:Slice):Promise<Blob>{
+async function pngForCrop(pdf:PDFDocumentProxy,crop:Slice,number:number,marks:number,kind:"question"|"mark"):Promise<Blob>{
  const canvas=document.createElement("canvas");
  await drawSlice(pdf,crop,canvas);
  if(!canvas.width||!canvas.height)throw Error("Crop image is empty.");
@@ -33,7 +35,10 @@ async function pngForCrop(pdf:PDFDocumentProxy,crop:Slice):Promise<Blob>{
   canvas.toBlob(value=>value?resolve(value):reject(Error("Could not encode a PNG")),"image/png");
  });
  canvas.width=0;canvas.height=0;
- return blob;
+ // Geometry is embedded in the newly generated PNG before its immutable hash
+ // is calculated. Existing images and database metadata are never rewritten.
+ const numbering=await readNumberingLayout(pdf,crop,number,marks,kind);
+ return numbering?embedNumberingLayout(blob,numbering):blob;
 }
 async function sha256(blob:Blob){
  const data=await blob.arrayBuffer();
@@ -81,7 +86,7 @@ export async function publishReviewedPaper(args:{
   const paths:{question_path?:string;mark_path?:string}={};
   for(const kind of ["question","mark"] as const){
    progress("Archiving "+(i+1)+"/"+drafts.length+" — Q"+draft.number+" "+(kind==="mark"?"mark scheme":"question")+".");
-   const blob=await pngForCrop(kind==="question"?questionPdf:schemePdf,draft[kind]);
+   const blob=await pngForCrop(kind==="question"?questionPdf:schemePdf,draft[kind],draft.number,draft.parts.reduce((sum,part)=>sum+part.marks,0),kind);
    const hash=await sha256(blob);
    const path=base+"Q"+String(draft.number).padStart(2,"0")+"/"+kind+"-"+hash+".png";
    await archiveCrop(path,blob);

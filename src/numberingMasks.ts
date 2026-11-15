@@ -8,7 +8,7 @@ import type { Crop } from "./CropEditor";
 export type NumberingMask = {
  numberWidth:number;numberHeight:number;footerHeight:number;
  numberTop?:number;numberLeft?:number;footerBottom?:number;footerWidth?:number;footerLeft?:number;
- numberEnabled?:boolean;footerEnabled?:boolean;reviewedFor?:string;
+ numberEnabled?:boolean;footerEnabled?:boolean;reviewedFor?:string;imageHash?:string;
 };
 
 export const defaultNumberingMask:NumberingMask={numberWidth:3.5,numberHeight:3.5,footerHeight:2.8,numberTop:0,numberLeft:0,footerBottom:0,footerWidth:55,footerLeft:45,numberEnabled:true,footerEnabled:true};
@@ -22,7 +22,8 @@ export function normaliseNumberingMask(input:unknown):NumberingMask {
   numberTop:percent(value.numberTop,0,200),numberLeft:percent(value.numberLeft,0,100-numberWidth),
   footerBottom:percent(value.footerBottom,0,200),footerWidth,footerLeft:percent(value.footerLeft,100-footerWidth,100-footerWidth),
   numberEnabled:value.numberEnabled!==false,footerEnabled:value.footerEnabled!==false,
-  ...(typeof value.reviewedFor==="string"?{reviewedFor:value.reviewedFor}:{})
+  ...(typeof value.reviewedFor==="string"?{reviewedFor:value.reviewedFor}:{}),
+  ...(typeof value.imageHash==="string"&&/^[a-f0-9]{64}$/.test(value.imageHash)?{imageHash:value.imageHash}:{})
  };
 }
 
@@ -43,7 +44,7 @@ function imageIdentity(src:string):string {
 }
 
 export function numberingMaskReviewKey(mask:unknown,src:string,crop:Crop,coverOriginalFooter=true):string {
- const {reviewedFor:_,...geometry}=normaliseNumberingMask(mask);
+ const {reviewedFor:_,imageHash:__,...geometry}=normaliseNumberingMask(mask);
  return "mqb-mask-v1:"+JSON.stringify([imageIdentity(src),[crop.top,crop.right,crop.bottom,crop.left],geometry,coverOriginalFooter]);
 }
 

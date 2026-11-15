@@ -696,3 +696,10 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
 .site .builder-mask-editor .mask-editor-controls p{font-size:12px;line-height:1.5}
 .site .builder-mask-editor .mask-editor-controls label{font-size:12px}
 @media(max-width:780px){.mask-editor-layout{grid-template-columns:minmax(0,1fr)}}
+
+/* Automatic replacements use original-image coordinates inside the same crop
+   frame in the preview and print. No opaque edge guesses are applied. */
+.mqb-automatic-numbering{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3;overflow:hidden}
+.mqb-automatic-numbering text{fill:#111}
+.automatic-numbering-status{min-height:2em}
+@media print{.mqb-automatic-numbering{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
