@@ -17,3 +17,13 @@ jobs:
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run test:smoke
+      - name: Upload assessment PDF examples and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: assessment-export-evidence
+          path: |
+            test-results/
+            docs/assessment-export.md
+          if-no-files-found: ignore
+          retention-days: 14

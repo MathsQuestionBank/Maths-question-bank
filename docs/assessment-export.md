@@ -61,3 +61,11 @@ npm run test:smoke
 ```
 
 Playwright uses local mocked Supabase responses and fixture images for these flows. PDF assertions inspect Chromium-generated documents; desktop-only PDF cases are skipped in the mobile project. These fixtures do not exhaustively validate every historical examination layout. Test results and example artifacts belong in the pull request's validation report.
+
+## Validation report — 15 November 2026
+
+The unmodified baseline (`2049e58`) passed build, 96 unit tests, and 19 smoke tests with one intentional mobile skip. No pre-existing failures were found.
+
+The completed implementation passed `npm run build` (existing bundle-size warning), all 157 unit tests across 19 files, and all 25 smoke tests with seven intentional mobile skips of desktop PDF cases. The unit suite also passed under the CI runner's Node 20. The matching export/reopen flow passed three consecutive runs with repeated cached-image reopening. An initial GitHub CI failure exposed rendering tests initializing a live Supabase client; these tests now mock that client and run without a native WebSocket or database connection.
+
+The Build workflow publishes an **assessment-export-evidence** artifact for 14 days, containing generated PDF examples, screenshots, test diagnostics, and this guide. Open the successful run from the pull request's checks to download it. The examples use synthetic question/source fixtures, including the student paper, teacher copy, separate source sheet, matching mark scheme, reopened/reordered combined output, long A4 paper, and tall cropped images. No production examination data was used for the evidence.
