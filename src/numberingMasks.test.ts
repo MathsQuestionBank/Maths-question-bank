@@ -1,4 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+// Rendering and cover geometry never need a live database client.
+vi.mock("./supabase",()=>({supabase:{}}));
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { CroppedImage, type Crop } from "./CropEditor";
