@@ -1,0 +1,520 @@
+{
+  "paper_id": "0f05091b-77e8-55f5-c23b-34d14c143b72",
+  "exam_board": "Edexcel",
+  "series": "November 2022",
+  "paper_code": "3H",
+  "tier": "Higher",
+  "mapped_record_count": 32,
+  "whole_question_groups": 26,
+  "multipart_question_groups": 6,
+  "private_asset_content_verified": false,
+  "teacher_approved": false,
+  "resources": {
+    "Q5:similar-triangles": {
+      "description": "Both labelled triangles, supplied side lengths, angle correspondence and similarity statement.",
+      "source_question": 5,
+      "source_pdf_pages": [
+        5
+      ],
+      "production_region_verified": false
+    },
+    "Q6:quiz-probabilities": {
+      "description": "Incomplete supplied probability tree, including the sports-win branch probability and music-win conditional branch probabilities, plus the quiz introduction. Required for both parts; do not substitute the student-completed tree.",
+      "source_question": 6,
+      "source_pdf_pages": [
+        6
+      ],
+      "production_region_verified": false
+    }
+  },
+  "parts": [
+    {
+      "database_record_id": "29a6682d-9a13-8799-3c5d-6da0b55dabda",
+      "source_question_id": "2022_3H_Q05a",
+      "original_question_number": 5,
+      "question_part": "a",
+      "stored_question_reference": "Q05a",
+      "marks": 2,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q5:similar-triangles"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "shared_context_needed",
+      "question_asset_path_fingerprint": "9e078e2faffb601367f3fbff2d911c234a093615e4d4edc89ccb8ff3f2f7b7e8",
+      "mark_asset_path_fingerprint": "ab65b4656bc6e73e6201cf2284169b1b3beb75ff4506a1260a05d0af9c9f2b34",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          5
+        ],
+        "mark_scheme_pdf_pages": [
+          7
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "Both unknown lengths can use the scale factor from the two supplied corresponding side lengths. AB in (b) does not require EF from (a).",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "f27e2f65-6ed7-4cc2-b0ec-9c42a045ddbf",
+      "source_question_id": "2022_3H_Q05b",
+      "original_question_number": 5,
+      "question_part": "b",
+      "stored_question_reference": "Q05b",
+      "marks": 2,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q5:similar-triangles"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "shared_context_needed",
+      "question_asset_path_fingerprint": "9e078e2faffb601367f3fbff2d911c234a093615e4d4edc89ccb8ff3f2f7b7e8",
+      "mark_asset_path_fingerprint": "ab65b4656bc6e73e6201cf2284169b1b3beb75ff4506a1260a05d0af9c9f2b34",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          5
+        ],
+        "mark_scheme_pdf_pages": [
+          7
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "Both unknown lengths can use the scale factor from the two supplied corresponding side lengths. AB in (b) does not require EF from (a).",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "c1a6c235-d031-956d-40af-34af3b30a5e4",
+      "source_question_id": "2022_3H_Q06a",
+      "original_question_number": 6,
+      "question_part": "a",
+      "stored_question_reference": "Q06a",
+      "marks": 2,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q6:quiz-probabilities"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "shared_context_needed",
+      "question_asset_path_fingerprint": "ce94383151a967dd636f77e403108c147af3eafece69ac349d4281acbea39de6",
+      "mark_asset_path_fingerprint": "09dc7ba29ee74d6ce099a89dee66c93823f93a42f54c12909b8ee08861384104",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          6
+        ],
+        "mark_scheme_pdf_pages": [
+          8
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "The win-both branch probabilities are already printed on the supplied tree. Part (b) needs that conditional-probability model, but not the complementary probabilities produced in (a); do not infer independence from marginal probabilities alone.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep the supplied tree as shared context for both parts. Part (b) does not need the complementary probabilities filled in by the student in (a).",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "51a63409-bdc4-400c-9105-83e27b078bcc",
+      "source_question_id": "2022_3H_Q06b",
+      "original_question_number": 6,
+      "question_part": "b",
+      "stored_question_reference": "Q06b",
+      "marks": 2,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q6:quiz-probabilities"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "shared_context_needed",
+      "question_asset_path_fingerprint": "ce94383151a967dd636f77e403108c147af3eafece69ac349d4281acbea39de6",
+      "mark_asset_path_fingerprint": "09dc7ba29ee74d6ce099a89dee66c93823f93a42f54c12909b8ee08861384104",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          6
+        ],
+        "mark_scheme_pdf_pages": [
+          8
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "The win-both branch probabilities are already printed on the supplied tree. Part (b) needs that conditional-probability model, but not the complementary probabilities produced in (a); do not infer independence from marginal probabilities alone.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep the supplied tree as shared context for both parts. Part (b) does not need the complementary probabilities filled in by the student in (a).",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "acde7057-5652-9f84-667a-84d89732898d",
+      "source_question_id": "2022_3H_Q07a",
+      "original_question_number": 7,
+      "question_part": "a",
+      "stored_question_reference": "Q07a",
+      "marks": 1,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "9d5b7bd94afb91edcaad249ca9e23de466ca0f10686109708f8b392672725494",
+      "mark_asset_path_fingerprint": "2902f9f88e0be1e71e6b987b0551e15d97e811d58ca150d9800847f959708912",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          7
+        ],
+        "mark_scheme_pdf_pages": [
+          8
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 1,
+        "question_observation": "Each part prints a separate complete conversion/index/algebra calculation. There is no reference to an earlier result.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "2c5477a7-44e5-4d57-a2ac-37f533d69a90",
+      "source_question_id": "2022_3H_Q07b",
+      "original_question_number": 7,
+      "question_part": "b",
+      "stored_question_reference": "Q07b",
+      "marks": 3,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "9d5b7bd94afb91edcaad249ca9e23de466ca0f10686109708f8b392672725494",
+      "mark_asset_path_fingerprint": "2902f9f88e0be1e71e6b987b0551e15d97e811d58ca150d9800847f959708912",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          7
+        ],
+        "mark_scheme_pdf_pages": [
+          8
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 3,
+        "question_observation": "Each part prints a separate complete conversion/index/algebra calculation. There is no reference to an earlier result.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "7df2860c-7848-fc3b-f3ad-80d5b52822c7",
+      "source_question_id": "2022_3H_Q09a",
+      "original_question_number": 9,
+      "question_part": "a",
+      "stored_question_reference": "Q09a",
+      "marks": 1,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "a9143a767ef3dd93152f0a1025f600d5c18ff497fb481f4bcec6ac1f2d4cea5a",
+      "mark_asset_path_fingerprint": "35493f570e6753dd5c5f7b5609e59270c8642d096af36f4dc1b5bbed5b1d32f3",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          8
+        ],
+        "mark_scheme_pdf_pages": [
+          9
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 1,
+        "question_observation": "Each part prints a separate complete conversion/index/algebra calculation. There is no reference to an earlier result.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "34cb6f1d-56f6-4fd8-952a-4dbde23d34ab",
+      "source_question_id": "2022_3H_Q09b",
+      "original_question_number": 9,
+      "question_part": "b",
+      "stored_question_reference": "Q09b",
+      "marks": 2,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "a9143a767ef3dd93152f0a1025f600d5c18ff497fb481f4bcec6ac1f2d4cea5a",
+      "mark_asset_path_fingerprint": "35493f570e6753dd5c5f7b5609e59270c8642d096af36f4dc1b5bbed5b1d32f3",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          8
+        ],
+        "mark_scheme_pdf_pages": [
+          9
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "Each part prints a separate complete conversion/index/algebra calculation. There is no reference to an earlier result.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "5f77b30d-b094-3705-433d-bc0602b3f383",
+      "source_question_id": "2022_3H_Q14a",
+      "original_question_number": 14,
+      "question_part": "a",
+      "stored_question_reference": "Q14a",
+      "marks": 2,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "880fcfb2c06b458a16cca00eba486ece79d2864afc484eb652616ff75ffa016e",
+      "mark_asset_path_fingerprint": "8dc5c487bbefd3f8617ee35007fca99d6bdf38ac97a9463924f0abce323173cd",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          11
+        ],
+        "mark_scheme_pdf_pages": [
+          10
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "Each part prints a separate complete conversion/index/algebra calculation. There is no reference to an earlier result.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "a03b6331-1ecc-460d-af6d-a6afd329e76c",
+      "source_question_id": "2022_3H_Q14b",
+      "original_question_number": 14,
+      "question_part": "b",
+      "stored_question_reference": "Q14b",
+      "marks": 3,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "880fcfb2c06b458a16cca00eba486ece79d2864afc484eb652616ff75ffa016e",
+      "mark_asset_path_fingerprint": "8dc5c487bbefd3f8617ee35007fca99d6bdf38ac97a9463924f0abce323173cd",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          11
+        ],
+        "mark_scheme_pdf_pages": [
+          10
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 3,
+        "question_observation": "Each part prints a separate complete conversion/index/algebra calculation. There is no reference to an earlier result.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "76eff8ab-1ca0-9af3-274c-fe43ef4389b0",
+      "source_question_id": "2022_3H_Q23a",
+      "original_question_number": 23,
+      "question_part": "a",
+      "stored_question_reference": "Q23a",
+      "marks": 1,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "842f9846ccaaf4e3ad3344d3df995596618c6bdbcdbd0f0feb3f7955374f13b0",
+      "mark_asset_path_fingerprint": "542cb4019ad1bae461ae9b2b7ee99069f77ab43bb5ee6e8ae7d4794004f36423",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          19
+        ],
+        "mark_scheme_pdf_pages": [
+          13
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 1,
+        "question_observation": "Part (a) uses the supplied f graph; (b) introduces different graphs A/B and function g. The graphs in (b) are not the graph constructed in (a).",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Retain each part\u2019s own complete graph(s), labels and function statement.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "54027cd5-dd10-4638-978b-6f7e75e19bbc",
+      "source_question_id": "2022_3H_Q23b",
+      "original_question_number": 23,
+      "question_part": "b",
+      "stored_question_reference": "Q23b",
+      "marks": 1,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "842f9846ccaaf4e3ad3344d3df995596618c6bdbcdbd0f0feb3f7955374f13b0",
+      "mark_asset_path_fingerprint": "542cb4019ad1bae461ae9b2b7ee99069f77ab43bb5ee6e8ae7d4794004f36423",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          19
+        ],
+        "mark_scheme_pdf_pages": [
+          13
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 1,
+        "question_observation": "Part (a) uses the supplied f graph; (b) introduces different graphs A/B and function g. The graphs in (b) are not the graph constructed in (a).",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Retain each part\u2019s own complete graph(s), labels and function statement.",
+      "review_flags": []
+    }
+  ]
+}

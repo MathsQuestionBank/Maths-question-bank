@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "scope": "Edexcel GCSE Foundation and Higher mapped-record inventory; actual total of printed multipart questions cannot be certified without the remaining source/asset inspection.",
+  "audit_status": "partial_content_audit_private_asset_access_blocked",
+  "snapshot_date_utc": "2026-11-16",
+  "base_commit": "a8e456a",
+  "paper_count": 90,
+  "mapped_record_count": 3181,
+  "whole_question_groups": 2257,
+  "metadata_multipart_question_groups": 732,
+  "multipart_mapped_part_records": 1656,
+  "source_question_groups_reviewed": 42,
+  "source_counterpart_parts_inspected": 91,
+  "metadata_only_parts_not_content_inspected": 1565,
+  "private_question_parts_inspected": 0,
+  "private_mark_scheme_parts_inspected": 0,
+  "teacher_approved_parts": 0,
+  "classification_counts_including_unapproved_source_proposals": {
+    "uncertain": 1568,
+    "shared_resource": 35,
+    "independent": 51,
+    "dependent": 2
+  },
+  "production_extraction_readiness_counts": {
+    "ready": 0,
+    "needs_crop": 0,
+    "shared_context_needed": 0,
+    "not_ready": 1656
+  },
+  "source_only_extraction_triage_counts": {
+    "shared_context_needed": 30,
+    "needs_crop": 49,
+    "not_ready": 12
+  },
+  "private_asset_review_required_parts": 1656,
+  "asset_reference_shapes": {
+    "question_assets=1;mark_assets=1": 689,
+    "question_assets=3;mark_assets=3": 3,
+    "question_assets=3;mark_assets=1": 8,
+    "question_assets=2;mark_assets=1": 29,
+    "question_assets=2;mark_assets=2": 2,
+    "question_assets=4;mark_assets=1": 1
+  },
+  "interpretation": "Source-backed proposals are not production-image verification or teacher approval. Unknown prerequisite/resource arrays are null, not empty. Every bank extraction remains not_ready; no app consumes this report.",
+  "metadata_snapshot_sha256": "ba6b401b31c406221e7443258d10e3cd5e3d77dde9c14996adfc506a8ec09b0d"
+}

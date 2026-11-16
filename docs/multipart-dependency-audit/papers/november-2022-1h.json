@@ -1,0 +1,667 @@
+{
+  "paper_id": "83bea572-269a-c915-a24f-8acf709ece4d",
+  "exam_board": "Edexcel",
+  "series": "November 2022",
+  "paper_code": "1H",
+  "tier": "Higher",
+  "mapped_record_count": 32,
+  "whole_question_groups": 24,
+  "multipart_question_groups": 7,
+  "private_asset_content_verified": false,
+  "teacher_approved": false,
+  "resources": {
+    "Q6:rizwan-ratios": {
+      "description": "The introduction defining a,b,c and both supplied ratios.",
+      "source_question": 6,
+      "source_pdf_pages": [
+        6
+      ],
+      "production_region_verified": false
+    },
+    "Q10:spinner-frequency-data": {
+      "description": "Spinner experiment introduction, total trials and supplied frequency table.",
+      "source_question": 10,
+      "source_pdf_pages": [
+        10
+      ],
+      "production_region_verified": false
+    },
+    "Q16:printed-identity": {
+      "description": "Exact identity printed in (a). Retain the original claim in (b); do not add assumptions or reveal the student proof.",
+      "source_question": 16,
+      "source_pdf_pages": [
+        16
+      ],
+      "production_region_verified": false
+    }
+  },
+  "parts": [
+    {
+      "database_record_id": "fcc63358-2679-10cf-08a1-24feeb820903",
+      "source_question_id": "2022_1H_Q02a",
+      "original_question_number": 2,
+      "question_part": "a",
+      "stored_question_reference": "Q02a",
+      "marks": 2,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "42a12208a9c982a9d6e162c3e39988cb761512e167b42355982a0711b6870055",
+      "mark_asset_path_fingerprint": "5ceef75b30074fb6c1589ac8331c87996f24cba7a7c6e083b50138e73dac5876",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          3
+        ],
+        "mark_scheme_pdf_pages": [
+          6
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "Each fraction task includes its complete expression; showing the identity in (b) does not use (a).",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "168a1654-3f7d-41c0-ae09-7ea9a0c55aa6",
+      "source_question_id": "2022_1H_Q02b",
+      "original_question_number": 2,
+      "question_part": "b",
+      "stored_question_reference": "Q02b",
+      "marks": 2,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "42a12208a9c982a9d6e162c3e39988cb761512e167b42355982a0711b6870055",
+      "mark_asset_path_fingerprint": "5ceef75b30074fb6c1589ac8331c87996f24cba7a7c6e083b50138e73dac5876",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          3
+        ],
+        "mark_scheme_pdf_pages": [
+          6
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "Each fraction task includes its complete expression; showing the identity in (b) does not use (a).",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "0bcaea63-1d61-5b51-104e-0782f2a84a2f",
+      "source_question_id": "2022_1H_Q06ai",
+      "original_question_number": 6,
+      "question_part": "ai",
+      "stored_question_reference": "Q06ai",
+      "marks": 2,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q6:rizwan-ratios"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "shared_context_needed",
+      "question_asset_path_fingerprint": "b0fd3b2c23a7502863089f0876fe5aefefa81bd0059a9acdcd0e00cce3fd9e0c",
+      "mark_asset_path_fingerprint": "260d561051f9f8784dc0ff08bd57094c3c69dc8ddc3bc6ce29bf0c4e0eb4d875",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          6
+        ],
+        "mark_scheme_pdf_pages": [
+          8
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "Both nested tasks use the two supplied ratios. The fraction in (a)(ii) can be derived afresh from those givens without the answer to (a)(i).",
+        "marking_observation": "This part has its own labelled marking criteria. Preserve the entire answer/method/guidance row and any referenced diagram; the sibling follow-through option is not a requirement for this part.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": [
+        "nested_parts"
+      ]
+    },
+    {
+      "database_record_id": "98bd2bb4-43f9-4200-a228-361db1e71cca",
+      "source_question_id": "2022_1H_Q06aii",
+      "original_question_number": 6,
+      "question_part": "aii",
+      "stored_question_reference": "Q06aii",
+      "marks": 2,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q6:rizwan-ratios"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "not_ready",
+      "question_asset_path_fingerprint": "b0fd3b2c23a7502863089f0876fe5aefefa81bd0059a9acdcd0e00cce3fd9e0c",
+      "mark_asset_path_fingerprint": "260d561051f9f8784dc0ff08bd57094c3c69dc8ddc3bc6ce29bf0c4e0eb4d875",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          6
+        ],
+        "mark_scheme_pdf_pages": [
+          8
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "Both nested tasks use the two supplied ratios. The fraction in (a)(ii) can be derived afresh from those givens without the answer to (a)(i).",
+        "marking_observation": "The (a)(ii) MS allows follow-through from (a)(i); retain a separate marking-review flag rather than inferring a compulsory question dependency.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": [
+        "nested_parts",
+        "marking_follow_through"
+      ]
+    },
+    {
+      "database_record_id": "1f743563-c0db-450a-9010-89a64ab47419",
+      "source_question_id": "2022_1H_Q06b",
+      "original_question_number": 6,
+      "question_part": "b",
+      "stored_question_reference": "Q06b",
+      "marks": 2,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "b0fd3b2c23a7502863089f0876fe5aefefa81bd0059a9acdcd0e00cce3fd9e0c",
+      "mark_asset_path_fingerprint": "260d561051f9f8784dc0ff08bd57094c3c69dc8ddc3bc6ce29bf0c4e0eb4d875",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          6
+        ],
+        "mark_scheme_pdf_pages": [
+          8
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "Part (b) introduces different variables m,n,p and complete relations, independent of Rizwan\u2019s ratios.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Retain the Emma introduction and both equations above (b).",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "6cf5e019-0e6c-739d-8ffd-784862fe567e",
+      "source_question_id": "2022_1H_Q09a",
+      "original_question_number": 9,
+      "question_part": "a",
+      "stored_question_reference": "Q09a",
+      "marks": 2,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "218aa5a34d4022909bc54e8e9c11705f63c191a4c2cb313241790180d969495f",
+      "mark_asset_path_fingerprint": "f13c15848f179f5b3bd6e2b3fd2b5a398c8f57867c3615ef2e1aa214c8d6e1a6",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          9
+        ],
+        "mark_scheme_pdf_pages": [
+          9
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "The equation and complete value table are supplied locally in (a).",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep the equation and the full table, including supplied values.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "b9e3f83d-01a7-41dd-b901-f3214556937b",
+      "source_question_id": "2022_1H_Q09b",
+      "original_question_number": 9,
+      "question_part": "b",
+      "stored_question_reference": "Q09b",
+      "marks": 2,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "not_ready",
+      "question_asset_path_fingerprint": "218aa5a34d4022909bc54e8e9c11705f63c191a4c2cb313241790180d969495f",
+      "mark_asset_path_fingerprint": "f13c15848f179f5b3bd6e2b3fd2b5a398c8f57867c3615ef2e1aa214c8d6e1a6",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          9
+        ],
+        "mark_scheme_pdf_pages": [
+          9
+        ],
+        "mark_scheme_supplement_pages": [
+          19
+        ],
+        "source_part_marks_verified": 2,
+        "question_observation": "The function and plotting range are repeated in (b) and the grid is supplied. Earlier table answers are not mandatory inputs.",
+        "marking_observation": "MS partial credit refers to the table/mark in (a); review before standalone use. Correct graph is supplied separately on MS p19.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Retain the function, range and complete plotting grid.",
+      "review_flags": [
+        "marking_follow_through",
+        "mark_scheme_supplement"
+      ]
+    },
+    {
+      "database_record_id": "7de30d78-367d-3214-2a0e-158194f8634c",
+      "source_question_id": "2022_1H_Q10a",
+      "original_question_number": 10,
+      "question_part": "a",
+      "stored_question_reference": "Q10a",
+      "marks": 2,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q10:spinner-frequency-data"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "shared_context_needed",
+      "question_asset_path_fingerprint": "7a6c03b6793bc363ecb302f01a5a608bfd987b169b539c1f6558715aef13f6cf",
+      "mark_asset_path_fingerprint": "a02d298dd3dcdcdf2d5137745d2db0732b224e79f1512f256ecd5dde4db41206",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          10
+        ],
+        "mark_scheme_pdf_pages": [
+          10
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "The frequency table supplies the evidence for both probability estimates; the score-1 calculation in (b) is not based on the score-5 calculation in (a).",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "f2599a4b-e2f1-4da5-a9d8-4cf0056e8000",
+      "source_question_id": "2022_1H_Q10b",
+      "original_question_number": 10,
+      "question_part": "b",
+      "stored_question_reference": "Q10b",
+      "marks": 2,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q10:spinner-frequency-data"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "shared_context_needed",
+      "question_asset_path_fingerprint": "7a6c03b6793bc363ecb302f01a5a608bfd987b169b539c1f6558715aef13f6cf",
+      "mark_asset_path_fingerprint": "a02d298dd3dcdcdf2d5137745d2db0732b224e79f1512f256ecd5dde4db41206",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          10
+        ],
+        "mark_scheme_pdf_pages": [
+          10
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "The frequency table supplies the evidence for both probability estimates; the score-1 calculation in (b) is not based on the score-5 calculation in (a).",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "5d63122e-70a7-e8f2-c254-f94b6b97d447",
+      "source_question_id": "2022_1H_Q16a",
+      "original_question_number": 16,
+      "question_part": "a",
+      "stored_question_reference": "Q16a",
+      "marks": 3,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "b705dedc0a9c95d0ae54a051ab8aa20c7723e6ef21d4f054069e88a40402b000",
+      "mark_asset_path_fingerprint": "bfcb910905a53098a238a2aee6053ff6a4157e24afdb9d51aca28cd519f0c40c",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          16
+        ],
+        "mark_scheme_pdf_pages": [
+          12
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 3,
+        "question_observation": "The identity to prove is printed in full within (a).",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Retain the entire printed identity and proof instruction.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "42caa4f6-422b-44a9-9d08-a8eed5daeee6",
+      "source_question_id": "2022_1H_Q16b",
+      "original_question_number": 16,
+      "question_part": "b",
+      "stored_question_reference": "Q16b",
+      "marks": 1,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q16:printed-identity"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "shared_context_needed",
+      "question_asset_path_fingerprint": "b705dedc0a9c95d0ae54a051ab8aa20c7723e6ef21d4f054069e88a40402b000",
+      "mark_asset_path_fingerprint": "bfcb910905a53098a238a2aee6053ff6a4157e24afdb9d51aca28cd519f0c40c",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          16
+        ],
+        "mark_scheme_pdf_pages": [
+          12
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 1,
+        "question_observation": "Part (b) references the identity already printed in (a), not a numerical answer produced there. It can use that supplied identity without requiring the student\u2019s proof.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": [
+        "supplied_result_not_student_answer"
+      ]
+    },
+    {
+      "database_record_id": "5844c455-e8a4-8e89-e34e-56ea652dfeaa",
+      "source_question_id": "2022_1H_Q23a",
+      "original_question_number": 23,
+      "question_part": "a",
+      "stored_question_reference": "Q23a",
+      "marks": 2,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "cc3cb9b8c97a1e8740da92fe467fc89a60e6e2c3624e8ba75d4ae06db9c03aec",
+      "mark_asset_path_fingerprint": "5fc2d1404d4848ba80e7f5b1e583d60898180659a8967b7d804c40e60117d902",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          23
+        ],
+        "mark_scheme_pdf_pages": [
+          18
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "The two geometric-sequence tasks use explicitly different sequences; each has complete local givens.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Retain the five printed terms with (a); retain the distinct term positions/values and positivity condition preceding (b).",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "8a89ea9b-7bcc-43f4-9aaa-fa5d99db44d4",
+      "source_question_id": "2022_1H_Q23b",
+      "original_question_number": 23,
+      "question_part": "b",
+      "stored_question_reference": "Q23b",
+      "marks": 3,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "cc3cb9b8c97a1e8740da92fe467fc89a60e6e2c3624e8ba75d4ae06db9c03aec",
+      "mark_asset_path_fingerprint": "5fc2d1404d4848ba80e7f5b1e583d60898180659a8967b7d804c40e60117d902",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          23
+        ],
+        "mark_scheme_pdf_pages": [
+          18
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 3,
+        "question_observation": "The two geometric-sequence tasks use explicitly different sequences; each has complete local givens.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Retain the five printed terms with (a); retain the distinct term positions/values and positivity condition preceding (b).",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "b6e1d0c6-c7a0-80fe-7a30-058eca77a4ea",
+      "source_question_id": "2022_1H_Q24a",
+      "original_question_number": 24,
+      "question_part": "a",
+      "stored_question_reference": "Q24a",
+      "marks": 2,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "de540d1a0283b6182072db76d68a31edfacbdd8e59268d8f6c877cded2285cfa",
+      "mark_asset_path_fingerprint": "0cf6dda83d37b074af96133c15fee10508bcd5a07aa459863ac53030d5a8125e",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          24,
+          25
+        ],
+        "mark_scheme_pdf_pages": [
+          18
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "Part (a) includes its own solid diagrams, radius/height labels, volume formulas and equality condition.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Retain the complete first pair of solids, h label, formulas and equal-volume statement.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "dc4a0fef-f232-4c54-beba-a9bdd3b8e70f",
+      "source_question_id": "2022_1H_Q24b",
+      "original_question_number": 24,
+      "question_part": "b",
+      "stored_question_reference": "Q24b",
+      "marks": 4,
+      "classification": "uncertain",
+      "required_earlier_parts": null,
+      "required_shared_resources": null,
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "not_ready",
+      "question_asset_path_fingerprint": "de540d1a0283b6182072db76d68a31edfacbdd8e59268d8f6c877cded2285cfa",
+      "mark_asset_path_fingerprint": "0cf6dda83d37b074af96133c15fee10508bcd5a07aa459863ac53030d5a8125e",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          24,
+          25
+        ],
+        "mark_scheme_pdf_pages": [
+          18
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 4,
+        "question_observation": "The source introduces different solids and independent area givens, but h is not labelled on the second cone: only slant height l is shown there. The h definition appears in the earlier diagram. Confirm the exact context package before separation.",
+        "marking_observation": "MS uses h as perpendicular height and Pythagoras with slant height l. There is no use of the numerical ratio from (a), but the supplied height definition may need to be carried over.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "low",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": [
+        "symbol_definition_outside_part",
+        "possible_shared_resource:height-definition"
+      ]
+    }
+  ]
+}

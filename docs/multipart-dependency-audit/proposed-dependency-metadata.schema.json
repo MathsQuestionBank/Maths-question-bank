@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mathsquestionbank.uk/schemas/proposed-multipart-dependencies-v1",
+  "title": "Proposed dependency review metadata — design only, not consumed by the app",
+  "type": "object",
+  "required": ["version", "revision", "family", "parts", "resources"],
+  "properties": {
+    "version": {"const": 1},
+    "revision": {"type": "integer", "minimum": 1},
+    "family": {
+      "type": "object",
+      "required": ["paper_id", "original_question_number", "anchor_record_id", "source_snapshot_sha256"],
+      "properties": {
+        "paper_id": {"type": "string", "format": "uuid"},
+        "original_question_number": {"type": "integer", "minimum": 1},
+        "anchor_record_id": {"type": "string", "format": "uuid"},
+        "source_snapshot_sha256": {"$ref": "#/$defs/hash"}
+      },
+      "additionalProperties": false
+    },
+    "parts": {"type": "object", "additionalProperties": {"$ref": "#/$defs/part"}},
+    "resources": {"type": "object", "additionalProperties": {"$ref": "#/$defs/resource"}}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "review": {
+      "type": "object",
+      "required": ["status", "actor_kind", "reviewer_id", "reviewed_at", "evidence"],
+      "properties": {
+        "status": {"enum": ["draft", "needs_review", "approved", "rejected", "stale"]},
+        "actor_kind": {"enum": ["assistant_proposal", "human"]},
+        "reviewer_id": {"type": ["string", "null"]},
+        "reviewed_at": {"type": ["string", "null"], "format": "date-time"},
+        "evidence": {"type": "string", "minLength": 1}
+      },
+      "allOf": [{"if": {"properties": {"status": {"const": "approved"}}}, "then": {"properties": {"actor_kind": {"const": "human"}, "reviewer_id": {"type": "string", "minLength": 1}, "reviewed_at": {"type": "string", "format": "date-time"}}}}],
+      "additionalProperties": false
+    },
+    "recipe": {
+      "type": "object",
+      "required": ["asset_content_sha256", "source_width", "source_height", "regions", "verified"],
+      "properties": {
+        "asset_content_sha256": {"$ref": "#/$defs/hash"},
+        "source_width": {"type": "integer", "minimum": 1},
+        "source_height": {"type": "integer", "minimum": 1},
+        "regions": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["left", "top", "width", "height"], "properties": {"left": {"type": "number", "minimum": 0, "maximum": 1}, "top": {"type": "number", "minimum": 0, "maximum": 1}, "width": {"type": "number", "exclusiveMinimum": 0, "maximum": 1}, "height": {"type": "number", "exclusiveMinimum": 0, "maximum": 1}}, "additionalProperties": false}},
+        "verified": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "part": {
+      "type": "object",
+      "required": ["source_record_id", "printed_part_path", "classification", "answer_dependencies", "shared_resource_ids", "owned_context_ids", "question_recipe", "mark_recipe", "review"],
+      "properties": {
+        "source_record_id": {"type": "string", "format": "uuid"},
+        "printed_part_path": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "classification": {"enum": ["independent", "dependent", "shared_resource", "uncertain"]},
+        "answer_dependencies": {"type": "array", "items": {"type": "object", "required": ["source_record_id", "need", "evidence"], "properties": {"source_record_id": {"type": "string", "format": "uuid"}, "need": {"enum": ["answer", "method", "constructed_work"]}, "evidence": {"type": "string", "minLength": 1}}, "additionalProperties": false}},
+        "shared_resource_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+        "owned_context_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+        "question_recipe": {"anyOf": [{"$ref": "#/$defs/recipe"}, {"type": "null"}]},
+        "mark_recipe": {"anyOf": [{"$ref": "#/$defs/recipe"}, {"type": "null"}]},
+        "review": {"$ref": "#/$defs/review"}
+      },
+      "allOf": [
+        {"if": {"properties": {"classification": {"const": "independent"}}}, "then": {"properties": {"answer_dependencies": {"maxItems": 0}, "shared_resource_ids": {"maxItems": 0}}}},
+        {"if": {"properties": {"classification": {"const": "dependent"}}}, "then": {"properties": {"answer_dependencies": {"minItems": 1}}}},
+        {"if": {"properties": {"classification": {"const": "shared_resource"}}}, "then": {"properties": {"answer_dependencies": {"maxItems": 0}, "shared_resource_ids": {"minItems": 1}}}},
+        {"if": {"properties": {"classification": {"const": "uncertain"}}}, "then": {"properties": {"review": {"properties": {"status": {"enum": ["draft", "needs_review", "rejected", "stale"]}}}}}},
+        {"if": {"properties": {"review": {"properties": {"status": {"const": "approved"}}}}}, "then": {"properties": {"question_recipe": {"$ref": "#/$defs/recipe", "properties": {"verified": {"const": true}}}, "mark_recipe": {"$ref": "#/$defs/recipe", "properties": {"verified": {"const": true}}}}}}
+      ],
+      "additionalProperties": false
+    },
+    "resource": {
+      "type": "object",
+      "required": ["description", "kind", "source_part_id", "provided_by", "recipe", "physical_print_scale_required", "review"],
+      "properties": {
+        "description": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["given_text", "formula", "diagram", "table", "grid", "student_work"]},
+        "source_part_id": {"type": ["string", "null"]},
+        "provided_by": {"enum": ["examination_source", "student_prerequisite_task"]},
+        "recipe": {"anyOf": [{"$ref": "#/$defs/recipe"}, {"type": "null"}]},
+        "physical_print_scale_required": {"type": "boolean"},
+        "source_pdf_points": {"type": ["object", "null"], "description": "Future verified physical-size calibration for measurement tasks; pixels alone are insufficient."},
+        "review": {"$ref": "#/$defs/review"}
+      },
+      "additionalProperties": false
+    }
+  }
+}

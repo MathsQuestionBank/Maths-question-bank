@@ -1,0 +1,374 @@
+{
+  "paper_id": "1affac76-5ce5-4592-94e9-34a2977a1944",
+  "exam_board": "Edexcel",
+  "series": "June 2023",
+  "paper_code": "1H",
+  "tier": "Higher",
+  "mapped_record_count": 28,
+  "whole_question_groups": 24,
+  "multipart_question_groups": 4,
+  "private_asset_content_verified": false,
+  "teacher_approved": false,
+  "resources": {
+    "Q5:set-definitions": {
+      "description": "Supplied universal set and set definitions; blank Venn diagram is owned by (a).",
+      "source_question": 5,
+      "source_pdf_pages": [
+        5
+      ],
+      "production_region_verified": false
+    },
+    "Q6:baby-scatter-plot": {
+      "description": "Supplied scatter plot, axis labels/units and age/weight introduction.",
+      "source_question": 6,
+      "source_pdf_pages": [
+        6
+      ],
+      "production_region_verified": false
+    },
+    "Q20:function-definitions": {
+      "description": "Both supplied functions and the domain statement.",
+      "source_question": 20,
+      "source_pdf_pages": [
+        18
+      ],
+      "production_region_verified": false
+    }
+  },
+  "parts": [
+    {
+      "database_record_id": "71abd820-0841-48f3-a7b3-b08b0f5e125d",
+      "source_question_id": "EDX-H-JUNE2023-1H-Q05A",
+      "original_question_number": 5,
+      "question_part": "a",
+      "stored_question_reference": "Q05a",
+      "marks": 3,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q5:set-definitions"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "shared_context_needed",
+      "question_asset_path_fingerprint": "0450535c4de725d89973dcff37d29cb62ad9fa6e77b33e84ad9f091a644ec173",
+      "mark_asset_path_fingerprint": "395a5dfe378844c5ac0d2323d29bbfcd5a7b3e84f6f4aced1683e6f5d24e93c4",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          5
+        ],
+        "mark_scheme_pdf_pages": [
+          8
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 3,
+        "question_observation": "The universal set and square-number-set definition suffice to answer (b); the completed Venn diagram is not mathematically required.",
+        "marking_observation": "This part has its own labelled marking criteria. Preserve the entire answer/method/guidance row and any referenced diagram; the sibling follow-through option is not a requirement for this part.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "c1c689c1-37c8-4d82-975f-94ae279e9ad5",
+      "source_question_id": "EDX-H-JUNE2023-1H-Q05B",
+      "original_question_number": 5,
+      "question_part": "b",
+      "stored_question_reference": "Q05b",
+      "marks": 2,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q5:set-definitions"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "not_ready",
+      "question_asset_path_fingerprint": "0450535c4de725d89973dcff37d29cb62ad9fa6e77b33e84ad9f091a644ec173",
+      "mark_asset_path_fingerprint": "395a5dfe378844c5ac0d2323d29bbfcd5a7b3e84f6f4aced1683e6f5d24e93c4",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          5
+        ],
+        "mark_scheme_pdf_pages": [
+          8
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "The universal set and square-number-set definition suffice to answer (b); the completed Venn diagram is not mathematically required.",
+        "marking_observation": "MS (b) has follow-through from the Venn diagram; standalone criteria need review even though its correct answer follows from the supplied set definitions.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": [
+        "marking_follow_through"
+      ]
+    },
+    {
+      "database_record_id": "ef67a21a-0d40-4576-bf6b-b70b5237dd55",
+      "source_question_id": "EDX-H-JUNE2023-1H-Q06A",
+      "original_question_number": 6,
+      "question_part": "a",
+      "stored_question_reference": "Q06a",
+      "marks": 1,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q6:baby-scatter-plot"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "shared_context_needed",
+      "question_asset_path_fingerprint": "9faacc1404cce5b3f184f3bd8a1f42874f3e4893cf2f6164972e0cd96db8ba95",
+      "mark_asset_path_fingerprint": "db4e5164578d464923051ba86c4aba84e832ec1f31139a1de80292785eec23d6",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          6
+        ],
+        "mark_scheme_pdf_pages": [
+          9
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 1,
+        "question_observation": "The scatter plot is already supplied. Estimating age in (b) does not require the relationship description from (a).",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "0cb4270a-4a7b-42ca-a9a0-caacf7ed63e3",
+      "source_question_id": "EDX-H-JUNE2023-1H-Q06B",
+      "original_question_number": 6,
+      "question_part": "b",
+      "stored_question_reference": "Q06b",
+      "marks": 2,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q6:baby-scatter-plot"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "shared_context_needed",
+      "question_asset_path_fingerprint": "9faacc1404cce5b3f184f3bd8a1f42874f3e4893cf2f6164972e0cd96db8ba95",
+      "mark_asset_path_fingerprint": "db4e5164578d464923051ba86c4aba84e832ec1f31139a1de80292785eec23d6",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          6
+        ],
+        "mark_scheme_pdf_pages": [
+          9
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "The scatter plot is already supplied. Estimating age in (b) does not require the relationship description from (a).",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "674607f4-1627-43d5-95f0-8d6e195e4618",
+      "source_question_id": "EDX-H-JUNE2023-1H-Q14A",
+      "original_question_number": 14,
+      "question_part": "a",
+      "stored_question_reference": "Q14a",
+      "marks": 1,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "fb83f893c4660e81f3a9fce0228abb20ef3dd33a1476b2e513c26c5ece8e14fb",
+      "mark_asset_path_fingerprint": "70b0db3351c5956a2e838bdca58ee4c94fb84b1aa0c4611074632c82f3c2b23b",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          13
+        ],
+        "mark_scheme_pdf_pages": [
+          13
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 1,
+        "question_observation": "The index task and numerical evaluation use separate fully printed expressions.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "53b88ea2-23c2-488e-b262-4c21edef14b0",
+      "source_question_id": "EDX-H-JUNE2023-1H-Q14B",
+      "original_question_number": 14,
+      "question_part": "b",
+      "stored_question_reference": "Q14b",
+      "marks": 3,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "fb83f893c4660e81f3a9fce0228abb20ef3dd33a1476b2e513c26c5ece8e14fb",
+      "mark_asset_path_fingerprint": "70b0db3351c5956a2e838bdca58ee4c94fb84b1aa0c4611074632c82f3c2b23b",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          13
+        ],
+        "mark_scheme_pdf_pages": [
+          13
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 3,
+        "question_observation": "The index task and numerical evaluation use separate fully printed expressions.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "3d525920-ba59-450a-9627-895c9ef16753",
+      "source_question_id": "EDX-H-JUNE2023-1H-Q20A",
+      "original_question_number": 20,
+      "question_part": "a",
+      "stored_question_reference": "Q20a",
+      "marks": 2,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q20:function-definitions"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "shared_context_needed",
+      "question_asset_path_fingerprint": "f06156d9db24e64ca21cf04765b11d8650cc3119b3c2b09dac021b4930b13c91",
+      "mark_asset_path_fingerprint": "9e2d9aa1d3830ccb8ca930c53cf69aa91490d4eee945555f74a55be12271b475",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          18
+        ],
+        "mark_scheme_pdf_pages": [
+          16
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "The two function definitions and domain are supplied in the common stem. Composition in (b) can use g and f directly, without the inverse found in (a).",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "f1e9190f-e843-420e-a580-7578bb41c82a",
+      "source_question_id": "EDX-H-JUNE2023-1H-Q20B",
+      "original_question_number": 20,
+      "question_part": "b",
+      "stored_question_reference": "Q20b",
+      "marks": 3,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q20:function-definitions"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "shared_context_needed",
+      "question_asset_path_fingerprint": "f06156d9db24e64ca21cf04765b11d8650cc3119b3c2b09dac021b4930b13c91",
+      "mark_asset_path_fingerprint": "9e2d9aa1d3830ccb8ca930c53cf69aa91490d4eee945555f74a55be12271b475",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          18
+        ],
+        "mark_scheme_pdf_pages": [
+          16
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 3,
+        "question_observation": "The two function definitions and domain are supplied in the common stem. Composition in (b) can use g and f directly, without the inverse found in (a).",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    }
+  ]
+}

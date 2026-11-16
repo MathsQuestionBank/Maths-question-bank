@@ -13,6 +13,7 @@ jobs:
         with:
           node-version: '20'
       - run: npm install
+      - run: python -m unittest discover -s tools -p 'test_multipart_dependency_audit.py' -v
       - run: npm run test
       - run: npm run build
       - run: npx playwright install --with-deps chromium
@@ -28,6 +29,7 @@ jobs:
             docs/multipart-numbering-followup.md
             docs/smart-shadow-assessments.md
             docs/gcse-grade-interpretation.md
+            docs/multipart-dependency-audit/
             docs/find-similar-questions.md
             docs/find-similar-examples/
             docs/grade-interpretation-examples/

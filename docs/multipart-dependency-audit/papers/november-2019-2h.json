@@ -1,0 +1,327 @@
+{
+  "paper_id": "97d39f66-c1a9-4b87-93f6-516732bfa999",
+  "exam_board": "Edexcel",
+  "series": "November 2019",
+  "paper_code": "2H",
+  "tier": "Higher",
+  "mapped_record_count": 31,
+  "whole_question_groups": 25,
+  "multipart_question_groups": 6,
+  "private_asset_content_verified": false,
+  "teacher_approved": false,
+  "resources": {},
+  "parts": [
+    {
+      "database_record_id": "a673c32e-2687-47bd-926b-f8dfda401433",
+      "source_question_id": "EDX-H-NOVEMBER2019-2H-Q04I",
+      "original_question_number": 4,
+      "question_part": "i",
+      "stored_question_reference": "Q04i",
+      "marks": 2,
+      "classification": "uncertain",
+      "required_earlier_parts": null,
+      "required_shared_resources": null,
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": null,
+      "question_asset_path_fingerprint": "c9be3f9d2805eb22a0eabc06d6d4c185abdb686c29ac6ed89d62211ea631c3a9",
+      "mark_asset_path_fingerprint": "371883f4d9ec9893e1bfdf41ea67acd5f6fe6a08cb474f4aabfd6abaea46a530",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "metadata_only",
+        "note": "Sibling mapping identifies a candidate only; content, prerequisites and standalone assets have not been verified."
+      },
+      "confidence": "unassessed",
+      "review_status": "not_content_reviewed"
+    },
+    {
+      "database_record_id": "5583662e-3a8f-496a-9332-5faa597476d3",
+      "source_question_id": "EDX-H-NOVEMBER2019-2H-Q04II",
+      "original_question_number": 4,
+      "question_part": "ii",
+      "stored_question_reference": "Q04ii",
+      "marks": 1,
+      "classification": "uncertain",
+      "required_earlier_parts": null,
+      "required_shared_resources": null,
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": null,
+      "question_asset_path_fingerprint": "c9be3f9d2805eb22a0eabc06d6d4c185abdb686c29ac6ed89d62211ea631c3a9",
+      "mark_asset_path_fingerprint": "371883f4d9ec9893e1bfdf41ea67acd5f6fe6a08cb474f4aabfd6abaea46a530",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "metadata_only",
+        "note": "Sibling mapping identifies a candidate only; content, prerequisites and standalone assets have not been verified."
+      },
+      "confidence": "unassessed",
+      "review_status": "not_content_reviewed"
+    },
+    {
+      "database_record_id": "bb040420-7df9-4e63-8ba1-551505831d18",
+      "source_question_id": "EDX-H-NOVEMBER2019-2H-Q05A",
+      "original_question_number": 5,
+      "question_part": "a",
+      "stored_question_reference": "Q05a",
+      "marks": 1,
+      "classification": "uncertain",
+      "required_earlier_parts": null,
+      "required_shared_resources": null,
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": null,
+      "question_asset_path_fingerprint": "7ed0d039b1f743039356ec4bef435161944bac8191a828341b2df080826570b4",
+      "mark_asset_path_fingerprint": "88cc036ccd69f88863881a45df0fa15439631bcd0c393d97732d3e0640368f1c",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "metadata_only",
+        "note": "Sibling mapping identifies a candidate only; content, prerequisites and standalone assets have not been verified."
+      },
+      "confidence": "unassessed",
+      "review_status": "not_content_reviewed"
+    },
+    {
+      "database_record_id": "bf02cdd8-ea31-4c33-beb0-3d9a4cbcbe60",
+      "source_question_id": "EDX-H-NOVEMBER2019-2H-Q05B",
+      "original_question_number": 5,
+      "question_part": "b",
+      "stored_question_reference": "Q05b",
+      "marks": 1,
+      "classification": "uncertain",
+      "required_earlier_parts": null,
+      "required_shared_resources": null,
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": null,
+      "question_asset_path_fingerprint": "7ed0d039b1f743039356ec4bef435161944bac8191a828341b2df080826570b4",
+      "mark_asset_path_fingerprint": "88cc036ccd69f88863881a45df0fa15439631bcd0c393d97732d3e0640368f1c",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "metadata_only",
+        "note": "Sibling mapping identifies a candidate only; content, prerequisites and standalone assets have not been verified."
+      },
+      "confidence": "unassessed",
+      "review_status": "not_content_reviewed"
+    },
+    {
+      "database_record_id": "2bb2a1e4-b75a-4e76-9360-6e222a6ef458",
+      "source_question_id": "EDX-H-NOVEMBER2019-2H-Q11A",
+      "original_question_number": 11,
+      "question_part": "a",
+      "stored_question_reference": "Q11a",
+      "marks": 1,
+      "classification": "uncertain",
+      "required_earlier_parts": null,
+      "required_shared_resources": null,
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": null,
+      "question_asset_path_fingerprint": "1c139a623cb776418ccd863ab059b18a1bb3f06b41c76414eabd1ed6ed9089c2",
+      "mark_asset_path_fingerprint": "6269d1deed0adf2ea9f07dfa73a1d675f284c1f7ca4093c33aef2137f2e19584",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "metadata_only",
+        "note": "Sibling mapping identifies a candidate only; content, prerequisites and standalone assets have not been verified."
+      },
+      "confidence": "unassessed",
+      "review_status": "not_content_reviewed"
+    },
+    {
+      "database_record_id": "38f9a247-f03d-4eca-9c79-3777ae7172e5",
+      "source_question_id": "EDX-H-NOVEMBER2019-2H-Q11B",
+      "original_question_number": 11,
+      "question_part": "b",
+      "stored_question_reference": "Q11b",
+      "marks": 2,
+      "classification": "uncertain",
+      "required_earlier_parts": null,
+      "required_shared_resources": null,
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": null,
+      "question_asset_path_fingerprint": "1c139a623cb776418ccd863ab059b18a1bb3f06b41c76414eabd1ed6ed9089c2",
+      "mark_asset_path_fingerprint": "6269d1deed0adf2ea9f07dfa73a1d675f284c1f7ca4093c33aef2137f2e19584",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "metadata_only",
+        "note": "Sibling mapping identifies a candidate only; content, prerequisites and standalone assets have not been verified."
+      },
+      "confidence": "unassessed",
+      "review_status": "not_content_reviewed"
+    },
+    {
+      "database_record_id": "42a2c495-9d8a-4fdf-a0d8-6b21ffa2734c",
+      "source_question_id": "EDX-H-NOVEMBER2019-2H-Q21A",
+      "original_question_number": 21,
+      "question_part": "a",
+      "stored_question_reference": "Q21a",
+      "marks": 4,
+      "classification": "uncertain",
+      "required_earlier_parts": null,
+      "required_shared_resources": null,
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": null,
+      "question_asset_path_fingerprint": "7797f08745b858f37eeb0819200b456529f8d84313e1b609cb486bece7b7337f",
+      "mark_asset_path_fingerprint": "0e2194553433d7c2811c8b0c466dce60858ca800a96c01fe1efd80ac855df143",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "metadata_only",
+        "note": "Sibling mapping identifies a candidate only; content, prerequisites and standalone assets have not been verified."
+      },
+      "confidence": "unassessed",
+      "review_status": "not_content_reviewed"
+    },
+    {
+      "database_record_id": "a7802f24-8db8-4974-a0a2-643531c4d030",
+      "source_question_id": "EDX-H-NOVEMBER2019-2H-Q21B",
+      "original_question_number": 21,
+      "question_part": "b",
+      "stored_question_reference": "Q21b",
+      "marks": 1,
+      "classification": "uncertain",
+      "required_earlier_parts": null,
+      "required_shared_resources": null,
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": null,
+      "question_asset_path_fingerprint": "7797f08745b858f37eeb0819200b456529f8d84313e1b609cb486bece7b7337f",
+      "mark_asset_path_fingerprint": "0e2194553433d7c2811c8b0c466dce60858ca800a96c01fe1efd80ac855df143",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "metadata_only",
+        "note": "Sibling mapping identifies a candidate only; content, prerequisites and standalone assets have not been verified."
+      },
+      "confidence": "unassessed",
+      "review_status": "not_content_reviewed"
+    },
+    {
+      "database_record_id": "62dfc5fb-9454-4b3c-b8b2-ad1c95c03f03",
+      "source_question_id": "EDX-H-NOVEMBER2019-2H-Q22A",
+      "original_question_number": 22,
+      "question_part": "a",
+      "stored_question_reference": "Q22a",
+      "marks": 3,
+      "classification": "uncertain",
+      "required_earlier_parts": null,
+      "required_shared_resources": null,
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": null,
+      "question_asset_path_fingerprint": "9173c9ef09b909fa6d46a6b0d89b6649d49b55d085a4a24825600f7f0c6caff1",
+      "mark_asset_path_fingerprint": "3661430795b6ea3958a0069dbf14327ff1db98a40a7427e349087261789f21aa",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "metadata_only",
+        "note": "Sibling mapping identifies a candidate only; content, prerequisites and standalone assets have not been verified."
+      },
+      "confidence": "unassessed",
+      "review_status": "not_content_reviewed"
+    },
+    {
+      "database_record_id": "bea2be21-c681-41eb-b2ef-b69943da2fab",
+      "source_question_id": "EDX-H-NOVEMBER2019-2H-Q22B",
+      "original_question_number": 22,
+      "question_part": "b",
+      "stored_question_reference": "Q22b",
+      "marks": 1,
+      "classification": "uncertain",
+      "required_earlier_parts": null,
+      "required_shared_resources": null,
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": null,
+      "question_asset_path_fingerprint": "9173c9ef09b909fa6d46a6b0d89b6649d49b55d085a4a24825600f7f0c6caff1",
+      "mark_asset_path_fingerprint": "3661430795b6ea3958a0069dbf14327ff1db98a40a7427e349087261789f21aa",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "metadata_only",
+        "note": "Sibling mapping identifies a candidate only; content, prerequisites and standalone assets have not been verified."
+      },
+      "confidence": "unassessed",
+      "review_status": "not_content_reviewed"
+    },
+    {
+      "database_record_id": "47c6d665-f444-434c-91fe-0a50c26dc217",
+      "source_question_id": "EDX-H-NOVEMBER2019-2H-Q23A",
+      "original_question_number": 23,
+      "question_part": "a",
+      "stored_question_reference": "Q23a",
+      "marks": 3,
+      "classification": "uncertain",
+      "required_earlier_parts": null,
+      "required_shared_resources": null,
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": null,
+      "question_asset_path_fingerprint": "601eec58533bfe72cf534de09f861ba8fcbe267b4653078c1696d52627fcac37",
+      "mark_asset_path_fingerprint": "328114a52075b1414faf260d623288726585e48e15d31bfe3793de3e05279f37",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "metadata_only",
+        "note": "Sibling mapping identifies a candidate only; content, prerequisites and standalone assets have not been verified."
+      },
+      "confidence": "unassessed",
+      "review_status": "not_content_reviewed"
+    },
+    {
+      "database_record_id": "8a008ef8-964a-4ccb-bd52-754789a75ad2",
+      "source_question_id": "EDX-H-NOVEMBER2019-2H-Q23B",
+      "original_question_number": 23,
+      "question_part": "b",
+      "stored_question_reference": "Q23b",
+      "marks": 3,
+      "classification": "uncertain",
+      "required_earlier_parts": null,
+      "required_shared_resources": null,
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": null,
+      "question_asset_path_fingerprint": "601eec58533bfe72cf534de09f861ba8fcbe267b4653078c1696d52627fcac37",
+      "mark_asset_path_fingerprint": "328114a52075b1414faf260d623288726585e48e15d31bfe3793de3e05279f37",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "metadata_only",
+        "note": "Sibling mapping identifies a candidate only; content, prerequisites and standalone assets have not been verified."
+      },
+      "confidence": "unassessed",
+      "review_status": "not_content_reviewed"
+    }
+  ]
+}

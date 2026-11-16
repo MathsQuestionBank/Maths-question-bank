@@ -1,0 +1,20 @@
+{
+  "snapshot_date_utc": "2026-11-16",
+  "access_mode": "Connected Supabase read-only SELECTs and existing/public source examination resources",
+  "qualification_verified": "GCSE Mathematics",
+  "paper_count": 90,
+  "question_record_count": 3181,
+  "private_storage_bucket_public": false,
+  "question_references_missing_storage_object_catalogue_entry": 0,
+  "mark_references_missing_storage_object_catalogue_entry": 0,
+  "private_image_bytes_inspected": 0,
+  "private_storage_download_capability_available": false,
+  "source_question_pdf_pages_visually_reviewed": 45,
+  "source_mark_scheme_pdf_pages_visually_reviewed": 36,
+  "source_paper_pairs_reviewed": 6,
+  "source_part_mark_allocations_compared_with_database": 91,
+  "source_part_mark_allocation_mismatches": 0,
+  "production_question_writes": 0,
+  "production_storage_writes": 0,
+  "limits": "Storage catalogue existence is not image-content verification. Public counterparts are linked by stored paper/reference and matching marks, not byte identity with private crops. No service key, JWT generation, policy change, public bucket conversion or credential workaround was used."
+}
