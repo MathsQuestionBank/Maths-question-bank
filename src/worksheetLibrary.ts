@@ -1,14 +1,23 @@
+import type { TargetedShadowInfo } from "./smartShadowMatching";
 import { normalizeNumberingMasks, type NumberingMask } from "./numberingMasks";
 
 export type ExportMode="questions"|"teacher"|"marks"|"both";
 export type TeacherSourceMode="inline"|"sheet"|"none";
 export type SavedAssessment={
  id:string;name:string;ids:string[];minutes:number;folder:string;
- nameBox?:boolean;classBox?:boolean;paperTier?:string;paperCalc?:string;cover?:boolean;answers?:boolean;exportMode?:ExportMode;teacherSourceMode?:TeacherSourceMode;performanceGrade?:string;printTeacherStats?:boolean;renumberStudentQuestions?:boolean;replaceSourceTotals?:boolean;numberingMasks?:Record<string,NumberingMask>;linkedOriginalAssessmentId?:string;shadowSet?:string;
+ nameBox?:boolean;classBox?:boolean;paperTier?:string;paperCalc?:string;cover?:boolean;answers?:boolean;exportMode?:ExportMode;teacherSourceMode?:TeacherSourceMode;performanceGrade?:string;printTeacherStats?:boolean;renumberStudentQuestions?:boolean;replaceSourceTotals?:boolean;numberingMasks?:Record<string,NumberingMask>;linkedOriginalAssessmentId?:string;shadowSet?:string;targetedShadow?:TargetedShadowInfo;
 };
 export type LegacyAssessment=Omit<SavedAssessment,"id"|"folder">&{id?:string;folder?:string};
 export const ASSESSMENTS_KEY="mqb-draft-assessments";
 export const FOLDERS_KEY="mqb-worksheet-folders";
+/** Optional provenance is configuration only; damaged backups must still open. */
+function normaliseTargetedShadow(value:unknown):TargetedShadowInfo|undefined {
+ if(!value||typeof value!=="object")return undefined;
+ const x=value as Partial<TargetedShadowInfo>;
+ const ids=(a:unknown):a is string[]=>Array.isArray(a)&&a.every(id=>typeof id==="string");
+ if(x.version!==1||typeof x.originalTitle!=="string"||!x.difficulty||!["same","easier","harder"].includes(x.difficulty)||!ids(x.unmatchedOriginalIds)||!Array.isArray(x.replacements)||!x.replacements.every(r=>r&&typeof r.originalKey==="string"&&typeof r.replacementKey==="string"&&ids(r.originalIds)&&ids(r.replacementIds)&&(r.method==="official"||r.method==="alternative")))return undefined;
+ return {version:1,originalTitle:x.originalTitle,difficulty:x.difficulty,replacements:x.replacements.map(r=>({...r,originalIds:[...r.originalIds],replacementIds:[...r.replacementIds]})),unmatchedOriginalIds:[...x.unmatchedOriginalIds]};
+}
 export function normaliseAssessments(input:unknown):SavedAssessment[]{
  if(!Array.isArray(input))return [];
  return input.flatMap((item,index)=>{
@@ -24,7 +33,8 @@ export function normaliseAssessments(input:unknown):SavedAssessment[]{
    teacherSourceMode:a.teacherSourceMode&&["inline","sheet","none"].includes(a.teacherSourceMode)?a.teacherSourceMode:"inline",
    renumberStudentQuestions:a.renumberStudentQuestions===true,
    replaceSourceTotals:a.replaceSourceTotals!==false,
-   numberingMasks:normalizeNumberingMasks(a.numberingMasks)
+   numberingMasks:normalizeNumberingMasks(a.numberingMasks),
+   targetedShadow:normaliseTargetedShadow(a.targetedShadow)
   } as SavedAssessment];
  });
 }
@@ -54,7 +64,7 @@ export function assessmentSettingsSignature(a:SavedAssessment):string {
   renumberStudentQuestions:a.renumberStudentQuestions??false,replaceSourceTotals:a.replaceSourceTotals??true,
   numberingMasks:Object.fromEntries(Object.keys(masks).sort().map(key=>[key,masks[key]])),
   performanceGrade:a.performanceGrade??"All grades",printTeacherStats:a.printTeacherStats??false,
-  linkedOriginalAssessmentId:a.linkedOriginalAssessmentId??null,shadowSet:a.shadowSet??null
+  linkedOriginalAssessmentId:a.linkedOriginalAssessmentId??null,shadowSet:a.shadowSet??null,targetedShadow:a.targetedShadow??null
  });
 }
 

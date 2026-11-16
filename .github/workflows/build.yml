@@ -26,5 +26,6 @@ jobs:
             test-results/
             docs/assessment-export.md
             docs/multipart-numbering-followup.md
+            docs/smart-shadow-assessments.md
           if-no-files-found: ignore
           retention-days: 14
