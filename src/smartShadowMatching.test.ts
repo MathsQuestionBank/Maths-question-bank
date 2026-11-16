@@ -1,14 +1,15 @@
 import {describe,it,expect} from "vitest";
 import type {BankQuestion} from "./questionData";
 import {buildAssessmentGroups,assessmentGroupImages,checkAssessmentExport} from "./assessmentGroups";
-import {createSmartShadowMatcher,enhancedSkills,groupGrade} from "./smartShadowMatching";
+import {createSmartShadowMatcher as matcher,enhancedSkills} from "./smartShadowMatching";
+const createSmartShadowMatcher=(all:BankQuestion[],ids:string[],excluded:string[]=[],grade:number|null=6)=>matcher(all,ids,excluded,grade);
 const q=(id:string,opts:Partial<BankQuestion>={}):BankQuestion=>({id,sourceId:`EDX-H-JUNE2022-3H-Q${id}`,questionNumber:id,examBoard:"Edexcel",topic:"Algebra",skill:"Solving simultaneous equations",tier:"Higher",sourceTier:"Higher",sourceCalculator:true,calculator:true,paperCode:"3H",grade:6,marks:4,series:"June 2022",ao:"AO1",challenge:"Standard",prompt:"",answer:"",tags:[],gradePerformance:{6:70},questionPath:`${id}/q.png`,markSchemePath:`${id}/m.png`,questionUrl:`https://fixture/${id}/q.png`,markSchemeUrl:`https://fixture/${id}/m.png`,imageCrops:{question:{top:0,bottom:100,left:0,right:100},mark:{top:0,bottom:100,left:0,right:100}},cropReview:{question:"approved",mark:"approved"},...opts});
 const options=(all:BankQuestion[],difficulty:"same"|"easier"|"harder"="same",ids=["1"])=>{const m=createSmartShadowMatcher(all,ids);return m.suggest(m.originals[0].key,difficulty).suggestions};
 const multipart=()=>[q("a",{sourceId:"2022_3H_Q14a",marks:2}),q("b",{sourceId:"2022_3H_Q14b",skill:"Expanding double brackets",marks:3}),q("c",{sourceId:"2023_3H_Q18a",marks:2}),q("d",{sourceId:"2023_3H_Q18b",skill:"Expanding double brackets",marks:3})];
 const official=(id:string,original:string,opts:Partial<BankQuestion>={})=>q(id,{shadowPaperId:"official-set",shadowOfQuestionId:original,shadowSet:"A",shadowStatus:"reviewed",...opts});
 describe("smart targeted shadow matching",()=>{
- it("requires enhanced skill, never broad topic, and ranks exact grade first",()=>{
-  const all=[q("1"),q("2",{grade:7}),q("3"),q("4",{skill:"Algebra"}),q("5",{skill:"Expanding double brackets"})];
+ it("requires enhanced skill, never broad topic, and ignores legacy question grade",()=>{
+  const all=[q("1"),q("2",{grade:7,gradePerformance:{6:74}}),q("3"),q("4",{skill:"Algebra"}),q("5",{skill:"Expanding double brackets"})];
   const found=options(all);expect(found.map(s=>s.group.question.id)).toEqual(["3","2"]);
   expect(found[0].category).toBe("Strong metadata match");
   expect(found[0].reasons).toContain("Same enhanced skill coverage.");
@@ -22,25 +23,40 @@ describe("smart targeted shadow matching",()=>{
   expect(options(all).map(s=>s.group.key)).toEqual(["2","3","4"]);
   expect(options([...all].reverse()).map(s=>s.group.key)).toEqual(["2","3","4"]);
  });
- it("uses a directed grade range for easier/harder and never calls it equivalent",()=>{
-  const all=[q("1"),q("2",{grade:5}),q("3",{grade:7}),q("4",{grade:9}),q("5",{grade:0})];
+ it("uses complete selected-cohort performance windows, never legacy grade direction",()=>{
+  const all=[q("1",{grade:7}),q("2",{grade:9,gradePerformance:{6:80}}),q("3",{grade:3,gradePerformance:{6:60}}),q("4",{grade:5,gradePerformance:{6:99}}),q("5",{grade:0,gradePerformance:{}})];
   expect(options(all,"easier").map(s=>s.group.question.id)).toEqual(["2"]);
   expect(options(all,"harder").map(s=>s.group.question.id)).toEqual(["3"]);
-  expect(options(all,"harder")[0].reasons.join(" ")).toContain("grade alone does not establish equivalent demand");
+  expect(options(all,"easier")[0].reasons.join(" ")).toContain("original 70%, replacement 80%");
   expect(options(all).some(s=>s.group.question.id==="5")).toBe(true);
  });
- it("can use real historic performance to differentiate same-grade demand",()=>{
-  const all=[q("1"),q("2",{gradePerformance:{6:80}}),q("3",{gradePerformance:{6:50}}),q("4",{gradePerformance:{}})];
-  expect(options(all,"easier").map(s=>s.group.question.id)).toEqual(["2"]);
-  expect(options(all,"harder").map(s=>s.group.question.id)).toEqual(["3"]);
-  expect(options(all,"easier")[0].reasons.join(" ")).toContain("70% vs 80%");
- });
- it("rejects unknown grades for directed requests and exposes missing metadata",()=>{
-  const all=[q("1",{grade:0}),q("2",{grade:0,ao:"Unmapped",gradePerformance:{},examBoard:undefined,series:"Unspecified"})];
+ it("offers skill-led possible matches with explicit missing-performance warnings, never directed estimates",()=>{
+  const all=[q("1",{grade:0,gradePerformance:{}}),q("2",{grade:0,ao:"Unmapped",gradePerformance:{},examBoard:undefined,series:"Unspecified"})];
   const found=options(all)[0];expect(found.category).toBe("Possible match — teacher review recommended");
-  expect(found.warnings.join(" ")).toMatch(/Grade metadata.*historic difficulty.*objective metadata.*source metadata/);
+  expect(found.warnings.join(" ")).toMatch(/historical performance.*unavailable.*objective metadata.*source metadata/);
   expect(options(all,"easier")).toEqual([]);
-  const m=createSmartShadowMatcher(all,["1"]);expect(m.suggest("1","easier").reason).toContain("Grade metadata is missing");
+  const m=createSmartShadowMatcher(all,["1"]);expect(m.suggest("1","easier").reason).toContain("historical performance");
+ });
+ it("requires an explicit target student grade, never derives it from metadata.grade",()=>{
+  const m=createSmartShadowMatcher([q("1"),q("2")],["1"],[],null);
+  expect(m.suggest("1","same")).toMatchObject({available:0,reason:expect.stringContaining("Choose a target student grade")});
+  expect(()=>m.generate([{originalKey:"1",replacementKey:"2"}],"same","Test")).toThrow();
+ });
+ it("reverses recommendations with realistic grade 1–9 profiles and ignores legacy grades",()=>{
+  const profile=(values:number[])=>Object.fromEntries(values.map((v,i)=>[i+1,v]));
+  const all=[q("1",{grade:7,gradePerformance:profile([2,8,17,30,45,60,72,85,95])}),q("2",{grade:3,gradePerformance:profile([5,12,24,40,55,65,70,82,94])}),q("3",{grade:9,gradePerformance:profile([1,5,12,23,40,60,82,92,98])})];
+  const at=(grade:number,difficulty:"same"|"easier"|"harder")=>createSmartShadowMatcher(all,["1"],[],grade).suggest("1",difficulty).suggestions.map(s=>s.group.key);
+  expect(at(4,"easier")).toEqual(["2"]);expect(at(4,"harder")).toEqual(["3"]);
+  expect(at(7,"easier")).toEqual(["3"]);expect(at(7,"harder")).toEqual([]);
+  const changed=all.map(p=>({...p,grade:0}));expect(options(changed).map(s=>s.group.key)).toEqual(options(all).map(s=>s.group.key));
+ });
+ it("uses bounded inclusive recommendation windows and keeps real zero performance",()=>{
+  const all=[q("1"),q("near",{gradePerformance:{6:75}}),q("far",{gradePerformance:{6:90}}),q("too-near",{gradePerformance:{6:74.9}}),q("too-far",{gradePerformance:{6:90.1}})];
+  expect(options(all,"easier").map(s=>s.group.key).sort()).toEqual(["far","near"]);
+  expect(options([q("1",{gradePerformance:{6:10}}),q("zero",{gradePerformance:{6:0}})],"harder").map(s=>s.group.key)).toEqual(["zero"]);
+ });
+ it.each([NaN,Infinity,-1,101,null])("rejects invalid or missing performance %s in directed suggestions",value=>{
+  expect(options([q("1"),q("2",{gradePerformance:{6:value}})],"easier")).toEqual([]);
  });
  it.each(["Foundation","Higher"] as const)("only accepts compatible %s tier and calculator metadata",tier=>{
   const grade=tier==="Higher"?6:4;
@@ -70,7 +86,7 @@ describe("smart targeted shadow matching",()=>{
  });
  it("keeps multipart coverage, marks, all question/mark images and representative IDs together",()=>{
   const all=multipart(),m=createSmartShadowMatcher(all,["a"]),source=m.originals[0];
-  expect(source.parts.map(p=>p.id)).toEqual(["a","b"]);expect(enhancedSkills(source)).toHaveLength(2);expect(groupGrade(source)).toMatchObject({min:6,max:6});
+  expect(source.parts.map(p=>p.id)).toEqual(["a","b"]);expect(enhancedSkills(source)).toHaveLength(2);
   const suggestion=m.suggest(source.key,"same").suggestions[0];expect(suggestion.group.parts.map(p=>p.id)).toEqual(["c","d"]);expect(suggestion.group.marks).toBe(5);
   const generated=m.generate([{originalKey:source.key,replacementKey:suggestion.group.key}],"same","Original");
   expect(generated).toMatchObject({ids:["c"],totalMarks:5,info:{replacements:[{originalIds:["a","b"],replacementIds:["c","d"]}]}});

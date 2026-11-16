@@ -109,7 +109,8 @@ export function appendAssessmentGroupIds(all:ReadonlyArray<BankQuestion>,selecte
 }
 
 /** Sort the complete selected exam questions by mark-weighted grade performance.
- *  Lower percentages are harder for pupils who achieved that grade. Multipart
+ *  Lower percentages mean fewer available marks earned by that final-grade group;
+ *  they do not establish intrinsic question difficulty. Multipart
  *  questions move together and only receive a score when ALL parts have data.
  *  Missing data always goes at the end; tied scores preserve teacher ordering.
  *  Unavailable/stale IDs are kept rather than silently removed from saved work.

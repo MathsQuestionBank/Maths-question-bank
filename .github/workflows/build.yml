@@ -27,5 +27,7 @@ jobs:
             docs/assessment-export.md
             docs/multipart-numbering-followup.md
             docs/smart-shadow-assessments.md
+            docs/gcse-grade-interpretation.md
+            docs/grade-interpretation-examples/
           if-no-files-found: ignore
           retention-days: 14

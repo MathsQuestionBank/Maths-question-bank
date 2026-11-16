@@ -8,8 +8,8 @@ describe("question bank insights inventory",()=>{
  it("counts multipart rows as one whole question and never mutates source records",()=>{
   const all=multipart(),before=JSON.stringify(all),m=buildInsightsModel(all);
   expect(m.records).toHaveLength(2);expect(m.groups).toHaveLength(1);expect(m.groups[0].usable).toBe(true);expect(m.groups[0].group.marks).toBe(5);expect(JSON.stringify(all)).toBe(before);
-  const rows=skillCoverage(m);expect(rows.map(r=>r.grade)).toEqual([3,4]);expect(rows.every(r=>r.usable===1&&r.questions===1)).toBe(true);
-  const grades=gradeCoverage(m);expect(grades.find(g=>g.grade===3)?.count).toBe(1);expect(grades.find(g=>g.grade===4)?.count).toBe(1);
+  const rows=skillCoverage(m);expect(rows).toHaveLength(1);expect(rows.every(r=>r.usable===1&&r.questions===1)).toBe(true);
+  const grades=gradeCoverage(m);expect(grades.find(g=>g.grade===3)?.withData).toBe(0);expect(grades.find(g=>g.grade===4)?.withData).toBe(1);
  });
  it("deduplicates sibling mappings within the same skill/grade row",()=>{
   const all=multipart().map(p=>({...p,grade:4})),row=skillCoverage(buildInsightsModel(all))[0];
@@ -30,28 +30,38 @@ describe("question bank insights inventory",()=>{
   all[0].markSchemePath=undefined;all[1].markSchemePath=undefined;
   expect(buildInsightsModel(all).groups[0].markReady).toBe(false);
  });
- it("requires conjunctions on the same part, not grade on one sibling and skill on another",()=>{
-  const all=multipart();all[0].skill="Solving equations";
+ it("matches topic/skill on the same part, but weights all parts for the selected student grade",()=>{
+  const all=multipart();all[0].skill="Solving equations";all[0].gradePerformance={4:50};all[1].gradePerformance={4:100};
   const m=buildInsightsModel(all);
-  expect(skillCoverage(m,filter({grade:"4",skill:"Solving"}))).toEqual([]);
-  expect(skillCoverage(m,filter({grade:"4",skill:"Expanding"}))[0].usable).toBe(1);
+  expect(skillCoverage(m,filter({targetGrade:"4",skill:"Solving"}))[0]).toMatchObject({usable:1,withPerformance:1,medianPercent:80});
+  expect(skillCoverage(m,filter({targetGrade:"4",skill:"Expanding",performanceBand:"middle"}))).toEqual([]);
  });
- it("filters actual tier/grade/calculator metadata without display fallbacks",()=>{
+ it("filters actual tier/calculator metadata without grade defaults or display fallbacks",()=>{
   const m=buildInsightsModel([q("1"),q("2",{tier:"Higher",sourceTier:"Higher",grade:7,calculator:true,sourceCalculator:true}),q("3",{sourceTier:undefined,sourceCalculator:undefined,grade:0})]);
-  expect(skillCoverage(m,filter({tier:"Foundation",grade:"4",calculator:"Non-calculator"}))).toHaveLength(1);
-  expect(skillCoverage(m,filter({tier:"Unknown",grade:"Unclassified",calculator:"Unknown"}))[0]).toMatchObject({grade:null,tier:"Unknown",unknownCalculator:1});
-  expect(gradeCoverage(m,"Foundation").find(g=>g.grade===7)?.count).toBe(0);expect(gradeCoverage(m).find(g=>g.grade===null)?.count).toBe(1);
+  expect(skillCoverage(m,filter({tier:"Foundation",targetGrade:"4",calculator:"Non-calculator"}))).toHaveLength(1);
+  expect(skillCoverage(m,filter({tier:"Unknown",targetGrade:"4",calculator:"Unknown"}))[0]).toMatchObject({targetStudentGrade:4,tier:"Unknown",unknownCalculator:1});
+  expect(gradeCoverage(m,"Foundation").find(g=>g.grade===7)?.withData).toBe(0);
  });
- it("does not infer a grade from historic performance percentages",()=>{
-  const m=buildInsightsModel([q("1",{grade:0,gradePerformance:{4:99}})]);
-  expect(gradeCoverage(m).find(g=>g.grade===4)?.count).toBe(0);expect(skillCoverage(m,filter({grade:"4"}))).toEqual([]);
-  expect(m.readiness.incompleteMetadata).toBe(1);expect(m.metadataIssues).toContainEqual(["Grade",1]);
+ it("uses g4 despite legacy grade 3, 7 or absent, preserving raw metadata",()=>{
+  const all=[q("1",{grade:3}),q("2",{grade:7}),q("3",{grade:0})],before=JSON.stringify(all),m=buildInsightsModel(all);
+  expect(skillCoverage(m,filter({tier:"Foundation",targetGrade:"4"}))[0]).toMatchObject({usable:3,withPerformance:3,medianPercent:90});
+  expect(m.readiness.incompleteMetadata).toBe(0);expect(m.metadataIssues).not.toContainEqual(["Grade",1]);expect(JSON.stringify(all)).toBe(before);
  });
- it("reports only stored grade classes and leaves unavailable Grade 4 honestly empty",()=>{
-  const m=buildInsightsModel([q("1",{grade:3}),q("2",{grade:7}),q("3",{grade:0})]);
-  expect(m.storedGrades).toEqual([3,7]);expect(m.unclassifiedRecords).toBe(1);
-  expect(skillCoverage(m,filter({tier:"Foundation",grade:"4"}))).toEqual([]);
-  expect(skillCoverage(m,filter({tier:"Foundation",grade:"Unclassified"}))[0].usable).toBe(1);
+ it("shows each final-grade group's resource-level median and complete/missing counts, never question classifications",()=>{
+  const values=[1,5,12,22,35,45,25,70,90],profile=Object.fromEntries(values.map((v,i)=>[i+1,v]));
+  const m=buildInsightsModel([q("1",{grade:7,gradePerformance:profile}),q("2",{grade:3,gradePerformance:{7:75}}),q("3",{grade:0,gradePerformance:{7:0}})]);
+  const grades=gradeCoverage(m);
+  expect(grades).toHaveLength(9);expect(grades.find(g=>g.grade===7)).toEqual({grade:7,withData:3,missingData:0,medianPercent:25});
+  expect(grades.find(g=>g.grade===1)).toEqual({grade:1,withData:1,missingData:2,medianPercent:1});
+  expect(skillCoverage(m,filter({targetGrade:"7",performanceBand:"lowest"}))[0]).toMatchObject({usable:1,medianPercent:0});
+  expect(skillCoverage(m,filter({targetGrade:"4",performanceBand:"missing"}))[0]).toMatchObject({usable:2,withPerformance:0,missingPerformance:2,medianPercent:null});
+  expect(skillCoverage(m,filter({targetGrade:"4"}))[0]).toMatchObject({usable:3,withPerformance:1,missingPerformance:2,medianPercent:22});
+ });
+ it("does not impute missing multipart performance or discard zero, and validates mark shares",()=>{
+  const all=multipart();all[0].gradePerformance={4:0};all[1].gradePerformance={4:null};
+  const m=buildInsightsModel(all);expect(gradeCoverage(m).find(g=>g.grade===4)).toMatchObject({withData:0,missingData:1,medianPercent:null});
+  expect(skillCoverage(m,filter({targetGrade:"4",performanceBand:"available"}))).toEqual([]);
+  for(const value of [-1,101,NaN,Infinity])expect(gradeCoverage(buildInsightsModel([q("1",{gradePerformance:{4:value}})])).find(g=>g.grade===4)?.withData).toBe(0);
  });
  it("normalises skill case/spacing, splits semicolons, and avoids duplicate skill memberships",()=>{
   const m=buildInsightsModel([q("1",{skill:" Expanding brackets ; expanding   brackets; Solving equations "}),q("2",{skill:"EXPANDING BRACKETS"})]);
@@ -90,7 +100,7 @@ describe("question bank insights inventory",()=>{
   const first=multipart();
   const other=first.map((part,index)=>({...part,id:`other-${index}`,sourceId:`AQA-F-JUNE2024-2F-Q14${index?"b":"a"}`,examBoard:"AQA",series:"June 2024",paperCode:"2F",topic:"Geometry",calculator:true,sourceCalculator:true,questionPath:`other-${index}/q.png`,markSchemePath:`other-${index}/m.png`}));
   const m=buildInsightsModel([...first,...other]);expect(m.groups).toHaveLength(2);expect(paperCoverage(m)).toHaveLength(2);
-  expect(skillCoverage(m,filter({board:"AQA",topic:"Geometry",grade:"4"}))[0]).toMatchObject({questions:1,usable:1,calculator:1});
+  expect(skillCoverage(m,filter({board:"AQA",topic:"Geometry",targetGrade:"4"}))[0]).toMatchObject({questions:1,usable:1,calculator:1});
   expect(skillCoverage(m,filter({board:"AQA",topic:"Algebra"}))).toEqual([]);
  });
  it("counts full source paper identities instead of prefixes shared by many series and papers",()=>{
@@ -104,8 +114,8 @@ describe("question bank insights inventory",()=>{
   expect(countInsightPapers([{...c,paperId:undefined}])).toBe(0);
  });
  it("exports all sorted filtered rows with meaningful headings, Unicode, quotes and formula protection",()=>{
-  const all=[q("1",{skill:'=HYPERLINK("unsafe")',topic:"Ratio, proportion"}),q("2",{skill:"Angles — triangles"}),q("3",{grade:5})];
-  const rows=skillCoverage(buildInsightsModel(all),filter({grade:"4"}),{developing:2,good:3},"skill");const csv=coverageCsv(rows,{developing:2,good:3},"Edexcel");
-  expect(rows).toHaveLength(2);expect(csv.charCodeAt(0)).toBe(0xfeff);expect(csv).toContain('"Complete usable questions"');expect(csv).toContain('"\'=HYPERLINK(""unsafe"")"');expect(csv).toContain('"Ratio, proportion"');expect(csv).toContain("Angles — triangles");expect(csv.split("\r\n")).toHaveLength(3);expect(csv).toContain('"2","3","Edexcel"');
+  const all=[q("1",{skill:'=HYPERLINK("unsafe")',topic:"Ratio, proportion"}),q("2",{skill:"Angles — triangles"}),q("3",{grade:5,gradePerformance:{}})];
+  const rows=skillCoverage(buildInsightsModel(all),filter({targetGrade:"4",performanceBand:"available"}),{developing:2,good:3},"skill");const csv=coverageCsv(rows,{developing:2,good:3},"Edexcel");
+  expect(rows).toHaveLength(2);expect(csv.charCodeAt(0)).toBe(0xfeff);expect(csv).toContain('"Complete usable questions"');expect(csv).toContain("Target final student GCSE grade");expect(csv).not.toContain("Stored GCSE grade");expect(csv).toContain('"\'=HYPERLINK(""unsafe"")"');expect(csv).toContain('"Ratio, proportion"');expect(csv).toContain("Angles — triangles");expect(csv.split("\r\n")).toHaveLength(3);expect(csv).toContain('"2","3","Edexcel"');
  });
 });

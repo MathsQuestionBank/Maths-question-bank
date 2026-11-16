@@ -16,7 +16,7 @@ function normaliseTargetedShadow(value:unknown):TargetedShadowInfo|undefined {
  const x=value as Partial<TargetedShadowInfo>;
  const ids=(a:unknown):a is string[]=>Array.isArray(a)&&a.every(id=>typeof id==="string");
  if(x.version!==1||typeof x.originalTitle!=="string"||!x.difficulty||!["same","easier","harder"].includes(x.difficulty)||!ids(x.unmatchedOriginalIds)||!Array.isArray(x.replacements)||!x.replacements.every(r=>r&&typeof r.originalKey==="string"&&typeof r.replacementKey==="string"&&ids(r.originalIds)&&ids(r.replacementIds)&&(r.method==="official"||r.method==="alternative")))return undefined;
- return {version:1,originalTitle:x.originalTitle,difficulty:x.difficulty,replacements:x.replacements.map(r=>({...r,originalIds:[...r.originalIds],replacementIds:[...r.replacementIds]})),unmatchedOriginalIds:[...x.unmatchedOriginalIds]};
+ return {version:1,originalTitle:x.originalTitle,difficulty:x.difficulty,...(Number.isInteger(x.targetStudentGrade)&&x.targetStudentGrade!>=1&&x.targetStudentGrade!<=9?{targetStudentGrade:x.targetStudentGrade}:{}),...(x.matchingBasis==="student-grade-performance-v1"?{matchingBasis:x.matchingBasis}:{}),replacements:x.replacements.map(r=>({...r,originalIds:[...r.originalIds],replacementIds:[...r.replacementIds]})),unmatchedOriginalIds:[...x.unmatchedOriginalIds]};
 }
 export function normaliseAssessments(input:unknown):SavedAssessment[]{
  if(!Array.isArray(input))return [];

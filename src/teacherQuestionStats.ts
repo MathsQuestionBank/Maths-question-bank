@@ -1,5 +1,5 @@
 import type { BankQuestion } from "./questionData";
-import { gradesForTier } from "./gradeBands";
+import { studentGrades } from "./gradeBands";
 
 /** The paper number is independent of tier and calculator mode. */
 export function paperNumberFromCode(paperCode?: string): number | null {
@@ -34,13 +34,21 @@ export function compareOriginalQuestionNumber(a:QuestionPosition,b:QuestionPosit
 
 type GradePart=Pick<BankQuestion,"marks"|"gradePerformance">;
 
+/** Final GCSE result of the historical student group, never a question classification. */
+export const validStudentGrade=(grade:unknown):grade is number=>typeof grade==="number"&&Number.isInteger(grade)&&grade>=1&&grade<=9;
+export function performanceAtGrade(part:Pick<BankQuestion,"gradePerformance">,grade:number):number|null {
+ if(!validStudentGrade(grade))return null;
+ const value=part.gradePerformance[grade];
+ return typeof value==="number"&&Number.isFinite(value)&&value>=0&&value<=100?value:null;
+}
+
 /** Mark-weighted mean of grade-specific average marks; NOT the fully-correct pupil share. */
 export function weightedGradePerformance(parts:readonly GradePart[],grade:number):number|null {
- if(parts.length===0)return null;
+ if(parts.length===0||!validStudentGrade(grade))return null;
  let totalMarks=0,weighted=0;
  for(const part of parts){
-  const percent=part.gradePerformance[grade];
-  if(typeof percent!=="number"||!Number.isFinite(percent)||percent<0||percent>100||!Number.isFinite(part.marks)||part.marks<0)return null;
+  const percent=performanceAtGrade(part,grade);
+  if(typeof percent!=="number"||!Number.isFinite(percent)||percent<0||percent>100||!Number.isFinite(part.marks)||part.marks<=0)return null;
   weighted+=percent*part.marks;
   totalMarks+=part.marks;
  }
@@ -55,9 +63,9 @@ export function weightedGradePerformance(parts:readonly GradePart[],grade:number
  */
 export function averageQuestionPerformance(
  parts:ReadonlyArray<Pick<BankQuestion,"marks"|"gradePerformance">>,
- tier:string
+ _tier:string
 ):number|null {
- const values=gradesForTier(tier).map(grade=>weightedGradePerformance(parts,grade))
+ const values=studentGrades.map(grade=>weightedGradePerformance(parts,grade))
   .filter((x):x is number=>x!==null);
  if(!values.length)return null;
  return Math.round(values.reduce((sum,n)=>sum+n,0)/values.length*10)/10;

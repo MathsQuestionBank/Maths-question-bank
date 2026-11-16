@@ -2,7 +2,7 @@ import {useState} from "react";
 import JSZip from "jszip";
 import {supabase} from "./supabase";
 
-export type MappingRow={id:string;board:string;tier:string;series:string;paper:string;question:string;topic:string;strands:string;skills:string;review:string;excelRow:number;marks:number;ao:string;spec:string;gradePercent:Record<number,number|null>};
+export type MappingRow={id:string;board:string;tier:string;series:string;paper:string;question:string;topic:string;strands:string;skills:string;review:string;excelRow:number;marks:number;ao:string;spec:string;/** Average % available marks by final student GCSE grade; source column wording is retained when parsing. */ gradePercent:Record<number,number|null>};
 type Audit={rows:MappingRow[];duplicates:string[];reviewCount:number;issues:string[]};
 const MAX_SIZE=8*1024*1024;
 function parseSheet(xml:string,shared:string[]):string[][]{
