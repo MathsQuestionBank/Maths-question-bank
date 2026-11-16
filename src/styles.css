@@ -758,3 +758,17 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
 .similar-dialog::backdrop{background:rgba(20,36,48,.6)}
 .similar-dialog .targeted-heading h2{margin-top:6px}.similar-dialog .targeted-heading p{font-size:14px}.similar-dialog p{line-height:1.6}.similar-original{padding:16px;background:#f4f8fa;border:1px solid #dce5eb;border-radius:6px;margin-top:18px;overflow-wrap:anywhere}.similar-original h3{margin-top:0}.similar-original p{margin:8px 0;font-size:13px}.similar-original .targeted-preview>.mqb-cropped-image{width:100%!important;margin-inline:0}.similar-results{margin-top:24px;min-width:0}.similar-more{margin:20px 0;min-height:44px}.similar-basket-strip{position:sticky;bottom:-24px;z-index:6;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 0;margin-top:20px;border-top:1px solid #dce5eb;background:#fff}.similar-basket-strip strong{font-size:13px;color:#314d5c}.similar-basket-strip small{display:block;margin-top:5px;font-size:12px;color:#536574}.similar-dialog .targeted-enlarged-preview{max-height:88dvh;overflow:auto}
 @media(max-width:719px){.similar-dialog{width:calc(100% - 12px);max-height:96dvh;padding:14px}.similar-dialog .targeted-heading{display:block}.similar-dialog .targeted-heading>button{width:100%;min-height:44px}.similar-original{padding:12px}.similar-basket-strip{bottom:-14px;display:block}.similar-basket-strip button{width:100%;margin-top:10px;min-height:44px}.similar-dialog .targeted-alternative-nav{margin-top:10px}}
+
+/* Owner-only local audit export. No question images are loaded by this view. */
+.multipart-audit-export {max-width:960px;margin-inline:auto;padding:24px;overflow-wrap:anywhere;line-height:1.5}
+.multipart-audit-export h2 {margin-top:0}
+.audit-paper-picker {display:grid;gap:8px;margin-block:20px}
+.audit-paper-picker select {width:100%;min-width:0;max-width:100%;padding:11px 12px;border:1px solid #cfd8df;border-radius:8px;background:#fff;color:#203442}
+.audit-batch-actions {display:flex;flex-wrap:wrap;gap:10px;margin-block:16px}
+.audit-question-list {border:1px solid #dce3e4;border-radius:8px;padding:8px 16px;min-width:0}
+.audit-question-row {display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid #e8eded;cursor:pointer}
+.audit-question-row:last-child {border-bottom:0}
+.audit-question-row input {width:20px;height:20px;flex:0 0 20px;margin:2px 0 0}
+.audit-part-ids,.audit-unavailable {display:block;margin-top:5px}
+.audit-unavailable {font-size:.9rem;color:#843827}
+@media(max-width:600px){.multipart-audit-export{padding:16px}.audit-batch-actions button{flex:1 1 180px}.audit-question-list{padding:6px 10px}}

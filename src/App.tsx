@@ -1,3 +1,4 @@
+import MultipartAuditExporter from "./MultipartAuditExporter";
 import SimilarQuestionsDialog from "./SimilarQuestionsDialog";
 import {countInsightPapers} from "./questionBankInsights";
 import QuestionBankInsights from "./QuestionBankInsights";
@@ -30,7 +31,7 @@ import { reconcileAssessments } from "./assessmentReconciliation";
 import { saveVersionedAssessment, deleteVersionedAssessment } from "./versionedAssessments";
 import { loadAccountFolders, createAccountFolder, changeAccountFolder } from "./accountFolders";
 
-type Page = "home" | "bank" | "builder" | "saved" | "qualifications" | "further" | "statistics" | "account" | "import" | "insights" | "review";
+type Page = "home" | "bank" | "builder" | "saved" | "qualifications" | "further" | "statistics" | "account" | "import" | "insights" | "review" | "audit-export";
 type Question = BankQuestion;
 const groups=["Algebra","Geometry","Number","Probability","Ratio","Statistics"];
 const navigation:{page:Page;label:string}[]=[{page:"bank",label:"Question Bank"},{page:"builder",label:"Assessment Builder"},{page:"saved",label:"My Worksheets"},{page:"further",label:"Further Maths"},{page:"statistics",label:"Statistics"},{page:"account",label:"Account"}];
@@ -412,10 +413,10 @@ return <div className="site">
 </svg>
 <div className="header-inner"><button type="button" className="brand brand-button" onClick={()=>navigate("bank")} aria-label="Maths Question Bank — Question Bank"><span>Maths <em>Question Bank</em></span><small>Made for mathematics teachers</small></button><span className="header-note">Find questions. Build better assessments.</span></div>
 </header>
-<nav className="site-nav" aria-label="Main navigation">{navigation.map(item=><button type="button" key={item.page} aria-current={page===item.page||(["import","review","insights"].includes(page)&&item.page==="account")?"page":undefined} onClick={()=>navigate(item.page)}>{item.label}</button>)}</nav>
+<nav className="site-nav" aria-label="Main navigation">{navigation.map(item=><button type="button" key={item.page} aria-current={page===item.page||(["import","review","insights","audit-export"].includes(page)&&item.page==="account")?"page":undefined} onClick={()=>navigate(item.page)}>{item.label}</button>)}</nav>
 <main className="main">
 {page==="home"?<><section className="hero"><span className="eyebrow">MATHS QUESTION BANK</span><h1>Find questions. Build better assessments.</h1><p>Choose a tool to get started.</p></section><h2 className="dashboard-title">What would you like to do?</h2><div className="dashboard-grid">{tiles.map(t=><button className="dashboard-tile" key={t.page} onClick={()=>navigate(t.page)}><span className="tile-icon">{t.icon}</span><strong>{t.name}</strong><span>{t.desc}</span><span className="tile-arrow">Explore →</span></button>)}</div><div className="notice"><strong>Early preview:</strong> The mapped exam-question metadata is now in your private Supabase database. Import your existing V6.2 ZIP using the owner-only Import Exam Papers tool to add question images and mark schemes securely.</div><section className="owner-info"><h2>Owner tools</h2><div className="dashboard-grid"><button className="dashboard-tile" onClick={()=>navigate("import")}><span className="tile-icon">⇧</span><strong>Import Exam Papers</strong><span>Upload your V6.2 ZIP securely to private storage.</span><span className="tile-arrow">Open →</span></button><button className="dashboard-tile" onClick={()=>navigate("review")}><span className="tile-icon">✓</span><strong>Review image crops</strong><span>Check imported question images and mark schemes.</span><span className="tile-arrow">Open →</span></button><button className="dashboard-tile" onClick={()=>navigate("insights")}><span className="tile-icon">▥</span><strong>Question Bank Insights</strong><span>Review question, grade and enhanced skills coverage.</span><span className="tile-arrow">Open →</span></button></div></section></>:
-<><div className="page-top">{page!=="bank"&&<button className="back-link" onClick={()=>navigate("bank")}>← Question Bank</button>}<h1>{page==="bank"?"Question Bank":page==="builder"?"Assessment Builder":page==="saved"?"My Worksheets":page==="qualifications"?"More Qualifications":page==="further"?"Further Maths":page==="statistics"?"GCSE Statistics":page==="account"?"Account":page==="import"?"Import Exam Papers":page==="review"?"Review image crops":"Question Bank Insights"}</h1></div>
+<><div className="page-top">{page!=="bank"&&<button className="back-link" onClick={()=>navigate("bank")}>← Question Bank</button>}<h1>{page==="bank"?"Question Bank":page==="builder"?"Assessment Builder":page==="saved"?"My Worksheets":page==="qualifications"?"More Qualifications":page==="further"?"Further Maths":page==="statistics"?"GCSE Statistics":page==="account"?"Account":page==="import"?"Import Exam Papers":page==="review"?"Review image crops":page==="audit-export"?"Multipart audit export":"Question Bank Insights"}</h1></div>
 {page==="bank"&&<><div className="panel wide-filters"><h2>Find questions</h2><div className="filter-grid">
 <label>Tier<select value={tier} onChange={e=>{setTier(e.target.value)}}>{options(["All","Foundation","Higher"])}</select></label>
 <label>Topic<select value={topic} onChange={e=>setTopic(e.target.value)}>{options(["All",...groups])}</select></label>
@@ -509,6 +510,7 @@ return <div className="site">
  {(reconciliation.browserOnly.length>0||reconciliation.conflicts.length>0)&&<div className="panel"><h3>Browser assessments needing attention</h3><p className="hint">These are older assessments saved only in this browser or different from an account copy. They will not be deleted or overwritten automatically.</p>{reconciliation.conflicts.length>0&&<p role="alert">{reconciliation.conflicts.length} browser version(s) differ from an account version. Review before importing.</p>}{reconciliation.browserOnly.length>0&&<button className="secondary small" disabled={cloudBusy} onClick={()=>void importMissingBrowserAssessments()}>Import {reconciliation.browserOnly.length} browser-only assessment(s)</button>}{[...reconciliation.browserOnly,...reconciliation.conflicts.map(x=>x.browser)].map(item=><div className="saved-item" key={item.id}><div><strong>{item.name}</strong><p>{item.ids.length} questions · Browser copy</p></div><button className="secondary small" onClick={()=>{setEditingCloud(null);openSavedAssessment(item)}}>Open browser version</button></div>)}</div>}
  </div>}
 {isOwner&&page==="import"&&<ZipImporter onComplete={()=>{void reloadQuestions()}}/>}{isOwner&&page==="review"&&<CropReviewQueue questions={questions} onUpdate={(id,patch)=>setQuestions(old=>old.map(q=>q.id===id?{...q,...patch}:q))}/>}
+{isOwner&&page==="audit-export"&&<MultipartAuditExporter/>}
 {isOwner&&page==="insights"&&<><section className="panel saved-panel"><h2>Question bank overview</h2><p className="hint">Private owner statistics, including coverage and image completeness.</p><div className="v62-stats insights-stats"><div><strong>{questions.length}</strong><span>Mapped records</span></div><div><strong>{bankPapers}</strong><span>Exam papers</span></div><div><strong>{questions.length?Math.round(bankMapped/questions.length*100):0}%</strong><span>Mapping coverage</span></div><div><strong>{bankImages} / {questions.length}</strong><span>With both images</span></div></div>{loadingQuestions&&<p role="status" className="hint">Loading statistics…</p>}{questionError&&<p role="alert" className="hint">{questionError}</p>}</section><QuestionBankInsights questions={questions} loading={loadingQuestions} error={questionError}/></>}
 {page==="account"&&<section className="panel saved-panel"><h2>Your account</h2>
 <p className="hint">{isOwner?"Manage your departmental pilot and private question bank.":"Your worksheets are saved to your individual account and are not visible to other teachers."}</p>
@@ -516,6 +518,7 @@ return <div className="site">
 <button className="secondary" onClick={()=>navigate("import")}>Import exam papers</button>
 <button className="secondary" onClick={()=>navigate("review")}>Review question images</button>
 <button className="secondary" onClick={()=>navigate("insights")}>View Insights</button>
+<button className="secondary" onClick={()=>navigate("audit-export")}>Export multipart audit images</button>
 </>}
 <button className="secondary" onClick={()=>void supabase.auth.signOut()}>Sign out</button></div>
 {isOwner&&<section className="teacher-approvals"><div className="section-heading"><div>
