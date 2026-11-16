@@ -47,6 +47,9 @@ describe("smart targeted shadow matching",()=>{
   const all=[q("1",{tier,sourceTier:tier,grade}),q("2",{tier,sourceTier:tier,grade}),q("3",{tier,sourceTier:tier,grade,sourceCalculator:false,calculator:false}),q("4",{tier,sourceTier:undefined,grade}),q("5",{tier,sourceTier:tier,grade,sourceCalculator:undefined}),q("6",{sourceTier:tier==="Higher"?"Foundation":"Higher",grade})];
   expect(options(all).map(s=>s.group.question.id)).toEqual(["2"]);
  });
+ it("uses the stored tier rather than excluding real Higher questions with grade-3 skill metadata",()=>{
+  expect(options([q("1",{grade:3}),q("2",{grade:3}),q("3",{grade:3,tier:"Foundation",sourceTier:"Foundation"})]).map(s=>s.group.key)).toEqual(["2"]);
+ });
  it("does not infer non-calculator from the database display fallback",()=>{
   const m=createSmartShadowMatcher([q("1",{sourceCalculator:undefined,calculator:false}),q("2",{sourceCalculator:false,calculator:false})],["1"]);
   expect(m.suggest("1","same")).toMatchObject({available:0,reason:expect.stringContaining("calculator metadata is missing")});
@@ -89,6 +92,10 @@ describe("smart targeted shadow matching",()=>{
   const [a,b,c,d]=multipart(),all=[a,b,c,d,official("sa","a"),official("sb","b"),official("sc","c")];
   const m=createSmartShadowMatcher(all,["a"]),s=m.suggest(m.originals[0].key,"same").suggestions[0];
   expect(s.method).toBe("official");expect(s.group.parts.map(p=>p.id)).toEqual(["sa","sb"]);
+ });
+ it("never passes orphan shadow links off as examination alternatives",()=>{
+  const all=[q("1"),q("2",{skill:"Other enhanced skill"}),q("orphan",{shadowOfQuestionId:"2",shadowStatus:"awaiting-review"}),q("3")];
+  expect(options(all).map(s=>s.group.key)).toEqual(["3"]);
  });
  it("does not offer unavailable question or mark assets or metadata-only imports",()=>{
   expect(options([q("1"),q("2",{markSchemeUrl:undefined}),q("3",{questionUrl:undefined}),q("4",{marks:0})])).toEqual([]);

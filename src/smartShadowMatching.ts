@@ -59,18 +59,18 @@ export function createSmartShadowMatcher(all:BankQuestion[],assessmentIds:string
   return candidate.parts.length===ids.size&&candidate.parts.every(part=>shadowIsReady(part)&&ids.has(part.shadowOfQuestionId!))&&new Set(candidate.parts.map(part=>part.shadowOfQuestionId)).size===ids.size&&new Set(candidate.parts.map(part=>part.shadowPaperId)).size===1;
  }
  function assess(original:AssessmentGroup,candidate:AssessmentGroup,difficulty:ShadowDifficulty):{suggestion:ShadowSuggestion;rank:number[]}|null{
-  if(inAssessment.has(candidate.key)||[...family(candidate)].some(id=>originalFamilies.has(id))&&!candidate.question.shadowPaperId)return null;
+  const isShadow=candidate.parts.some(part=>!!part.shadowPaperId||!!part.shadowOfQuestionId);
+  if(inAssessment.has(candidate.key)||[...family(candidate)].some(id=>originalFamilies.has(id))&&!isShadow)return null;
   // Linked official variants may share the original family; all other shadows
   // are excluded rather than being passed off as bank alternatives.
-  const official=!!candidate.question.shadowPaperId&&officialFor(original,candidate);
-  if(candidate.question.shadowPaperId&&!official)return null;
+  const official=isShadow&&officialFor(original,candidate);
+  if(isShadow&&!official)return null;
   if(!ready(candidate)||(!official&&(!skillComplete(original)||!skillComplete(candidate))))return null;
   const originalTier=tier(original),candidateTier=tier(candidate),calc=calculator(original),candidateCalc=calculator(candidate);
   if(!originalTier||candidateTier!==originalTier||calc===null||candidateCalc!==calc)return null;
   const wanted=enhancedSkills(original),skills=enhancedSkills(candidate);
   if(!official&&(!wanted.length||!wanted.every(skill=>skills.includes(skill))))return null;
   const originalGrade=groupGrade(original),candidateGrade=groupGrade(candidate);
-  if(candidateGrade&&(candidateTier==="Foundation"&&candidateGrade.max>5||candidateTier==="Higher"&&candidateGrade.min<4))return null;
   const targetGrade=originalGrade?Math.round(originalGrade.value):null;
   const p=targetGrade?weightedGradePerformance(original.parts,targetGrade):null,c=targetGrade?weightedGradePerformance(candidate.parts,targetGrade):null;
   const delta=originalGrade&&candidateGrade?candidateGrade.value-originalGrade.value:null;
