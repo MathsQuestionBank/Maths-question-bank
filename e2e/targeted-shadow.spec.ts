@@ -23,8 +23,9 @@ const bank=()=>[
  row("r2","9",skills[1]),row("r3","10",skills[2]),
  row("easy","11",skills[0],3,5),row("hard","12",skills[0],5,7)
 ];
-async function fixture(page:Page){
- const rows=bank(),original={id:sourceId,title:"Year 10 five-question check",revision:3,created_at:"2026-11-16T10:00:00Z",configuration:{id:"original-draft",folder:"Unfiled",minutes:30,cover:false,nameBox:false,renumberStudentQuestions:false,exportMode:"questions"}};
+async function fixture(page:Page,configure?:(rows:ReturnType<typeof bank>)=>void){
+ const rows=bank();configure?.(rows);
+ const original={id:sourceId,title:"Year 10 five-question check",revision:3,created_at:"2026-11-16T10:00:00Z",configuration:{id:"original-draft",folder:"Unfiled",minutes:30,cover:false,nameBox:false,renumberStudentQuestions:false,exportMode:"questions"}};
  const saved=[structuredClone(original)];
  let links=["o1a","o2","o3","o4","o5"].map((question_id,position)=>({assessment_id:sourceId,question_id,position}));
  const writes:Record<string,any>[]=[];
@@ -52,7 +53,7 @@ async function fixture(page:Page){
  await page.route("**/targeted-fixture.svg?**",async route=>{
   const asset=decodeURIComponent(new URL(route.request().url()).searchParams.get("asset")!),mark=asset.startsWith("marks/"),r=rows.find(r=>(mark?r.mark_scheme_storage_path:r.question_storage_path)===asset)!;
   const n=r.question_number.match(/\d+/)![0],total=r.metadata.numbering_positions.question.totalRects[0].marks;
-  const text=mark?`Solution ${r.id}: ${r.skill}. Award ${r.marks} marks.`:r.skill===skills[0]?`Practice ${r.id}: (a) Expand (x + 2)(x + 3). (b) Expand (2x + 1)(x - 4).`:`Practice ${r.id}: ${r.skill}.`;
+  const text=mark?`Solution ${r.id}: ${r.skill}. Award ${r.marks} marks.`:/^(?:o1[ab]|r1[ab]|easy|hard)$/.test(r.id)?`Practice ${r.id}: (a) Expand (x + 2)(x + 3). (b) Expand (2x + 1)(x - 4).`:`Practice ${r.id}: ${r.skill}.`;
   await route.fulfill({contentType:"image/svg+xml",body:`<svg xmlns="http://www.w3.org/2000/svg" width="900" height="210"><rect width="900" height="210" fill="white"/><text x="10" y="25" font-size="20">${n}</text><text x="60" y="60" font-size="17">${text}</text><path d="M60 120h780 M60 155h780" stroke="#999"/><text x="575" y="198" font-size="15">${mark?`Award ${r.marks} marks`:`(Total for Question ${n} is ${total} marks)`}</text></svg>`});
  });
  await page.goto("/");
@@ -63,7 +64,9 @@ async function fixture(page:Page){
  return {saved,links:()=>links,writes,original};
 }
 async function screenshot(page:Page,testInfo:TestInfo,name:string,selector:string){
- const path=testInfo.outputPath(`${name}.png`);await page.locator(selector).screenshot({path});await testInfo.attach(name,{path,contentType:"image/png"});
+ // Full-component captures keep the sticky bar in its initial position; the
+ // phone test separately verifies it stays in the viewport while scrolling.
+ const path=testInfo.outputPath(`${name}.png`);await page.locator(selector).screenshot({path,style:".targeted-alternative-nav{position:static!important}"});await testInfo.attach(name,{path,contentType:"image/png"});
 }
 async function pdf(page:Page,testInfo:TestInfo,name:string){
  const data=await page.pdf({format:"A4",printBackground:true,preferCSSPageSize:true}),path=testInfo.outputPath(`${name}.pdf`);await writeFile(path,data);await testInfo.attach(name,{path,contentType:"application/pdf"});
@@ -86,7 +89,7 @@ test("teacher targets three of five questions, previews, generates and saves a s
  for(let i=1;i<=3;i++){
   const article=panel.getByRole("article",{name:`Replacements for question ${i}`,exact:true}),card=article.locator(".targeted-suggestion").first();
   await expect(card).toContainText("Smart alternative");await expect(card).toContainText("Strong metadata match");
-  await card.getByText("Preview question and mark scheme",{exact:true}).click();
+  await expect(card.locator(".targeted-preview")).toHaveAttribute("open","");
   await expect(card.locator("img")).toHaveCount(1);
   await card.getByRole("button",{name:"Mark scheme image",exact:true}).click();
   await expect(card.locator("img")).toHaveCount(i===1?2:1);
@@ -132,12 +135,12 @@ test("difficulty changes require fresh choices; unmatched questions and cancella
  const article=panel.getByRole("article",{name:"Replacements for question 1",exact:true});
  await article.getByRole("button",{name:"Choose this replacement",exact:true}).first().click();
  await panel.getByRole("combobox",{name:"Targeted shadow difficulty"}).selectOption("easier");
- await expect(article.locator(".targeted-suggestion")).toHaveCount(1);await expect(article).toContainText("Grade 5");
+ await expect(article.locator(".targeted-suggestion")).toHaveCount(1);await expect(article.locator(".targeted-summary-facts dd").first()).toContainText("5");
  await expect(panel.getByRole("button",{name:"Generate Shadow Assessment",exact:true})).toBeDisabled();
  await article.getByRole("button",{name:"Choose this replacement",exact:true}).click();
  await article.getByRole("button",{name:"Reject chosen replacement",exact:true}).click();
  await expect(panel.getByRole("button",{name:"Generate Shadow Assessment",exact:true})).toBeDisabled();
- await panel.getByRole("combobox",{name:"Targeted shadow difficulty"}).selectOption("harder");await expect(article).toContainText("Grade 7");
+ await panel.getByRole("combobox",{name:"Targeted shadow difficulty"}).selectOption("harder");await expect(article.locator(".targeted-summary-facts dd").first()).toContainText("7");
  await panel.getByRole("combobox",{name:"Targeted shadow difficulty"}).selectOption("same");
  await article.getByRole("button",{name:"Choose this replacement",exact:true}).first().click();
  await panel.getByRole("checkbox",{name:"Target question 5",exact:true}).check();
@@ -145,4 +148,70 @@ test("difficulty changes require fresh choices; unmatched questions and cancella
  await expect(panel.getByRole("button",{name:"Generate Shadow Assessment",exact:true})).toBeDisabled();
  await missing.getByRole("radio",{name:"Leave this question unmatched"}).check();await expect(panel.getByRole("button",{name:"Generate Shadow Assessment",exact:true})).toBeEnabled();
  await panel.getByRole("button",{name:"Cancel targeted shadow",exact:true}).click();await expect(page.locator(".paper-question")).toHaveCount(5);await expect(page.locator(".targeted-origin-banner")).toHaveCount(0);
+});
+
+
+test("replacement cards remain readable across desktop tablet and mobile",async({page},testInfo)=>{
+ await fixture(page,rows=>{
+  const longSkill="Expanding and simplifying products of two binomial expressions with positive and negative integer coefficients";
+  for(const r of rows){
+   if(r.skill===skills[0])r.skill=longSkill;
+   if(r.id==="o1a"||r.id==="o1b")r.metadata.g6=82.7;
+   if(r.id==="r1a"||r.id==="r1b")r.metadata.g6=88.5;
+   if(r.id==="hard")r.assessment_objective="AO2";
+   if(r.id==="r2"){r.metadata.grade=0;r.assessment_objective="";Reflect.deleteProperty(r.metadata,"g6");r.exam_papers.series="Unspecified";}
+  }
+ });
+ const panel=page.getByRole("region",{name:"Targeted shadow assessment"});
+ for(const i of [1,2,5])await panel.getByRole("checkbox",{name:`Target question ${i}`,exact:true}).check();
+ const article=panel.getByRole("article",{name:"Replacements for question 1",exact:true});
+ await article.locator(".targeted-preview").first().evaluate(node=>(node as HTMLDetailsElement).open=true);
+ const sizes=testInfo.project.name==="chromium"?[{name:"desktop",width:1440,height:1000},{name:"tablet",width:900,height:1100}]:[{name:"mobile",width:393,height:851},{name:"small-mobile",width:320,height:800}];
+ for(const size of sizes){
+  await page.setViewportSize(size);
+  await article.locator("img").first().evaluate(image=>(image as HTMLImageElement).decode());
+  const mobile=size.width<720,cards=article.locator(".targeted-suggestion"),first=cards.first(),nav=article.getByRole("group",{name:"Browse alternatives",exact:true});
+  await expect(cards).toHaveCount(3);
+  await expect(article.locator(".targeted-suggestion:visible")).toHaveCount(mobile?1:3);
+  if(mobile)await expect(nav).toBeVisible();else await expect(nav).toBeHidden();
+  const boxes=await cards.evaluateAll(nodes=>nodes.map(node=>{const b=node.getBoundingClientRect();return {x:b.x,y:b.y,width:b.width}}));
+  if(!mobile){expect(boxes[1].x).toBeGreaterThan(boxes[0].x+boxes[0].width);expect(boxes[1].y).toBeCloseTo(boxes[0].y,0);expect(boxes[2].y).toBeGreaterThan(boxes[0].y)}
+  const imageBox=await first.locator(".mqb-cropped-image").first().boundingBox();
+  expect(imageBox!.width).toBeGreaterThan(size.width*(mobile?.78:.35));expect(imageBox!.x).toBeGreaterThanOrEqual(0);expect(imageBox!.x+imageBox!.width).toBeLessThanOrEqual(size.width);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+  await expect(first.locator(".targeted-history dd")).toHaveText(["82.7%","88.5%"]);
+  await expect(first.locator(".targeted-history")).toContainText("final GCSE grade 6");await expect(first.locator(".targeted-history")).toContainText("not proof that a question is easier or harder");
+  await expect(first.locator(".targeted-reasons")).not.toHaveAttribute("open","");
+  await expect(first.getByText("Same enhanced skill coverage.",{exact:true})).toBeHidden();
+  await first.getByText("Why this question?",{exact:true}).click();await expect(first.getByText("Same enhanced skill coverage.",{exact:true})).toBeVisible();
+  await first.getByText("Why this question?",{exact:true}).click();
+  await screenshot(page,testInfo,`after-${size.name}-replacement-cards`,'.targeted-question[aria-label="Replacements for question 1"]');
+  if(mobile){
+   await expect(nav.getByRole("button",{name:"Previous alternative",exact:true})).toBeDisabled();
+   await first.getByRole("button",{name:"Choose this replacement",exact:true}).click();
+   await expect(nav.getByRole("button",{name:"Next alternative",exact:true})).toBeInViewport();
+   await nav.getByRole("button",{name:"Next alternative",exact:true}).click();await expect(nav.locator("span")).toHaveText("Alternative 2 of 3");
+   await expect(cards.nth(1)).toBeVisible();await expect(first).toBeHidden();
+   await expect(cards.nth(1).getByRole("button",{name:"Choose this replacement",exact:true})).toHaveAttribute("aria-pressed","false");
+   await expect(cards.nth(1).locator(".targeted-fact-difference").filter({hasText:"Marks"})).toContainText("Original: 5");
+   await expect(cards.nth(1).locator(".targeted-warnings")).toBeVisible();
+   await nav.getByRole("button",{name:"Next alternative",exact:true}).click();await expect(nav.locator("span")).toHaveText("Alternative 3 of 3");
+   await expect(nav.getByRole("button",{name:"Next alternative",exact:true})).toBeDisabled();
+   await expect(cards.nth(2).locator(".targeted-warnings")).toContainText("Assessment objective coverage differs");await expect(cards.nth(2).locator(".targeted-warnings")).toBeVisible();
+   await expect(cards.nth(2).locator(".targeted-reasons")).not.toHaveAttribute("open","");
+   await expect(cards.nth(2).locator(".targeted-fact-difference").filter({hasText:"Mapped parts"})).toContainText("Original: 2");
+   await nav.getByRole("button",{name:"Previous alternative",exact:true}).click();await expect(nav.locator("span")).toHaveText("Alternative 2 of 3");
+   await article.getByRole("button",{name:"View chosen replacement",exact:true}).click();await expect(first).toBeVisible();
+   await expect(first.getByRole("button",{name:"Replacement chosen",exact:true})).toHaveAttribute("aria-pressed","true");
+   await article.getByRole("button",{name:"Reject chosen replacement",exact:true}).click();
+  }
+  await first.getByRole("button",{name:"Mark scheme image",exact:true}).click();await expect(first.locator(".targeted-preview> .mqb-cropped-image")).toHaveCount(2);
+  await first.getByRole("button",{name:"Enlarge preview",exact:true}).click();const dialog=page.getByRole("dialog",{name:"Enlarged replacement preview"});await expect(dialog.locator("img")).toHaveCount(2);
+  await page.keyboard.press("Escape");await expect(dialog).toBeHidden();
+  await first.getByRole("button",{name:"Question image",exact:true}).click();
+  const missing=panel.getByRole("article",{name:"Replacements for question 2",exact:true}).locator(".targeted-suggestion");
+  await expect(missing).toContainText("Possible match — teacher review recommended");await expect(missing.locator(".targeted-summary-facts")).toContainText("Unavailable");
+  await expect(missing.locator(".targeted-history dd")).toHaveText(["70%","No data"]);await expect(missing.locator(".targeted-warnings")).toBeVisible();
+  const empty=panel.getByRole("article",{name:"Replacements for question 5",exact:true});await expect(empty).toContainText("No suitable match");await expect(empty.locator(".targeted-suggestion")).toHaveCount(0);await expect(empty.getByRole("group",{name:"Browse alternatives",exact:true})).toHaveCount(0);
+ }
 });
