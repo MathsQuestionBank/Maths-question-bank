@@ -17,6 +17,8 @@ async function setup(page:Page,options:{owner?:boolean;approved?:boolean;signedI
  await page.route(`${host}/**`,async route=>{
   const req=route.request(),url=new URL(req.url()),path=url.pathname;
   const reply=(data:unknown,status=200)=>route.fulfill({status,contentType:"application/json",body:JSON.stringify(data)});
+  const readPost=req.method()==="POST"&&(path==="/rest/v1/rpc/is_approved_owner"||path.includes("/storage/v1/object/sign/"));
+  if(!["GET","HEAD","OPTIONS"].includes(req.method())&&!readPost){writes++;return reply({message:"Unexpected mutation blocked by fixture"},405);}
   if(path==="/auth/v1/user")return options.signedIn===false?reply({error:"not authenticated"},401):reply(user);
   if(path==="/rest/v1/profiles")return reply([{role:options.owner===false?"member":"owner",approved:options.approved!==false}]);
   if(path==="/rest/v1/rpc/is_approved_owner"){roleChecks++;return reply(owner)}
@@ -32,7 +34,6 @@ async function setup(page:Page,options:{owner?:boolean;approved?:boolean;signedI
    if(options.failDownloads)return reply({message:"private-path?token=SECRET"},503);
    return route.fulfill({status:200,contentType:"image/png",body:png});
   }
-  if(req.method()!=="GET"&&!path.includes("/rpc/"))writes++;
   return reply([]);
  });
  await page.goto("/");
