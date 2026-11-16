@@ -772,3 +772,10 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
 .audit-part-ids,.audit-unavailable {display:block;margin-top:5px}
 .audit-unavailable {font-size:.9rem;color:#843827}
 @media(max-width:600px){.multipart-audit-export{padding:16px}.audit-batch-actions button{flex:1 1 180px}.audit-question-list{padding:6px 10px}}
+
+.insights-skill-mapping-note {font-size:.9rem;line-height:1.5;background:#eff6f6;border-left:3px solid #4b747c;padding:12px 14px}
+.insights-original-labels {font-size:.8rem;font-weight:400;margin-top:7px;max-width:32rem;overflow-wrap:anywhere}
+.insights-original-labels summary {cursor:pointer;color:#285a69}
+.insights-original-labels ul {padding-left:18px}
+.insights-original-labels code {white-space:pre-wrap;font-size:.8rem}
+.insights-label-review {color:#8a4a20;font-weight:600}

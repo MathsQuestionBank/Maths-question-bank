@@ -1,0 +1,346 @@
+{
+  "version": 1,
+  "scope": "Insights only; original metadata and all matching/assessment workflows unchanged",
+  "groups": [
+    {
+      "id": "linear-equations",
+      "label": "Solving linear equations",
+      "aliases": [
+        "Solving linear equations",
+        "Solve a linear equation",
+        "Solve linear equations"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "quadratic-equations",
+      "label": "Solving quadratic equations",
+      "aliases": [
+        "Solving quadratic equations",
+        "Solve quadratic equations"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "simultaneous-linear-equations",
+      "label": "Solving simultaneous linear equations",
+      "aliases": [
+        "Solving simultaneous linear equations",
+        "Solve simultaneous linear equations"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "simultaneous-linear-quadratic",
+      "label": "Solving simultaneous linear and quadratic equations",
+      "aliases": [
+        "Solving simultaneous linear and quadratic equations",
+        "Solve simultaneous linear and quadratic equations"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "linear-inequalities",
+      "label": "Solving linear inequalities",
+      "aliases": [
+        "Solving linear inequalities",
+        "Solve a linear inequality",
+        "Solve linear inequalities"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "quadratic-inequalities",
+      "label": "Solving quadratic inequalities",
+      "aliases": [
+        "Solving quadratic inequalities",
+        "Solve a quadratic inequality",
+        "Solve quadratic inequalities"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "collect-like-terms",
+      "label": "Collecting like terms",
+      "aliases": [
+        "Collecting like terms",
+        "Collect like terms"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "single-brackets",
+      "label": "Expanding single brackets",
+      "aliases": [
+        "Expanding single brackets",
+        "Expand a single bracket"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "factorise-linear",
+      "label": "Factorising linear expressions",
+      "aliases": [
+        "Factorising linear expressions",
+        "Factorise a linear expression"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "two-way-tables",
+      "label": "Two-way tables",
+      "aliases": [
+        "Two-way tables",
+        "Two way tables"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "stem-leaf-diagrams",
+      "label": "Stem-and-leaf diagrams",
+      "aliases": [
+        "Stem-and-leaf diagrams",
+        "Stem and leaf diagrams"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "pythagoras-trigonometry",
+      "label": "Pythagoras' theorem and trigonometry",
+      "aliases": [
+        "Pythagoras' theorem and trigonometry",
+        "Pythagoras and trigonometry",
+        "Pythagoras’s Theorem and Trigonometry"
+      ],
+      "rationale": "Same combined umbrella wording only. Pure Pythagoras, individual trigonometric tasks and explicit 2-D/3-D skills remain separate; this does not assert equal demand across tiers."
+    },
+    {
+      "id": "estimate-grouped-mean",
+      "label": "Estimating the mean from grouped data",
+      "aliases": [
+        "Estimating the mean from grouped data",
+        "Estimate a mean from grouped data",
+        "Estimate the mean from grouped data"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "draw-box-plot-summary",
+      "label": "Drawing a box plot from summary statistics",
+      "aliases": [
+        "Drawing a box plot from summary statistics",
+        "Construct a box plot from summary statistics",
+        "Draw a box plot from summary statistics"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "range-stem-leaf",
+      "label": "Finding the range from a stem-and-leaf diagram",
+      "aliases": [
+        "Finding the range from a stem-and-leaf diagram",
+        "Find the range from a stem-and-leaf diagram",
+        "Range from a stem-and-leaf diagram"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "round-one-decimal",
+      "label": "Rounding to one decimal place",
+      "aliases": [
+        "Rounding to one decimal place",
+        "Round a decimal to one decimal place",
+        "Round decimals to one decimal place"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "round-significant-figures",
+      "label": "Rounding to significant figures",
+      "aliases": [
+        "Rounding to significant figures",
+        "Round to significant figures"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "change-subject",
+      "label": "Rearranging formulae to change the subject",
+      "aliases": [
+        "Rearranging formulae to change the subject",
+        "Rearrange a formula to change the subject",
+        "Rearrange formulae to change the subject"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "decimal-fraction",
+      "label": "Converting decimals to fractions",
+      "aliases": [
+        "Converting decimals to fractions",
+        "Convert a decimal to a fraction"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "percentage-fraction",
+      "label": "Converting percentages to fractions",
+      "aliases": [
+        "Converting percentages to fractions",
+        "Convert a percentage to a fraction"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "ratio-share-fraction",
+      "label": "Converting ratio shares to fractions",
+      "aliases": [
+        "Converting ratio shares to fractions",
+        "Convert a ratio share to a fraction",
+        "Convert ratio shares to fractions"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "input-inverse",
+      "label": "Finding an input using inverse operations",
+      "aliases": [
+        "Finding an input using inverse operations",
+        "Find an input using inverse operations",
+        "Find the input using inverse operations"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "fraction-amount",
+      "label": "Finding a fraction of an amount",
+      "aliases": [
+        "Finding a fraction of an amount",
+        "Calculate a fraction of an amount",
+        "Find a fraction of an amount"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "ratio-means-missing",
+      "label": "Finding a missing value using a ratio of means",
+      "aliases": [
+        "Finding a missing value using a ratio of means",
+        "Find a missing value using a ratio of means",
+        "Use a ratio of means to find a missing data value"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "scale-drawings",
+      "label": "Scale drawings",
+      "aliases": [
+        "Scale drawings",
+        "Scale drawing"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "similar-triangles",
+      "label": "Similar triangles",
+      "aliases": [
+        "Similar triangles",
+        "Similarity of triangles"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "exact-trig-values",
+      "label": "Exact values of sine, cosine and tangent",
+      "aliases": [
+        "Exact values of sine, cosine and tangent",
+        "Exact values of sin θ and cos θ and tan θ",
+        "Exact values of sin, cos and tan"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "plot-quadratic",
+      "label": "Plotting a quadratic graph",
+      "aliases": [
+        "Plotting a quadratic graph",
+        "Draw a quadratic graph",
+        "Plot a quadratic graph"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "quadratic-value-table",
+      "label": "Completing a quadratic table of values",
+      "aliases": [
+        "Completing a quadratic table of values",
+        "Calculate a table of values for a quadratic",
+        "Complete a quadratic table of values"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "frequency-tree-probability",
+      "label": "Calculating a probability from a frequency tree",
+      "aliases": [
+        "Calculating a probability from a frequency tree",
+        "Calculate probability from a frequency tree",
+        "Find a probability from a frequency tree"
+      ],
+      "rationale": "Wording-only variants with the same explicitly stated mathematical task; no broader or narrower skill is included."
+    },
+    {
+      "id": "volume-prisms",
+      "label": "Volume of cuboids and other right prisms (including cylinders)",
+      "aliases": [
+        "Volume of cuboids and other right prisms (including cylinders)",
+        "Volume cuboids and other right prisms (including cylinders)"
+      ],
+      "rationale": "Restore the missing word of only; retain the original list of solids and do not include surface area."
+    },
+    {
+      "id": "powers-roots",
+      "label": "Powers and roots",
+      "aliases": [
+        "Powers and roots",
+        "Roots and powers"
+      ],
+      "rationale": "Same explicitly stated mathematical object and operation, with word order or verb variation only. The inverse map-distance task and narrower additional operations are not included."
+    },
+    {
+      "id": "median-class",
+      "label": "Identifying the median class",
+      "aliases": [
+        "Identifying the median class",
+        "Identify the median class",
+        "Identify the class containing the median"
+      ],
+      "rationale": "Same explicitly stated mathematical object and operation, with word order or verb variation only. The inverse map-distance task and narrower additional operations are not included."
+    },
+    {
+      "id": "map-to-real-distance",
+      "label": "Calculating a real distance using a map scale",
+      "aliases": [
+        "Calculating a real distance using a map scale",
+        "Calculate a real distance using a map scale",
+        "Find a real distance using a map scale",
+        "Use a map scale to calculate real distance"
+      ],
+      "rationale": "Same explicitly stated mathematical object and operation, with word order or verb variation only. The inverse map-distance task and narrower additional operations are not included."
+    }
+  ],
+  "requiresReview": [
+    {
+      "label": "Solving equations",
+      "reason": "Retained source descriptions include linear, quadratic and simultaneous equations, inequalities, graphs and modelling. The broad label does not identify a mathematical equation type. Keep original topic/tier rows separate; do not assign from tier or specification code."
+    },
+    {
+      "label": "Solve two simultaneous equations",
+      "reason": "The wording does not specify whether both equations are linear or one is quadratic. Keep separate from explicitly typed simultaneous skills until content is reviewed."
+    },
+    {
+      "label": "Simultaneous equations",
+      "reason": "The equation types are unspecified. Keep separate from explicitly typed simultaneous skills until content is reviewed."
+    }
+  ]
+}

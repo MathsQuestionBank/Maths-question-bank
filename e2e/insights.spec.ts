@@ -19,8 +19,13 @@ function fixtureRows(){
  const unknown=make("Unmapped",0);unknown.paper_id="unknown-paper-source";unknown.topic="Unmapped";unknown.assessment_objective="";unknown.exam_papers.tier=undefined;unknown.exam_papers.series="Unspecified";unknown.metadata.tier=undefined;unknown.metadata.calculator=undefined;all.push(unknown);
  return all;
 }
-async function openFixture(page:Page,owner=true,delaySigning=false,sparseGrades=false){
- const rows=fixtureRows();if(sparseGrades)for(const row of rows)row.metadata.grade=row.metadata.grade===0||row.exam_papers.exam_board==="AQA"?0:row.exam_papers.tier==="Higher"?7:3;let imageRequests=0,questionQueries=0,signingCalls=0,writes=0,hold=delaySigning;
+function canonicalFixtureRows(){
+ const base=fixtureRows()[0];
+ const make=(ref:string,skill:string,topic="Algebra",tier="Foundation")=>({...structuredClone(base),id:`alias-${ref}`,paper_id:`fixture-${tier}`,question_number:ref,skill,topic,exam_papers:{...base.exam_papers,paper_code:tier==="Higher"?"1H":"1F",tier},metadata:{...base.metadata,id:`FIXTURE-${tier}-Q${ref}`,tier}});
+ return [make("501","Solve a linear equation"),make("502","Solve linear equations","Number"),make("503","Solving linear equations","Algebra","Higher"),make("504","Solve quadratic equations"),make("505","Solve simultaneous linear equations","Algebra","Higher"),make("506","Solving equations"),make("507","Solving equations","Number"),make("508a","Solve linear equations"),make("508b","Solving linear equations","Number")];
+}
+async function openFixture(page:Page,owner=true,delaySigning=false,sparseGrades=false,aliases=false){
+ const rows=aliases?canonicalFixtureRows():fixtureRows();if(sparseGrades)for(const row of rows)row.metadata.grade=row.metadata.grade===0||row.exam_papers.exam_board==="AQA"?0:row.exam_papers.tier==="Higher"?7:3;let imageRequests=0,questionQueries=0,signingCalls=0,writes=0,hold=delaySigning;
  let release:()=>void=()=>{};const gate=new Promise<void>(resolve=>release=resolve);
  await page.addInitScript(({user,token})=>localStorage.setItem("sb-ljisttslifnyrbuybfud-auth-token",JSON.stringify({user,access_token:token,refresh_token:"fixture",expires_at:4102444800,expires_in:999999999,token_type:"bearer"})),{user,token:token()});
  await page.route("https://ljisttslifnyrbuybfud.supabase.co/**",async route=>{
@@ -126,4 +131,28 @@ test("question bank filters student-result performance, including groups outside
  await page.getByRole("combobox",{name:"Historical average marks",exact:true}).selectOption({label:"70–100% average marks"});await expect(cards).toHaveCount(0);
  await page.getByRole("combobox",{name:"Historical average marks",exact:true}).selectOption("Any");
  await page.getByRole("combobox",{name:"Target student grade",exact:true}).selectOption("3");await expect(cards).toHaveCount(2);await expect(cards.first()).toContainText("G3: 5%");
+});
+
+
+test("canonical skills aggregate whole questions while exposing original labels and retaining ambiguous equations",async({page},testInfo)=>{
+ const state=await openFixture(page,true,false,false,true),dashboard=page.locator(".insights-dashboard"),table=dashboard.getByRole("table",{name:"Filtered enhanced skill resource coverage",exact:true});
+ await dashboard.getByRole("combobox",{name:"Rows per page",exact:true}).selectOption("25");
+ await expect(table.getByRole("rowheader")).toHaveCount(5);
+ const linear=table.getByRole("row").filter({has:page.getByRole("rowheader",{name:"Solving linear equations",exact:true})});
+ await expect(linear).toContainText("5 mapped records · 4 whole");await expect(linear.locator('td[data-label="Complete usable"] strong')).toHaveText("4");await expect(linear).toContainText("Algebra | Number");await expect(linear).toContainText("Foundation | Higher");
+ await linear.getByText("Original labels (3)",{exact:true}).click();await expect(linear.getByText('"Solve a linear equation"',{exact:true})).toBeVisible();await expect(linear.getByText('"Solve linear equations"',{exact:true})).toBeVisible();
+ await expect(table.getByRole("rowheader",{name:"Solving equations",exact:true})).toHaveCount(2);await expect(table.getByRole("rowheader",{name:"Solving quadratic equations",exact:true})).toHaveCount(1);await expect(table.getByRole("rowheader",{name:"Solving simultaneous linear equations",exact:true})).toHaveCount(1);
+ const before=state.counts();await dashboard.getByLabel("Enhanced skill",{exact:true}).fill("Solve a linear equation");await expect(table.getByRole("rowheader")).toHaveCount(1);await expect(linear).toContainText("5 mapped records · 4 whole");
+ const downloading=page.waitForEvent("download");await dashboard.getByRole("button",{name:"Export filtered CSV (1 rows)",exact:true}).click();const file=await downloading,csv=await readFile((await file.path())!,"utf8");expect(csv).toContain('"Solving linear equations"');expect(csv).toContain("Original skill labels (JSON)");expect(csv).toContain("Solve a linear equation");expect(csv).toContain('"5","4","4","4"');expect(csv).not.toContain("Solving quadratic equations");
+ await dashboard.getByRole("combobox",{name:"Tier",exact:true}).selectOption("Foundation");await expect(linear).toContainText("4 mapped records · 3 whole");
+ await dashboard.getByRole("combobox",{name:"Topic",exact:true}).selectOption("Algebra");await expect(linear).toContainText("2 mapped records · 2 whole");
+ await dashboard.getByRole("button",{name:"Reset coverage filters",exact:true}).click();await dashboard.getByLabel("Enhanced skill",{exact:true}).fill("Solving equations");await expect(table.getByRole("rowheader")).toHaveCount(2);await expect(table.locator(".insights-label-review")).toHaveCount(2);
+ await table.getByText("Original labels (1)",{exact:true}).first().click();await expect(table.getByText(/Retained source descriptions/).first()).toBeVisible();
+ await dashboard.getByRole("button",{name:"Reset coverage filters",exact:true}).click();
+ for(const summary of await table.locator("details.insights-original-labels[open] > summary").all())await summary.click();
+ await linear.getByText("Original labels (3)",{exact:true}).click();
+ if(testInfo.project.name==="chromium")await page.setViewportSize({width:1440,height:1100});
+ await capture(page,testInfo,`${testInfo.project.name}-canonical-skills`,'section[aria-labelledby="insights-skills-title"]');
+ if(testInfo.project.name==="mobile-chromium"){await page.setViewportSize({width:320,height:800});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true)}
+ expect(state.counts()).toEqual(before);expect(state.counts().writes).toBe(0);expect(state.counts().imageRequests).toBe(0);
 });
