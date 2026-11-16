@@ -31,8 +31,10 @@ const compare=(a:number[],b:number[])=>{for(let i=0;i<a.length;i++){const n=a[i]
 export function createSmartShadowMatcher(all:BankQuestion[],assessmentIds:string[],additionalExcludedIds:string[]=[],targetStudentGrade:number|null=null){
  const catalogue=buildAssessmentGroups(all,all.map(q=>q.id));
  const originals=buildAssessmentGroups(all,assessmentIds);
+ const officialCandidates=catalogue.filter(group=>group.question.shadowPaperId);
  const byId=new Map(all.map(q=>[q.id,q]));
  const byKey=new Map(catalogue.map(group=>[group.key,group]));
+ const byPart=new Map(catalogue.flatMap(group=>group.parts.map(part=>[part.id,group] as const)));
  const family=(group:AssessmentGroup)=>new Set(group.parts.map(part=>{
   const q=part.shadowOfQuestionId?byId.get(part.shadowOfQuestionId)||part:part;
   const source=q.sourceId?.match(/^(.+[-_]Q)0*(\d+)[a-z]*$/i);
@@ -53,7 +55,7 @@ export function createSmartShadowMatcher(all:BankQuestion[],assessmentIds:string
   const ids=new Set(original.parts.map(part=>part.shadowOfQuestionId||part.id));
   return candidate.parts.length===ids.size&&candidate.parts.every(part=>shadowIsReady(part)&&ids.has(part.shadowOfQuestionId!))&&new Set(candidate.parts.map(part=>part.shadowOfQuestionId)).size===ids.size&&new Set(candidate.parts.map(part=>part.shadowPaperId)).size===1;
  }
- function assess(original:AssessmentGroup,candidate:AssessmentGroup,difficulty:ShadowDifficulty):{suggestion:ShadowSuggestion;rank:number[]}|null{
+ function assess(original:AssessmentGroup,candidate:AssessmentGroup,difficulty:ShadowDifficulty,studentGrade:number|null=targetStudentGrade):{suggestion:ShadowSuggestion;rank:number[]}|null{
   const isShadow=candidate.parts.some(part=>!!part.shadowPaperId||!!part.shadowOfQuestionId);
   if(inAssessment.has(candidate.key)||[...family(candidate)].some(id=>originalFamilies.has(id))&&!isShadow)return null;
   // Linked official variants may share the original family; all other shadows
@@ -65,8 +67,8 @@ export function createSmartShadowMatcher(all:BankQuestion[],assessmentIds:string
   if(!originalTier||candidateTier!==originalTier||calc===null||candidateCalc!==calc)return null;
   const wanted=enhancedSkills(original),skills=enhancedSkills(candidate);
   if(!official&&(!wanted.length||!wanted.every(skill=>skills.includes(skill))))return null;
-  if(!validStudentGrade(targetStudentGrade))return null;
-  const p=weightedGradePerformance(original.parts,targetStudentGrade),c=weightedGradePerformance(candidate.parts,targetStudentGrade);
+  if(!validStudentGrade(studentGrade))return null;
+  const p=weightedGradePerformance(original.parts,studentGrade),c=weightedGradePerformance(candidate.parts,studentGrade);
   const delta=p===null||c===null?null:Math.round((c-p)*10)/10;
   // Transparent recommendation windows, not calibrated difficulty estimates.
   // Larger historical mark shares guide easier practice; all parts must report
@@ -79,7 +81,7 @@ export function createSmartShadowMatcher(all:BankQuestion[],assessmentIds:string
   if(!skillComplete(original)||!skillComplete(candidate))warnings.push("Enhanced skill metadata is incomplete; review the linked official shadow.");
   else if(!exactSkills)warnings.push("Enhanced skill coverage differs; check the extra demand.");
   if(delta===null)warnings.push("Complete historical performance at the selected final student grade is unavailable. This is a skill-led suggestion; similar difficulty cannot be established.");
-  else reasons.push(`Average % of available marks for students who achieved final GCSE grade ${targetStudentGrade}: original ${p}%, replacement ${c}%. This is not the percentage answering fully correctly or proof of equivalent demand.`);
+  else reasons.push(`Average % of available marks for students who achieved final GCSE grade ${studentGrade}: original ${p}%, replacement ${c}%. This is not the percentage answering fully correctly or proof of equivalent demand.`);
   const originalAos=aos(original),candidateAos=aos(candidate),aoMatch=originalAos.length>0&&same(originalAos,candidateAos);
   if(aoMatch)reasons.push("Same assessment objective coverage.");else warnings.push(candidateAos.length&&originalAos.length?"Assessment objective coverage differs.":"Assessment objective metadata is incomplete.");
   if(candidate.marks===original.marks)reasons.push("Same total marks.");else reasons.push(`${candidate.marks} marks instead of ${original.marks}; check the workload.`);
@@ -93,16 +95,34 @@ export function createSmartShadowMatcher(all:BankQuestion[],assessmentIds:string
   const distance=delta===null?100:difficulty==="same"?Math.abs(delta):Math.abs(Math.abs(delta)-10);
   return {suggestion,rank:[official?0:1,exactSkills?0:1,delta===null?1:0,distance,aoMatch?0:1,Math.abs(candidate.marks-original.marks),Math.abs(candidate.parts.length-original.parts.length)]};
  }
- function ranked(key:string,difficulty:ShadowDifficulty,reserved:ReadonlySet<string>){
+ function ranked(key:string,difficulty:ShadowDifficulty,reserved:ReadonlySet<string>,studentGrade:number|null=targetStudentGrade){
   const original=originals.find(group=>group.key===key);if(!original)return [];
   const skills=enhancedSkills(original);
   const keys=new Set<string>(skills.length?[...(skillIndex.get(skills[0])||[])]:[]);
-  for(const candidate of catalogue)if(candidate.question.shadowPaperId&&officialFor(original,candidate))keys.add(candidate.key);
+  for(const candidate of officialCandidates)if(officialFor(original,candidate))keys.add(candidate.key);
   const reservedFamilies=new Set([...reserved].flatMap(key=>{const group=byKey.get(key);return group?[...family(group)]:[]}));
-  const ranked=[...keys].filter(key=>!reserved.has(key)&&![...family(byKey.get(key)!)].some(id=>reservedFamilies.has(id))).flatMap(key=>{const group=byKey.get(key)!;const result=assess(original,group,difficulty);return result?[result]:[]}).sort((a,b)=>compare(a.rank,b.rank)||a.suggestion.group.key.localeCompare(b.suggestion.group.key));
+  const ranked=[...keys].filter(key=>!reserved.has(key)&&![...family(byKey.get(key)!)].some(id=>reservedFamilies.has(id))).flatMap(key=>{const group=byKey.get(key)!;const result=assess(original,group,difficulty,studentGrade);return result?[result]:[]}).sort((a,b)=>compare(a.rank,b.rank)||a.suggestion.group.key.localeCompare(b.suggestion.group.key));
   const seen=new Set<string>();return ranked.filter(item=>{const identity=[...family(item.suggestion.group)].sort().join("|");if(seen.has(identity))return false;seen.add(identity);return true});
  }
+ // One cached ranked result per active original/cohort/practice selection.
+ // Paging and basket additions reuse it; no new catalogue or image fetches.
+ let browseCache:{key:string;matches:ReturnType<typeof ranked>}|undefined;
  return {originals,
+  /** Basket aliases use the same source-family identity as ranking. Official
+   * variants remain distinct resources and may coexist with their original. */
+  isSelected(key:string,ids:ReadonlySet<string>){
+   const group=byKey.get(key);if(!group)return false;
+   const wanted=family(group),variant=group.question.shadowPaperId;
+   return [...ids].some(id=>{const selected=byPart.get(id);return !!selected&&selected.question.shadowPaperId===variant&&[...family(selected)].some(source=>wanted.has(source))});
+  },
+  browse(key:string,difficulty:ShadowDifficulty,studentGrade:number|null,offset=0,limit=3){
+   const cacheKey=JSON.stringify([key,difficulty,studentGrade]);
+   if(browseCache?.key!==cacheKey)browseCache={key:cacheKey,matches:ranked(key,difficulty,new Set(),studentGrade)};
+   const matches=browseCache.matches,original=originals.find(group=>group.key===key);
+   const start=Number.isFinite(offset)?Math.max(0,Math.floor(offset)):0,size=Number.isFinite(limit)?Math.max(1,Math.floor(limit)):3;
+   const reason=!original?"The original question is unavailable.":!validStudentGrade(studentGrade)?"Choose a target student grade to compare historical average marks.":!skillComplete(original)?"Enhanced skill metadata is missing for one or more original parts. Broad topic matches are not substituted.":!tier(original)||calculator(original)===null?"Original tier or calculator metadata is missing; compatibility cannot be verified.":enhancedSkills(original).some(skill=>[...(skillIndex.get(skill)||[])].every(candidateKey=>candidateKey===key))?"No other question is mapped to the required enhanced skills. Broad topic matches are not substituted.":difficulty!=="same"&&weightedGradePerformance(original.parts,studentGrade!)===null?"Complete historical performance is missing for the selected student grade. Try Similar historical demand for explicitly warned skill-led suggestions, or choose another student grade.":"No other complete question meets the enhanced-skill, tier, calculator and selected historical-performance requirements. Try another student grade or practice level; compatibility rules remain unchanged.";
+   return {suggestions:matches.slice(start,start+size).map(item=>item.suggestion),available:matches.length,hasMore:start+size<matches.length,reason:matches.length?undefined:reason};
+  },
   suggest(key:string,difficulty:ShadowDifficulty,reserved:ReadonlySet<string>=new Set(),keepKey?:string){
    const original=originals.find(group=>group.key===key);
    const matches=ranked(key,difficulty,reserved),top=matches.slice(0,3).map(item=>item.suggestion);

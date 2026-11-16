@@ -28,6 +28,8 @@ jobs:
             docs/multipart-numbering-followup.md
             docs/smart-shadow-assessments.md
             docs/gcse-grade-interpretation.md
+            docs/find-similar-questions.md
+            docs/find-similar-examples/
             docs/grade-interpretation-examples/
           if-no-files-found: ignore
           retention-days: 14

@@ -1,26 +1,14 @@
 import {weightedGradePerformance} from "./teacherQuestionStats";
 import {studentGrades} from "./gradeBands";
-import ShadowSuggestionSummary from "./ShadowSuggestionSummary";
-import {useMemo,useRef,useState} from "react";
+import {QuestionSkills as Skills,QuestionAlternatives as Suggestions} from "./QuestionComparisons";
+import {useMemo,useState} from "react";
 import type {BankQuestion} from "./questionData";
-import {assessmentGroupImages,type AssessmentGroup} from "./assessmentGroups";
-import {formatAssessmentSource,formatQuestionSource} from "./assessmentNumbering";
-import {CroppedImage} from "./CropEditor";
-import {createSmartShadowMatcher,type ShadowDifficulty,type TargetedShadowInfo,type ShadowSuggestion} from "./smartShadowMatching";
+import {type AssessmentGroup} from "./assessmentGroups";
+import {formatAssessmentSource} from "./assessmentNumbering";
+import {createSmartShadowMatcher,type ShadowDifficulty,type TargetedShadowInfo} from "./smartShadowMatching";
 
 export const difficultyLabels:Record<ShadowDifficulty,string>={same:"Same difficulty",easier:"Slightly easier",harder:"Slightly harder"};
 function performanceLabel(group:AssessmentGroup,grade:number|null){const value=grade===null?null:weightedGradePerformance(group.parts,grade);return grade===null?"Select target student grade":`Final Grade ${grade} students: ${value===null?"no complete performance data":`${value}% average marks`}`;}
-function Skills({group}:{group:AssessmentGroup}){return <>{[...new Set(group.parts.map(part=>part.skill))].join("; ")}</>}
-function Preview({group}:{group:AssessmentGroup}){
- const [kind,setKind]=useState<"question"|"mark">("question"),[enlarged,setEnlarged]=useState(false);
- const dialog=useRef<HTMLDialogElement>(null);
- const content=()=> <>{assessmentGroupImages(group,kind).map(image=><CroppedImage key={image.key} src={image.src} crop={image.crop} alt={`${group.label} ${kind==="question"?"question":"mark scheme"}`}/>)}
- {group.parts.filter(part=>part.originalContent&&!(kind==="question"?part.questionUrl:part.markSchemeUrl)).map(part=><p className="assessment-text" key={part.id}>{kind==="question"?part.prompt:part.answer}</p>)}</>;
- return <details className="targeted-preview" open><summary>Preview question and mark scheme</summary><div className="targeted-preview-tabs"><button type="button" className="secondary small" aria-pressed={kind==="question"} onClick={()=>setKind("question")}>Question image</button><button type="button" className="secondary small" aria-pressed={kind==="mark"} onClick={()=>setKind("mark")}>Mark scheme image</button></div>
- {content()}<button type="button" className="text-button" onClick={()=>{setEnlarged(true);dialog.current?.showModal()}}>Enlarge preview</button>
- <dialog ref={dialog} className="targeted-enlarged-preview" aria-label="Enlarged replacement preview" onClose={()=>setEnlarged(false)}><div className="v62-modal-heading"><h3>{group.label} · {kind==="question"?"Question":"Mark scheme"}</h3><button type="button" className="secondary small" onClick={()=>dialog.current?.close()}>Close enlarged preview</button></div>{enlarged&&content()}</dialog>
- </details>;
-}
 export default function TargetedShadowBuilder({questions,ids,excludedIds=[],title,initialTargetStudentGrade=null,onClose,onGenerate}:{questions:BankQuestion[];ids:string[];excludedIds?:string[];title:string;initialTargetStudentGrade?:number|null;onClose:()=>void;onGenerate:(result:{ids:string[];info:TargetedShadowInfo;totalMarks:number})=>void}){
  const idsSignature=ids.join("\u0000"),excludedSignature=excludedIds.join("\u0000");
  const [targetStudentGrade,setTargetStudentGrade]=useState<number|null>(initialTargetStudentGrade);
@@ -50,28 +38,4 @@ export default function TargetedShadowBuilder({questions,ids,excludedIds=[],titl
  {error&&<p role="alert">{error}</p>}
  <div className="targeted-generate"><p>{accepted.length} replacement{accepted.length===1?"":"s"} chosen. {selected.length-accepted.length} not chosen or unmatched. Only chosen replacements will be included.</p><button type="button" className="primary" disabled={!complete||!accepted.length} onClick={generate}>Generate Shadow Assessment</button></div>
  </section>;
-}
-function Suggestions({targetStudentGrade,original,suggestions,questions,chosenKey,onChoose}:{targetStudentGrade:number|null;original:AssessmentGroup;suggestions:ShadowSuggestion[];questions:BankQuestion[];chosenKey?:string|null;onChoose:(key:string)=>void}){
- const [activeKey,setActiveKey]=useState<string>();
- const list=useRef<HTMLDivElement>(null);
- const browse=(key:string)=>{setActiveKey(key);requestAnimationFrame(()=>list.current?.scrollIntoView({block:"start"}))};
- const activeIndex=Math.max(0,suggestions.findIndex(item=>item.group.key===activeKey));
- const chosenIndex=suggestions.findIndex(item=>item.group.key===chosenKey);
- if(!suggestions.length)return null;
- return <>
-  {suggestions.length>1&&<div className="targeted-alternative-nav" role="group" aria-label="Browse alternatives"><button type="button" className="secondary small" disabled={activeIndex===0} onClick={()=>browse(suggestions[activeIndex-1].group.key)}>Previous alternative</button><span aria-live="polite">Alternative {activeIndex+1} of {suggestions.length}</span><button type="button" className="secondary small" disabled={activeIndex===suggestions.length-1} onClick={()=>browse(suggestions[activeIndex+1].group.key)}>Next alternative</button></div>}
-  <div className="targeted-suggestions" ref={list}>{suggestions.map((suggestion,index)=><Suggestion targetStudentGrade={targetStudentGrade} key={suggestion.group.key} original={original} suggestion={suggestion} questions={questions} index={index} active={index===activeIndex} onActivate={()=>setActiveKey(suggestion.group.key)} selected={chosenKey===suggestion.group.key} onChoose={()=>onChoose(suggestion.group.key)}/>)}</div>
-  {chosenIndex>=0&&<p className="targeted-mobile-choice">Chosen: alternative {chosenIndex+1}.<button type="button" className="text-button" onClick={()=>browse(chosenKey!)}>View chosen replacement</button></p>}
- </>;
-}
-function Suggestion({targetStudentGrade,original,suggestion,questions,index,active,onActivate,selected,onChoose}:{targetStudentGrade:number|null;original:AssessmentGroup;suggestion:ShadowSuggestion;questions:BankQuestion[];index:number;active:boolean;onActivate:()=>void;selected:boolean;onChoose:()=>void}){
- const group=suggestion.group;
- return <div className={`targeted-suggestion${selected?" is-selected":""}`} data-active={active} onFocusCapture={onActivate}>
-  <div className="targeted-suggestion-heading"><h4>Alternative {index+1}</h4><span className="targeted-match-label">{suggestion.method==="official"?"Official shadow":"Smart alternative"}</span></div><strong className="targeted-match-category">{suggestion.category}</strong>
-  <p className="targeted-source">{suggestion.method==="official"?<>Replacement source: {formatQuestionSource(group.question)}<br/>{formatAssessmentSource(group,questions)}</>:formatAssessmentSource(group,questions)}</p><p><Skills group={group}/></p><p className="targeted-compatibility">{group.question.tier} · {group.question.calculator?"Calculator":"Non-calculator"}</p>
-  <ShadowSuggestionSummary targetStudentGrade={targetStudentGrade} original={original} replacement={group}/>
-  {suggestion.warnings.length>0&&<div className="targeted-warnings" aria-label="Recommendation warnings"><strong>Check before choosing</strong><ul>{suggestion.warnings.map(warning=><li key={warning}>{warning}</li>)}</ul></div>}
-  <details className="targeted-reasons"><summary>Why this question?</summary><ul>{suggestion.reasons.map(reason=><li key={reason}>{reason}</li>)}</ul></details>
-  <Preview group={group}/><button type="button" className={selected?"primary small":"secondary small"} aria-pressed={selected} onClick={onChoose}>{selected?"Replacement chosen":"Choose this replacement"}</button>
- </div>;
 }
