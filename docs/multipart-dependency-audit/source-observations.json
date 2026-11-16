@@ -1,0 +1,1681 @@
+{
+  "version": 1,
+  "scope": "Public source counterparts only; no private production crop was inspected. All findings are provisional, not teacher-approved.",
+  "parts": [
+    {
+      "series": "June 2022",
+      "paper_code": "1F",
+      "question_number": 8,
+      "part_suffix": "a",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "rainfall-chart",
+          "description": "Supplied rainfall chart, scale, month labels and introductory description."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "Both parts use the supplied rainfall chart. Part (a) adds May/June bars; part (b) critiques a reading of the already supplied February bar, so the completed bars from (a) are not required.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "1F",
+      "question_number": 8,
+      "part_suffix": "b",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "rainfall-chart",
+          "description": "Supplied rainfall chart, scale, month labels and introductory description."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "Both parts use the supplied rainfall chart. Part (a) adds May/June bars; part (b) critiques a reading of the already supplied February bar, so the completed bars from (a) are not required.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "1F",
+      "question_number": 9,
+      "part_suffix": "a",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "tile-patterns",
+          "description": "Supplied patterns 1\u20134 and statement identifying the sequence."
+        }
+      ],
+      "part_owned_context": "For (a), retain the blank drawing grid. For (b), retain the complete pattern-number/square-count table.",
+      "evidence": "The supplied tile patterns define the pattern family. Drawing pattern 5 is not a prerequisite for filling the numerical table; both tasks can use the original pattern strip.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "1F",
+      "question_number": 9,
+      "part_suffix": "b",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "tile-patterns",
+          "description": "Supplied patterns 1\u20134 and statement identifying the sequence."
+        }
+      ],
+      "part_owned_context": "For (a), retain the blank drawing grid. For (b), retain the complete pattern-number/square-count table.",
+      "evidence": "The supplied tile patterns define the pattern family. Drawing pattern 5 is not a prerequisite for filling the numerical table; both tasks can use the original pattern strip.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "1F",
+      "question_number": 12,
+      "part_suffix": "a",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "Each part prints a separate complete arithmetic/standard-form expression and its own instruction; no earlier result is referenced.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "1F",
+      "question_number": 12,
+      "part_suffix": "b",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "Each part prints a separate complete arithmetic/standard-form expression and its own instruction; no earlier result is referenced.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "1F",
+      "question_number": 26,
+      "part_suffix": "a",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "Each part prints a separate complete arithmetic/standard-form expression and its own instruction; no earlier result is referenced.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "1F",
+      "question_number": 26,
+      "part_suffix": "b",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "Each part prints a separate complete arithmetic/standard-form expression and its own instruction; no earlier result is referenced.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "1F",
+      "question_number": 26,
+      "part_suffix": "c",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "Each part prints a separate complete arithmetic/standard-form expression and its own instruction; no earlier result is referenced.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "1F",
+      "question_number": 13,
+      "part_suffix": "a",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Include the complete sweets paragraph with (a); include the complete counters paragraph and given probability with (b).",
+      "evidence": "Part (a) has a sweets-in-a-jar experiment; part (b) introduces a different counters-in-a-bag experiment. Neither experiment uses the other answer.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "1F",
+      "question_number": 13,
+      "part_suffix": "b",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Include the complete sweets paragraph with (a); include the complete counters paragraph and given probability with (b).",
+      "evidence": "Part (a) has a sweets-in-a-jar experiment; part (b) introduces a different counters-in-a-bag experiment. Neither experiment uses the other answer.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "1F",
+      "question_number": 15,
+      "part_suffix": "a",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Retain the full estimation instruction for (a); include the Given-that statement above the (b) marker when extracting (b).",
+      "evidence": "The estimate in (a) and place-value multiplication in (b) use different stated calculations. The printed Given-that calculation preceding (b) is supplied information, not the answer to (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "1F",
+      "question_number": 15,
+      "part_suffix": "b",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Retain the full estimation instruction for (a); include the Given-that statement above the (b) marker when extracting (b).",
+      "evidence": "The estimate in (a) and place-value multiplication in (b) use different stated calculations. The printed Given-that calculation preceding (b) is supplied information, not the answer to (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "1F",
+      "question_number": 16,
+      "part_suffix": "a",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Retain the complete Savio journey introduction with departure time, distance and assumed speed.",
+      "evidence": "The departure time, distance and assumed speed are supplied above (a); calculating arrival time does not require another task.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 3
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "1F",
+      "question_number": 16,
+      "part_suffix": "b",
+      "classification": "uncertain",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "The wording explicitly refers to the answer to (a), but the mark scheme accepts a qualitative earlier-arrival explanation without the numerical arrival time. Teacher must decide whether a context-only package preserves the unmodified task.",
+      "marking_review": "Source MS p10 accepts a qualitative explanation; it does not require the numerical value from (a). Do not automatically force a numerical prerequisite or declare independence.",
+      "review_flags": [
+        "qualitative_cross_reference",
+        "possible_prerequisite:a"
+      ],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "low",
+      "source_marks": 1
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "1F",
+      "question_number": 17,
+      "part_suffix": "a",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "participant-counts",
+          "description": "Supplied totals and adult/pass/child/fail counts; include the random-selection statement for (b)."
+        }
+      ],
+      "part_owned_context": "Keep the empty frequency tree for (a); the tree is not essential to (b) if all necessary supplied counts are retained.",
+      "evidence": "Adult-failure count is derivable directly from the supplied adult and adult-pass counts. Part (b) does not mathematically require the filled frequency tree from (a).",
+      "marking_review": "This part has its own labelled marking criteria. Preserve the entire answer/method/guidance row and any referenced diagram; the sibling follow-through option is not a requirement for this part.",
+      "review_flags": [
+        "mark_scheme_supplement"
+      ],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 3
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "1F",
+      "question_number": 17,
+      "part_suffix": "b",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "participant-counts",
+          "description": "Supplied totals and adult/pass/child/fail counts; include the random-selection statement for (b)."
+        }
+      ],
+      "part_owned_context": "Keep the empty frequency tree for (a); the tree is not essential to (b) if all necessary supplied counts are retained.",
+      "evidence": "Adult-failure count is derivable directly from the supplied adult and adult-pass counts. Part (b) does not mathematically require the filled frequency tree from (a).",
+      "marking_review": "MS (b) offers follow-through from (a), but the correct probability is directly supported by the givens. Standalone marking needs teacher review of follow-through wording. MS (a) also refers to the completed tree on supplementary MS p18.",
+      "review_flags": [
+        "marking_follow_through"
+      ],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "1F",
+      "question_number": 28,
+      "part_suffix": "a",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Retain the equation, x-values, supplied y-values and complete table.",
+      "evidence": "Part (a) supplies its own equation and value table; no earlier question part is needed.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "1F",
+      "question_number": 28,
+      "part_suffix": "b",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Retain the repeated function, stated x-range and complete plotting grid.",
+      "evidence": "Part (b) repeats the complete function and x-range and supplies its own grid. The table in (a) is scaffolding, not a necessary earlier answer.",
+      "marking_review": "Full-credit graph criterion stands alone, but the partial-credit rule explicitly follows through the table and mark in (a). An unchanged isolated MS row is not yet approved.",
+      "review_flags": [
+        "marking_follow_through"
+      ],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "1F",
+      "question_number": 28,
+      "part_suffix": "c",
+      "classification": "dependent",
+      "required_earlier_part_suffixes": [
+        "b"
+      ],
+      "shared_resources": [],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "The instruction explicitly says to use the student\u2019s graph. That graph is constructed in (b), not supplied in the original source.",
+      "marking_review": "MS (c) explicitly follows through the student graph. Retain marking association with the prerequisite (b) graph.",
+      "review_flags": [
+        "student_constructed_graph"
+      ],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "November 2024",
+      "paper_code": "1F",
+      "question_number": 7,
+      "part_suffix": "a",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "accurate-triangle",
+          "description": "Full triangle with P/Q/x labels and accurate-drawing statement."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "All three tasks refer to the same supplied accurately drawn triangle; identifying the angle and measuring it do not require each other\u2019s answers.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [
+        "preserve_aspect_ratio",
+        "physical_print_scale_required"
+      ],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "November 2024",
+      "paper_code": "1F",
+      "question_number": 7,
+      "part_suffix": "b",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "accurate-triangle",
+          "description": "Full triangle with P/Q/x labels and accurate-drawing statement."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "All three tasks refer to the same supplied accurately drawn triangle; identifying the angle and measuring it do not require each other\u2019s answers.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [
+        "preserve_aspect_ratio"
+      ],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "November 2024",
+      "paper_code": "1F",
+      "question_number": 7,
+      "part_suffix": "c",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "accurate-triangle",
+          "description": "Full triangle with P/Q/x labels and accurate-drawing statement."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "All three tasks refer to the same supplied accurately drawn triangle; identifying the angle and measuring it do not require each other\u2019s answers.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [
+        "preserve_aspect_ratio"
+      ],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "November 2024",
+      "paper_code": "1F",
+      "question_number": 8,
+      "part_suffix": "a",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "coordinate-grid",
+          "description": "Complete supplied coordinate axes, scales and A/C points."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "A and C are already plotted. Reading A, plotting B and finding the midpoint of AC do not require another part\u2019s result; retain the original grid.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "November 2024",
+      "paper_code": "1F",
+      "question_number": 8,
+      "part_suffix": "b",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "coordinate-grid",
+          "description": "Complete supplied coordinate axes, scales and A/C points."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "A and C are already plotted. Reading A, plotting B and finding the midpoint of AC do not require another part\u2019s result; retain the original grid.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "November 2024",
+      "paper_code": "1F",
+      "question_number": 8,
+      "part_suffix": "c",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "coordinate-grid",
+          "description": "Complete supplied coordinate axes, scales and A/C points."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "A and C are already plotted. Reading A, plotting B and finding the midpoint of AC do not require another part\u2019s result; retain the original grid.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "November 2024",
+      "paper_code": "1F",
+      "question_number": 9,
+      "part_suffix": "a",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "milly-sticker-chart",
+          "description": "Milly introduction, supplied bar chart and total sticker count."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "The tennis bar and total sticker count are supplied before (a). Part (b) uses that existing count, not the cricket bar drawn in (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 3
+    },
+    {
+      "series": "November 2024",
+      "paper_code": "1F",
+      "question_number": 9,
+      "part_suffix": "b",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "milly-sticker-chart",
+          "description": "Milly introduction, supplied bar chart and total sticker count."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "The tennis bar and total sticker count are supplied before (a). Part (b) uses that existing count, not the cricket bar drawn in (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "November 2024",
+      "paper_code": "1F",
+      "question_number": 9,
+      "part_suffix": "c",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Retain the Ewan introduction and given ratio preceding (c).",
+      "evidence": "A different collector and a complete large:small ratio are introduced immediately before (c); earlier bar-chart tasks are unrelated.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "November 2024",
+      "paper_code": "1F",
+      "question_number": 9,
+      "part_suffix": "d",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "The ratio to convert is repeated explicitly in (d); neither Milly\u2019s chart nor the fraction from (c) is required.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "November 2024",
+      "paper_code": "1F",
+      "question_number": 10,
+      "part_suffix": "a",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "reflection-grid",
+          "description": "Supplied coordinate grid and mirror line; retain the shaded source shape for (a)."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "The mirror line is supplied. Reading its equation does not require the reflected shape constructed in (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "November 2024",
+      "paper_code": "1F",
+      "question_number": 10,
+      "part_suffix": "b",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "reflection-grid",
+          "description": "Supplied coordinate grid and mirror line; retain the shaded source shape for (a)."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "The mirror line is supplied. Reading its equation does not require the reflected shape constructed in (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "November 2024",
+      "paper_code": "1F",
+      "question_number": 11,
+      "part_suffix": "a",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "film-survey-givens",
+          "description": "Full survey introduction, including adult/action count and total; empty two-way table is owned by (a)."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "The adult/action count and grand total needed in (b) are already supplied in the introduction. The completed two-way table is not a prerequisite.",
+      "marking_review": "This part has its own labelled marking criteria. Preserve the entire answer/method/guidance row and any referenced diagram; the sibling follow-through option is not a requirement for this part.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 3
+    },
+    {
+      "series": "November 2024",
+      "paper_code": "1F",
+      "question_number": 11,
+      "part_suffix": "b",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "film-survey-givens",
+          "description": "Full survey introduction, including adult/action count and total; empty two-way table is owned by (a)."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "The adult/action count and grand total needed in (b) are already supplied in the introduction. The completed two-way table is not a prerequisite.",
+      "marking_review": "MS (b) permits follow-through from the student table. That marking option does not prove an answer dependency; review it before isolating the marking row.",
+      "review_flags": [
+        "marking_follow_through"
+      ],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "November 2024",
+      "paper_code": "1F",
+      "question_number": 13,
+      "part_suffix": "a",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Retain each different number machine and its own input/output statements; the second machine is not the first machine\u2019s result.",
+      "evidence": "The source explicitly introduces a different object for (b); its givens are complete and do not use the result in (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "November 2024",
+      "paper_code": "1F",
+      "question_number": 13,
+      "part_suffix": "b",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Retain each different number machine and its own input/output statements; the second machine is not the first machine\u2019s result.",
+      "evidence": "The source explicitly introduces a different object for (b); its givens are complete and do not use the result in (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "November 2024",
+      "paper_code": "1F",
+      "question_number": 14,
+      "part_suffix": "a",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Retain the first cuboid dimensions and volume with (a); retain the separate second cuboid and its three dimensions with (b).",
+      "evidence": "The source explicitly introduces a different object for (b); its givens are complete and do not use the result in (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "November 2024",
+      "paper_code": "1F",
+      "question_number": 14,
+      "part_suffix": "b",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Retain the first cuboid dimensions and volume with (a); retain the separate second cuboid and its three dimensions with (b).",
+      "evidence": "The source explicitly introduces a different object for (b); its givens are complete and do not use the result in (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 3
+    },
+    {
+      "series": "November 2024",
+      "paper_code": "1F",
+      "question_number": 15,
+      "part_suffix": "a",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "Separate complete algebra/fraction tasks are printed in the two parts, with no result or shared external context required.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "November 2024",
+      "paper_code": "1F",
+      "question_number": 15,
+      "part_suffix": "b",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "Separate complete algebra/fraction tasks are printed in the two parts, with no result or shared external context required.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 3
+    },
+    {
+      "series": "November 2024",
+      "paper_code": "1F",
+      "question_number": 20,
+      "part_suffix": "a",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "Separate complete algebra/fraction tasks are printed in the two parts, with no result or shared external context required.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "November 2024",
+      "paper_code": "1F",
+      "question_number": 20,
+      "part_suffix": "b",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "Separate complete algebra/fraction tasks are printed in the two parts, with no result or shared external context required.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 3
+    },
+    {
+      "series": "November 2024",
+      "paper_code": "1F",
+      "question_number": 19,
+      "part_suffix": "a",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Retain the complete probability table, equal-probability assumption and number of rolls.",
+      "evidence": "All probabilities, the equal-probability assumption and roll count are supplied before (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 3
+    },
+    {
+      "series": "November 2024",
+      "paper_code": "1F",
+      "question_number": 19,
+      "part_suffix": "b",
+      "classification": "uncertain",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "The wording refers to the answer to (a). A qualitative increase may be argued from the supplied assumption change alone, while the MS explicitly references the student\u2019s answer. Context-only separation requires teacher judgement.",
+      "marking_review": "MS p13 says the answer to (a) increases and permits comparison with the student\u2019s answer. Preserve this uncertainty rather than inventing an automatic dependency decision.",
+      "review_flags": [
+        "qualitative_cross_reference",
+        "possible_prerequisite:a"
+      ],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "low",
+      "source_marks": 1
+    },
+    {
+      "series": "November 2024",
+      "paper_code": "1F",
+      "question_number": 22,
+      "part_suffix": "a",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Include the distance/speed introduction, units and instruction to give time in minutes.",
+      "evidence": "The supplied journey distance and speed support the estimate without another part.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 3
+    },
+    {
+      "series": "November 2024",
+      "paper_code": "1F",
+      "question_number": 22,
+      "part_suffix": "b",
+      "classification": "dependent",
+      "required_earlier_part_suffixes": [
+        "a"
+      ],
+      "shared_resources": [],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "The judgement is about the student\u2019s estimate/rounding in (a). The marking guidance explicitly requires a final answer to (a) and follows through its rounding/process.",
+      "marking_review": "Source MS p15 explicitly requires a final answer to (a), with reasoning tied to that estimation/rounding method.",
+      "review_flags": [
+        "earlier_method_and_answer"
+      ],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "November 2022",
+      "paper_code": "1H",
+      "question_number": 2,
+      "part_suffix": "a",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "Each fraction task includes its complete expression; showing the identity in (b) does not use (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "November 2022",
+      "paper_code": "1H",
+      "question_number": 2,
+      "part_suffix": "b",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "Each fraction task includes its complete expression; showing the identity in (b) does not use (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "November 2022",
+      "paper_code": "1H",
+      "question_number": 6,
+      "part_suffix": "ai",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "rizwan-ratios",
+          "description": "The introduction defining a,b,c and both supplied ratios."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "Both nested tasks use the two supplied ratios. The fraction in (a)(ii) can be derived afresh from those givens without the answer to (a)(i).",
+      "marking_review": "This part has its own labelled marking criteria. Preserve the entire answer/method/guidance row and any referenced diagram; the sibling follow-through option is not a requirement for this part.",
+      "review_flags": [
+        "nested_parts"
+      ],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "November 2022",
+      "paper_code": "1H",
+      "question_number": 6,
+      "part_suffix": "aii",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "rizwan-ratios",
+          "description": "The introduction defining a,b,c and both supplied ratios."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "Both nested tasks use the two supplied ratios. The fraction in (a)(ii) can be derived afresh from those givens without the answer to (a)(i).",
+      "marking_review": "The (a)(ii) MS allows follow-through from (a)(i); retain a separate marking-review flag rather than inferring a compulsory question dependency.",
+      "review_flags": [
+        "nested_parts",
+        "marking_follow_through"
+      ],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "November 2022",
+      "paper_code": "1H",
+      "question_number": 6,
+      "part_suffix": "b",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Retain the Emma introduction and both equations above (b).",
+      "evidence": "Part (b) introduces different variables m,n,p and complete relations, independent of Rizwan\u2019s ratios.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "November 2022",
+      "paper_code": "1H",
+      "question_number": 9,
+      "part_suffix": "a",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Keep the equation and the full table, including supplied values.",
+      "evidence": "The equation and complete value table are supplied locally in (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "November 2022",
+      "paper_code": "1H",
+      "question_number": 9,
+      "part_suffix": "b",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Retain the function, range and complete plotting grid.",
+      "evidence": "The function and plotting range are repeated in (b) and the grid is supplied. Earlier table answers are not mandatory inputs.",
+      "marking_review": "MS partial credit refers to the table/mark in (a); review before standalone use. Correct graph is supplied separately on MS p19.",
+      "review_flags": [
+        "marking_follow_through",
+        "mark_scheme_supplement"
+      ],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "November 2022",
+      "paper_code": "1H",
+      "question_number": 10,
+      "part_suffix": "a",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "spinner-frequency-data",
+          "description": "Spinner experiment introduction, total trials and supplied frequency table."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "The frequency table supplies the evidence for both probability estimates; the score-1 calculation in (b) is not based on the score-5 calculation in (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "November 2022",
+      "paper_code": "1H",
+      "question_number": 10,
+      "part_suffix": "b",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "spinner-frequency-data",
+          "description": "Spinner experiment introduction, total trials and supplied frequency table."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "The frequency table supplies the evidence for both probability estimates; the score-1 calculation in (b) is not based on the score-5 calculation in (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "November 2022",
+      "paper_code": "1H",
+      "question_number": 16,
+      "part_suffix": "a",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Retain the entire printed identity and proof instruction.",
+      "evidence": "The identity to prove is printed in full within (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 3
+    },
+    {
+      "series": "November 2022",
+      "paper_code": "1H",
+      "question_number": 16,
+      "part_suffix": "b",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "printed-identity",
+          "description": "Exact identity printed in (a). Retain the original claim in (b); do not add assumptions or reveal the student proof."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "Part (b) references the identity already printed in (a), not a numerical answer produced there. It can use that supplied identity without requiring the student\u2019s proof.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [
+        "supplied_result_not_student_answer"
+      ],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "November 2022",
+      "paper_code": "1H",
+      "question_number": 23,
+      "part_suffix": "a",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Retain the five printed terms with (a); retain the distinct term positions/values and positivity condition preceding (b).",
+      "evidence": "The two geometric-sequence tasks use explicitly different sequences; each has complete local givens.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "November 2022",
+      "paper_code": "1H",
+      "question_number": 23,
+      "part_suffix": "b",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Retain the five printed terms with (a); retain the distinct term positions/values and positivity condition preceding (b).",
+      "evidence": "The two geometric-sequence tasks use explicitly different sequences; each has complete local givens.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 3
+    },
+    {
+      "series": "November 2022",
+      "paper_code": "1H",
+      "question_number": 24,
+      "part_suffix": "a",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Retain the complete first pair of solids, h label, formulas and equal-volume statement.",
+      "evidence": "Part (a) includes its own solid diagrams, radius/height labels, volume formulas and equality condition.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "November 2022",
+      "paper_code": "1H",
+      "question_number": 24,
+      "part_suffix": "b",
+      "classification": "uncertain",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "The source introduces different solids and independent area givens, but h is not labelled on the second cone: only slant height l is shown there. The h definition appears in the earlier diagram. Confirm the exact context package before separation.",
+      "marking_review": "MS uses h as perpendicular height and Pythagoras with slant height l. There is no use of the numerical ratio from (a), but the supplied height definition may need to be carried over.",
+      "review_flags": [
+        "symbol_definition_outside_part",
+        "possible_shared_resource:height-definition"
+      ],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "low",
+      "source_marks": 4
+    },
+    {
+      "series": "June 2023",
+      "paper_code": "1H",
+      "question_number": 5,
+      "part_suffix": "a",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "set-definitions",
+          "description": "Supplied universal set and set definitions; blank Venn diagram is owned by (a)."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "The universal set and square-number-set definition suffice to answer (b); the completed Venn diagram is not mathematically required.",
+      "marking_review": "This part has its own labelled marking criteria. Preserve the entire answer/method/guidance row and any referenced diagram; the sibling follow-through option is not a requirement for this part.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 3
+    },
+    {
+      "series": "June 2023",
+      "paper_code": "1H",
+      "question_number": 5,
+      "part_suffix": "b",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "set-definitions",
+          "description": "Supplied universal set and set definitions; blank Venn diagram is owned by (a)."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "The universal set and square-number-set definition suffice to answer (b); the completed Venn diagram is not mathematically required.",
+      "marking_review": "MS (b) has follow-through from the Venn diagram; standalone criteria need review even though its correct answer follows from the supplied set definitions.",
+      "review_flags": [
+        "marking_follow_through"
+      ],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "June 2023",
+      "paper_code": "1H",
+      "question_number": 6,
+      "part_suffix": "a",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "baby-scatter-plot",
+          "description": "Supplied scatter plot, axis labels/units and age/weight introduction."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "The scatter plot is already supplied. Estimating age in (b) does not require the relationship description from (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "June 2023",
+      "paper_code": "1H",
+      "question_number": 6,
+      "part_suffix": "b",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "baby-scatter-plot",
+          "description": "Supplied scatter plot, axis labels/units and age/weight introduction."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "The scatter plot is already supplied. Estimating age in (b) does not require the relationship description from (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "June 2023",
+      "paper_code": "1H",
+      "question_number": 14,
+      "part_suffix": "a",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "The index task and numerical evaluation use separate fully printed expressions.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "June 2023",
+      "paper_code": "1H",
+      "question_number": 14,
+      "part_suffix": "b",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "The index task and numerical evaluation use separate fully printed expressions.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 3
+    },
+    {
+      "series": "June 2023",
+      "paper_code": "1H",
+      "question_number": 20,
+      "part_suffix": "a",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "function-definitions",
+          "description": "Both supplied functions and the domain statement."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "The two function definitions and domain are supplied in the common stem. Composition in (b) can use g and f directly, without the inverse found in (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "June 2023",
+      "paper_code": "1H",
+      "question_number": 20,
+      "part_suffix": "b",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "function-definitions",
+          "description": "Both supplied functions and the domain statement."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "The two function definitions and domain are supplied in the common stem. Composition in (b) can use g and f directly, without the inverse found in (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 3
+    },
+    {
+      "series": "November 2022",
+      "paper_code": "3H",
+      "question_number": 5,
+      "part_suffix": "a",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "similar-triangles",
+          "description": "Both labelled triangles, supplied side lengths, angle correspondence and similarity statement."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "Both unknown lengths can use the scale factor from the two supplied corresponding side lengths. AB in (b) does not require EF from (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "November 2022",
+      "paper_code": "3H",
+      "question_number": 5,
+      "part_suffix": "b",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "similar-triangles",
+          "description": "Both labelled triangles, supplied side lengths, angle correspondence and similarity statement."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "Both unknown lengths can use the scale factor from the two supplied corresponding side lengths. AB in (b) does not require EF from (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "November 2022",
+      "paper_code": "3H",
+      "question_number": 6,
+      "part_suffix": "a",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "quiz-probabilities",
+          "description": "Incomplete supplied probability tree, including the sports-win branch probability and music-win conditional branch probabilities, plus the quiz introduction. Required for both parts; do not substitute the student-completed tree."
+        }
+      ],
+      "part_owned_context": "Keep the supplied tree as shared context for both parts. Part (b) does not need the complementary probabilities filled in by the student in (a).",
+      "evidence": "The win-both branch probabilities are already printed on the supplied tree. Part (b) needs that conditional-probability model, but not the complementary probabilities produced in (a); do not infer independence from marginal probabilities alone.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "November 2022",
+      "paper_code": "3H",
+      "question_number": 6,
+      "part_suffix": "b",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "quiz-probabilities",
+          "description": "Incomplete supplied probability tree, including the sports-win branch probability and music-win conditional branch probabilities, plus the quiz introduction. Required for both parts; do not substitute the student-completed tree."
+        }
+      ],
+      "part_owned_context": "Keep the supplied tree as shared context for both parts. Part (b) does not need the complementary probabilities filled in by the student in (a).",
+      "evidence": "The win-both branch probabilities are already printed on the supplied tree. Part (b) needs that conditional-probability model, but not the complementary probabilities produced in (a); do not infer independence from marginal probabilities alone.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "November 2022",
+      "paper_code": "3H",
+      "question_number": 7,
+      "part_suffix": "a",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "Each part prints a separate complete conversion/index/algebra calculation. There is no reference to an earlier result.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "November 2022",
+      "paper_code": "3H",
+      "question_number": 7,
+      "part_suffix": "b",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "Each part prints a separate complete conversion/index/algebra calculation. There is no reference to an earlier result.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 3
+    },
+    {
+      "series": "November 2022",
+      "paper_code": "3H",
+      "question_number": 9,
+      "part_suffix": "a",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "Each part prints a separate complete conversion/index/algebra calculation. There is no reference to an earlier result.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "November 2022",
+      "paper_code": "3H",
+      "question_number": 9,
+      "part_suffix": "b",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "Each part prints a separate complete conversion/index/algebra calculation. There is no reference to an earlier result.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "November 2022",
+      "paper_code": "3H",
+      "question_number": 14,
+      "part_suffix": "a",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "Each part prints a separate complete conversion/index/algebra calculation. There is no reference to an earlier result.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "November 2022",
+      "paper_code": "3H",
+      "question_number": 14,
+      "part_suffix": "b",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "Each part prints a separate complete conversion/index/algebra calculation. There is no reference to an earlier result.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 3
+    },
+    {
+      "series": "November 2022",
+      "paper_code": "3H",
+      "question_number": 23,
+      "part_suffix": "a",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Retain each part\u2019s own complete graph(s), labels and function statement.",
+      "evidence": "Part (a) uses the supplied f graph; (b) introduces different graphs A/B and function g. The graphs in (b) are not the graph constructed in (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "November 2022",
+      "paper_code": "3H",
+      "question_number": 23,
+      "part_suffix": "b",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Retain each part\u2019s own complete graph(s), labels and function statement.",
+      "evidence": "Part (a) uses the supplied f graph; (b) introduces different graphs A/B and function g. The graphs in (b) are not the graph constructed in (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "3H",
+      "question_number": 2,
+      "part_suffix": "a",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Include the T/m formula above (a); (b) owns its separately printed d/p formula.",
+      "evidence": "The first formula and substitution belong to (a); (b) prints a different complete formula.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "3H",
+      "question_number": 2,
+      "part_suffix": "b",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Include the T/m formula above (a); (b) owns its separately printed d/p formula.",
+      "evidence": "The first formula and substitution belong to (a); (b) prints a different complete formula.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "3H",
+      "question_number": 8,
+      "part_suffix": "a",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "electricity-cost-graph",
+          "description": "Supplied graph, axis labels/units and electricity pricing introduction."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "The axes and electricity story determine the meaning of gradient. Interpreting cost per unit does not require the numerical gradient answer from (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "3H",
+      "question_number": 8,
+      "part_suffix": "b",
+      "classification": "shared_resource",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [
+        {
+          "key": "electricity-cost-graph",
+          "description": "Supplied graph, axis labels/units and electricity pricing introduction."
+        }
+      ],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "The axes and electricity story determine the meaning of gradient. Interpreting cost per unit does not require the numerical gradient answer from (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "3H",
+      "question_number": 9,
+      "part_suffix": "a",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Retain the full Liam statement and displayed incorrect working preceding (b).",
+      "evidence": "Part (b) supplies a separate incorrect index method to critique; it is not the student\u2019s work or answer from (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 3
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "3H",
+      "question_number": 9,
+      "part_suffix": "b",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Retain the full Liam statement and displayed incorrect working preceding (b).",
+      "evidence": "Part (b) supplies a separate incorrect index method to critique; it is not the student\u2019s work or answer from (a).",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 1
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "3H",
+      "question_number": 14,
+      "part_suffix": "a",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "Factorising the p expression and expanding/proving the m expression are separate fully stated algebra tasks.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "3H",
+      "question_number": 14,
+      "part_suffix": "b",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "evidence": "Factorising the p expression and expanding/proving the m expression are separate fully stated algebra tasks.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 3
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "3H",
+      "question_number": 17,
+      "part_suffix": "a",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Retain the Year 10 data table and blank grid with (a); retain the provided Year 11 histogram and n definition with (b).",
+      "evidence": "The first task constructs a Year 10 histogram. The second supplies a different Year 11 histogram and its own n definition. It does not use the student\u2019s Year 10 histogram.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 3
+    },
+    {
+      "series": "June 2022",
+      "paper_code": "3H",
+      "question_number": 17,
+      "part_suffix": "b",
+      "classification": "independent",
+      "required_earlier_part_suffixes": [],
+      "shared_resources": [],
+      "part_owned_context": "Retain the Year 10 data table and blank grid with (a); retain the provided Year 11 histogram and n definition with (b).",
+      "evidence": "The first task constructs a Year 10 histogram. The second supplies a different Year 11 histogram and its own n definition. It does not use the student\u2019s Year 10 histogram.",
+      "marking_review": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+      "review_flags": [],
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "confidence": "medium",
+      "source_marks": 2
+    }
+  ]
+}

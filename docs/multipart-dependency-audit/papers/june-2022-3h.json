@@ -1,0 +1,430 @@
+{
+  "paper_id": "4b27ff09-d9e0-42a5-9e11-07ed40cba2cf",
+  "exam_board": "Edexcel",
+  "series": "June 2022",
+  "paper_code": "3H",
+  "tier": "Higher",
+  "mapped_record_count": 27,
+  "whole_question_groups": 22,
+  "multipart_question_groups": 5,
+  "private_asset_content_verified": false,
+  "teacher_approved": false,
+  "resources": {
+    "Q8:electricity-cost-graph": {
+      "description": "Supplied graph, axis labels/units and electricity pricing introduction.",
+      "source_question": 8,
+      "source_pdf_pages": [
+        9
+      ],
+      "production_region_verified": false
+    }
+  },
+  "parts": [
+    {
+      "database_record_id": "2a3d06e9-3fcb-4d4d-abd2-47fc7c3ec257",
+      "source_question_id": "EDX-H-JUNE2022-3H-Q02A",
+      "original_question_number": 2,
+      "question_part": "a",
+      "stored_question_reference": "Q02a",
+      "marks": 2,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "9e9df0363654f0404feb24085d0b12d734b57a1c849f4622bac38352e01c90cd",
+      "mark_asset_path_fingerprint": "036328215b2c131e734ed4fea78743fe0f1f58245120e4ea595b0cc325b7076c",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          3
+        ],
+        "mark_scheme_pdf_pages": [
+          6
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "The first formula and substitution belong to (a); (b) prints a different complete formula.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Include the T/m formula above (a); (b) owns its separately printed d/p formula.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "9327eecb-12b5-4e9a-bb45-b6efdefaa968",
+      "source_question_id": "EDX-H-JUNE2022-3H-Q02B",
+      "original_question_number": 2,
+      "question_part": "b",
+      "stored_question_reference": "Q02b",
+      "marks": 2,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "9e9df0363654f0404feb24085d0b12d734b57a1c849f4622bac38352e01c90cd",
+      "mark_asset_path_fingerprint": "036328215b2c131e734ed4fea78743fe0f1f58245120e4ea595b0cc325b7076c",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          3
+        ],
+        "mark_scheme_pdf_pages": [
+          6
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "The first formula and substitution belong to (a); (b) prints a different complete formula.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Include the T/m formula above (a); (b) owns its separately printed d/p formula.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "2cbe2812-d4f4-4c6a-b84f-c43900753f94",
+      "source_question_id": "EDX-H-JUNE2022-3H-Q08A",
+      "original_question_number": 8,
+      "question_part": "a",
+      "stored_question_reference": "Q08a",
+      "marks": 2,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q8:electricity-cost-graph"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "shared_context_needed",
+      "question_asset_path_fingerprint": "6b866ed05dfc17c116ee66b751592e51d45a01910c432dfee395db672804386c",
+      "mark_asset_path_fingerprint": "2a7974da2f6ea0f7945648aab70a8ab34c351010ba9fd184a5847aa31d795bb3",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          9
+        ],
+        "mark_scheme_pdf_pages": [
+          10
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "The axes and electricity story determine the meaning of gradient. Interpreting cost per unit does not require the numerical gradient answer from (a).",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "2809e2fb-f5bc-40a5-9b10-117170464925",
+      "source_question_id": "EDX-H-JUNE2022-3H-Q08B",
+      "original_question_number": 8,
+      "question_part": "b",
+      "stored_question_reference": "Q08b",
+      "marks": 1,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q8:electricity-cost-graph"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "shared_context_needed",
+      "question_asset_path_fingerprint": "6b866ed05dfc17c116ee66b751592e51d45a01910c432dfee395db672804386c",
+      "mark_asset_path_fingerprint": "2a7974da2f6ea0f7945648aab70a8ab34c351010ba9fd184a5847aa31d795bb3",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          9
+        ],
+        "mark_scheme_pdf_pages": [
+          10
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 1,
+        "question_observation": "The axes and electricity story determine the meaning of gradient. Interpreting cost per unit does not require the numerical gradient answer from (a).",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "4e3f3559-05b8-457b-98f6-be4db885e6cc",
+      "source_question_id": "EDX-H-JUNE2022-3H-Q09A",
+      "original_question_number": 9,
+      "question_part": "a",
+      "stored_question_reference": "Q09a",
+      "marks": 3,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "2fefc7677278921ca3000510ff30ec87aa9dcf872c1f3361a422f49803ff8ccb",
+      "mark_asset_path_fingerprint": "d95c23753d54b53020c72740548b9699f41597b08f96c134ad299e8ffe7876d1",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          10
+        ],
+        "mark_scheme_pdf_pages": [
+          11
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 3,
+        "question_observation": "Part (b) supplies a separate incorrect index method to critique; it is not the student\u2019s work or answer from (a).",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Retain the full Liam statement and displayed incorrect working preceding (b).",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "2d8aea21-62ff-4f64-9793-55a7f5c18002",
+      "source_question_id": "EDX-H-JUNE2022-3H-Q09B",
+      "original_question_number": 9,
+      "question_part": "b",
+      "stored_question_reference": "Q09b",
+      "marks": 1,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "2fefc7677278921ca3000510ff30ec87aa9dcf872c1f3361a422f49803ff8ccb",
+      "mark_asset_path_fingerprint": "d95c23753d54b53020c72740548b9699f41597b08f96c134ad299e8ffe7876d1",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          10
+        ],
+        "mark_scheme_pdf_pages": [
+          11
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 1,
+        "question_observation": "Part (b) supplies a separate incorrect index method to critique; it is not the student\u2019s work or answer from (a).",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Retain the full Liam statement and displayed incorrect working preceding (b).",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "6fa11303-111a-4c1a-b345-0d68f1d3da19",
+      "source_question_id": "EDX-H-JUNE2022-3H-Q14A",
+      "original_question_number": 14,
+      "question_part": "a",
+      "stored_question_reference": "Q14a",
+      "marks": 2,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "93a64dc0fda0e3d10ff209445a5d54d965a5762922cc00b13031983e2aff9054",
+      "mark_asset_path_fingerprint": "94c9d98a6901e7d7135c4157df6a1e0b665401e0368c6942fe1c2eb1ce0bbff6",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          15
+        ],
+        "mark_scheme_pdf_pages": [
+          13
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "Factorising the p expression and expanding/proving the m expression are separate fully stated algebra tasks.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "6d79392c-6217-49ab-8d8a-6cec1ae53543",
+      "source_question_id": "EDX-H-JUNE2022-3H-Q14B",
+      "original_question_number": 14,
+      "question_part": "b",
+      "stored_question_reference": "Q14b",
+      "marks": 3,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "93a64dc0fda0e3d10ff209445a5d54d965a5762922cc00b13031983e2aff9054",
+      "mark_asset_path_fingerprint": "94c9d98a6901e7d7135c4157df6a1e0b665401e0368c6942fe1c2eb1ce0bbff6",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          15
+        ],
+        "mark_scheme_pdf_pages": [
+          13
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 3,
+        "question_observation": "Factorising the p expression and expanding/proving the m expression are separate fully stated algebra tasks.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "1f67542a-b82e-46b1-813a-f56f380fbf59",
+      "source_question_id": "EDX-H-JUNE2022-3H-Q17A",
+      "original_question_number": 17,
+      "question_part": "a",
+      "stored_question_reference": "Q17a",
+      "marks": 3,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "8b527b00723346d9547af7767172d66ea0c1747a9ce160cce306e187583ff66d",
+      "mark_asset_path_fingerprint": "03844fdb350d1d1a10ae7bf77b32414a2d8688b36494f6688559f37d8c2764ad",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          18,
+          19
+        ],
+        "mark_scheme_pdf_pages": [
+          15
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 3,
+        "question_observation": "The first task constructs a Year 10 histogram. The second supplies a different Year 11 histogram and its own n definition. It does not use the student\u2019s Year 10 histogram.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Retain the Year 10 data table and blank grid with (a); retain the provided Year 11 histogram and n definition with (b).",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "7d009c2f-d4dc-439e-b20d-38912ace354f",
+      "source_question_id": "EDX-H-JUNE2022-3H-Q17B",
+      "original_question_number": 17,
+      "question_part": "b",
+      "stored_question_reference": "Q17b",
+      "marks": 2,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "8b527b00723346d9547af7767172d66ea0c1747a9ce160cce306e187583ff66d",
+      "mark_asset_path_fingerprint": "03844fdb350d1d1a10ae7bf77b32414a2d8688b36494f6688559f37d8c2764ad",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          18,
+          19
+        ],
+        "mark_scheme_pdf_pages": [
+          15
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "The first task constructs a Year 10 histogram. The second supplies a different Year 11 histogram and its own n definition. It does not use the student\u2019s Year 10 histogram.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Retain the Year 10 data table and blank grid with (a); retain the provided Year 11 histogram and n definition with (b).",
+      "review_flags": []
+    }
+  ]
+}

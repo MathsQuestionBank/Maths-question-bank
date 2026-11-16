@@ -1,0 +1,1141 @@
+{
+  "paper_id": "6d1b9f13-86dc-4161-b376-ba7ce2469e4d",
+  "exam_board": "Edexcel",
+  "series": "November 2024",
+  "paper_code": "1F",
+  "tier": "Foundation",
+  "mapped_record_count": 41,
+  "whole_question_groups": 26,
+  "multipart_question_groups": 11,
+  "private_asset_content_verified": false,
+  "teacher_approved": false,
+  "resources": {
+    "Q7:accurate-triangle": {
+      "description": "Full triangle with P/Q/x labels and accurate-drawing statement.",
+      "source_question": 7,
+      "source_pdf_pages": [
+        4
+      ],
+      "production_region_verified": false
+    },
+    "Q8:coordinate-grid": {
+      "description": "Complete supplied coordinate axes, scales and A/C points.",
+      "source_question": 8,
+      "source_pdf_pages": [
+        5
+      ],
+      "production_region_verified": false
+    },
+    "Q9:milly-sticker-chart": {
+      "description": "Milly introduction, supplied bar chart and total sticker count.",
+      "source_question": 9,
+      "source_pdf_pages": [
+        6,
+        7
+      ],
+      "production_region_verified": false
+    },
+    "Q10:reflection-grid": {
+      "description": "Supplied coordinate grid and mirror line; retain the shaded source shape for (a).",
+      "source_question": 10,
+      "source_pdf_pages": [
+        8
+      ],
+      "production_region_verified": false
+    },
+    "Q11:film-survey-givens": {
+      "description": "Full survey introduction, including adult/action count and total; empty two-way table is owned by (a).",
+      "source_question": 11,
+      "source_pdf_pages": [
+        9
+      ],
+      "production_region_verified": false
+    }
+  },
+  "parts": [
+    {
+      "database_record_id": "14c41b49-0af8-437f-a6a5-9c21f6d0ab44",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q07A",
+      "original_question_number": 7,
+      "question_part": "a",
+      "stored_question_reference": "Q07a",
+      "marks": 1,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q7:accurate-triangle"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "not_ready",
+      "question_asset_path_fingerprint": "be1e5d7896e293bf07b8a1ac5511aa5aac04bb02ceeaa0c57ca05b30a605203b",
+      "mark_asset_path_fingerprint": "0f9ac7236d7278fa46f0c0854300497145336964ad37a47099ac37c8d6cdc364",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          4
+        ],
+        "mark_scheme_pdf_pages": [
+          6
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 1,
+        "question_observation": "All three tasks refer to the same supplied accurately drawn triangle; identifying the angle and measuring it do not require each other\u2019s answers.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": [
+        "preserve_aspect_ratio",
+        "physical_print_scale_required"
+      ]
+    },
+    {
+      "database_record_id": "c2b53234-aa05-437c-aee7-6af8a5c67534",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q07B",
+      "original_question_number": 7,
+      "question_part": "b",
+      "stored_question_reference": "Q07b",
+      "marks": 1,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q7:accurate-triangle"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "shared_context_needed",
+      "question_asset_path_fingerprint": "be1e5d7896e293bf07b8a1ac5511aa5aac04bb02ceeaa0c57ca05b30a605203b",
+      "mark_asset_path_fingerprint": "0f9ac7236d7278fa46f0c0854300497145336964ad37a47099ac37c8d6cdc364",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          4
+        ],
+        "mark_scheme_pdf_pages": [
+          6
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 1,
+        "question_observation": "All three tasks refer to the same supplied accurately drawn triangle; identifying the angle and measuring it do not require each other\u2019s answers.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": [
+        "preserve_aspect_ratio"
+      ]
+    },
+    {
+      "database_record_id": "e3b14286-2ab1-4073-857e-aa058f390e4f",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q07C",
+      "original_question_number": 7,
+      "question_part": "c",
+      "stored_question_reference": "Q07c",
+      "marks": 1,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q7:accurate-triangle"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "shared_context_needed",
+      "question_asset_path_fingerprint": "be1e5d7896e293bf07b8a1ac5511aa5aac04bb02ceeaa0c57ca05b30a605203b",
+      "mark_asset_path_fingerprint": "0f9ac7236d7278fa46f0c0854300497145336964ad37a47099ac37c8d6cdc364",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          4
+        ],
+        "mark_scheme_pdf_pages": [
+          6
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 1,
+        "question_observation": "All three tasks refer to the same supplied accurately drawn triangle; identifying the angle and measuring it do not require each other\u2019s answers.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": [
+        "preserve_aspect_ratio"
+      ]
+    },
+    {
+      "database_record_id": "106fb600-da91-4cd7-9c2d-4caa7672f41f",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q08A",
+      "original_question_number": 8,
+      "question_part": "a",
+      "stored_question_reference": "Q08a",
+      "marks": 1,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q8:coordinate-grid"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "shared_context_needed",
+      "question_asset_path_fingerprint": "f665b0516f8ca9975caea6896241dc78f8ee126ddfe4d591dcd7c496af798662",
+      "mark_asset_path_fingerprint": "9766ecfd3c4175a4117ddeffa7187dec7826705e44c5ea80150f459320478451",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          5
+        ],
+        "mark_scheme_pdf_pages": [
+          6
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 1,
+        "question_observation": "A and C are already plotted. Reading A, plotting B and finding the midpoint of AC do not require another part\u2019s result; retain the original grid.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "a5e35ee1-5f35-498e-85ca-ba1bc472acd7",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q08B",
+      "original_question_number": 8,
+      "question_part": "b",
+      "stored_question_reference": "Q08b",
+      "marks": 1,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q8:coordinate-grid"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "shared_context_needed",
+      "question_asset_path_fingerprint": "f665b0516f8ca9975caea6896241dc78f8ee126ddfe4d591dcd7c496af798662",
+      "mark_asset_path_fingerprint": "9766ecfd3c4175a4117ddeffa7187dec7826705e44c5ea80150f459320478451",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          5
+        ],
+        "mark_scheme_pdf_pages": [
+          6
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 1,
+        "question_observation": "A and C are already plotted. Reading A, plotting B and finding the midpoint of AC do not require another part\u2019s result; retain the original grid.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "2bec06cb-ee42-4aed-9de0-1c355ba59e16",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q08C",
+      "original_question_number": 8,
+      "question_part": "c",
+      "stored_question_reference": "Q08c",
+      "marks": 1,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q8:coordinate-grid"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "shared_context_needed",
+      "question_asset_path_fingerprint": "f665b0516f8ca9975caea6896241dc78f8ee126ddfe4d591dcd7c496af798662",
+      "mark_asset_path_fingerprint": "9766ecfd3c4175a4117ddeffa7187dec7826705e44c5ea80150f459320478451",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          5
+        ],
+        "mark_scheme_pdf_pages": [
+          6
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 1,
+        "question_observation": "A and C are already plotted. Reading A, plotting B and finding the midpoint of AC do not require another part\u2019s result; retain the original grid.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "81417820-0892-4f9a-81a3-39904e3f1c2f",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q09A",
+      "original_question_number": 9,
+      "question_part": "a",
+      "stored_question_reference": "Q09a",
+      "marks": 3,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q9:milly-sticker-chart"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "shared_context_needed",
+      "question_asset_path_fingerprint": "5c599edaa55d4e1efa873f2f3aaf39cabffdd61a4d3da60355d69cc29e2c5323",
+      "mark_asset_path_fingerprint": "09c377973bda6664cb1ec8b36ce0402597b523c8cca7b64cd6a2bdc5698752b6",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          6,
+          7
+        ],
+        "mark_scheme_pdf_pages": [
+          7
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 3,
+        "question_observation": "The tennis bar and total sticker count are supplied before (a). Part (b) uses that existing count, not the cricket bar drawn in (a).",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "c3990101-d658-4770-bb9f-a9e047060c34",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q09B",
+      "original_question_number": 9,
+      "question_part": "b",
+      "stored_question_reference": "Q09b",
+      "marks": 2,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q9:milly-sticker-chart"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "shared_context_needed",
+      "question_asset_path_fingerprint": "5c599edaa55d4e1efa873f2f3aaf39cabffdd61a4d3da60355d69cc29e2c5323",
+      "mark_asset_path_fingerprint": "09c377973bda6664cb1ec8b36ce0402597b523c8cca7b64cd6a2bdc5698752b6",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          6,
+          7
+        ],
+        "mark_scheme_pdf_pages": [
+          7
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "The tennis bar and total sticker count are supplied before (a). Part (b) uses that existing count, not the cricket bar drawn in (a).",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "b12e8648-a38a-4776-a601-d1a6b9ccde04",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q09C",
+      "original_question_number": 9,
+      "question_part": "c",
+      "stored_question_reference": "Q09c",
+      "marks": 1,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "5c599edaa55d4e1efa873f2f3aaf39cabffdd61a4d3da60355d69cc29e2c5323",
+      "mark_asset_path_fingerprint": "09c377973bda6664cb1ec8b36ce0402597b523c8cca7b64cd6a2bdc5698752b6",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          6,
+          7
+        ],
+        "mark_scheme_pdf_pages": [
+          7
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 1,
+        "question_observation": "A different collector and a complete large:small ratio are introduced immediately before (c); earlier bar-chart tasks are unrelated.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Retain the Ewan introduction and given ratio preceding (c).",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "31f5b3d9-7e98-4918-9ab5-a7d2037b9521",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q09D",
+      "original_question_number": 9,
+      "question_part": "d",
+      "stored_question_reference": "Q09d",
+      "marks": 1,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "5c599edaa55d4e1efa873f2f3aaf39cabffdd61a4d3da60355d69cc29e2c5323",
+      "mark_asset_path_fingerprint": "09c377973bda6664cb1ec8b36ce0402597b523c8cca7b64cd6a2bdc5698752b6",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          6,
+          7
+        ],
+        "mark_scheme_pdf_pages": [
+          7
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 1,
+        "question_observation": "The ratio to convert is repeated explicitly in (d); neither Milly\u2019s chart nor the fraction from (c) is required.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "3dba3bda-803e-479e-980c-047193eac337",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q10A",
+      "original_question_number": 10,
+      "question_part": "a",
+      "stored_question_reference": "Q10a",
+      "marks": 2,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q10:reflection-grid"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "shared_context_needed",
+      "question_asset_path_fingerprint": "ccabfb4283fba8b6286656ab84df1df0df10a8b03d040b0ba574f34465b636dd",
+      "mark_asset_path_fingerprint": "aec0c8a6e8a06bbb700962f2d8b306e9a110ec8c52bbd5d60830167eebfe32f2",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          8
+        ],
+        "mark_scheme_pdf_pages": [
+          7
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "The mirror line is supplied. Reading its equation does not require the reflected shape constructed in (a).",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "3b70d8a3-d57c-4a96-8b32-5a05f2e0113f",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q10B",
+      "original_question_number": 10,
+      "question_part": "b",
+      "stored_question_reference": "Q10b",
+      "marks": 1,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q10:reflection-grid"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "shared_context_needed",
+      "question_asset_path_fingerprint": "ccabfb4283fba8b6286656ab84df1df0df10a8b03d040b0ba574f34465b636dd",
+      "mark_asset_path_fingerprint": "aec0c8a6e8a06bbb700962f2d8b306e9a110ec8c52bbd5d60830167eebfe32f2",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          8
+        ],
+        "mark_scheme_pdf_pages": [
+          7
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 1,
+        "question_observation": "The mirror line is supplied. Reading its equation does not require the reflected shape constructed in (a).",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "03dfca29-2e5a-45ea-87fe-3d3ff8a19b2a",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q11A",
+      "original_question_number": 11,
+      "question_part": "a",
+      "stored_question_reference": "Q11a",
+      "marks": 3,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q11:film-survey-givens"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "shared_context_needed",
+      "question_asset_path_fingerprint": "1f3c7ad25026ac91fe33d52f645625ae1bb46902f62ff6d601edc77dbae84b65",
+      "mark_asset_path_fingerprint": "8c5434e9cd1c4eda8a9e9e4bdfadfdcc6a3347423db25ec796a49b6f2bfe8b61",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          9
+        ],
+        "mark_scheme_pdf_pages": [
+          8
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 3,
+        "question_observation": "The adult/action count and grand total needed in (b) are already supplied in the introduction. The completed two-way table is not a prerequisite.",
+        "marking_observation": "This part has its own labelled marking criteria. Preserve the entire answer/method/guidance row and any referenced diagram; the sibling follow-through option is not a requirement for this part.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "509ffef9-2547-4345-8793-50a40c4d7f42",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q11B",
+      "original_question_number": 11,
+      "question_part": "b",
+      "stored_question_reference": "Q11b",
+      "marks": 2,
+      "classification": "shared_resource",
+      "required_earlier_parts": [],
+      "required_shared_resources": [
+        "Q11:film-survey-givens"
+      ],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "not_ready",
+      "question_asset_path_fingerprint": "1f3c7ad25026ac91fe33d52f645625ae1bb46902f62ff6d601edc77dbae84b65",
+      "mark_asset_path_fingerprint": "8c5434e9cd1c4eda8a9e9e4bdfadfdcc6a3347423db25ec796a49b6f2bfe8b61",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          9
+        ],
+        "mark_scheme_pdf_pages": [
+          8
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "The adult/action count and grand total needed in (b) are already supplied in the introduction. The completed two-way table is not a prerequisite.",
+        "marking_observation": "MS (b) permits follow-through from the student table. That marking option does not prove an answer dependency; review it before isolating the marking row.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": [
+        "marking_follow_through"
+      ]
+    },
+    {
+      "database_record_id": "554b00f6-4422-4ab7-814a-9d73edd39bc1",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q13A",
+      "original_question_number": 13,
+      "question_part": "a",
+      "stored_question_reference": "Q13a",
+      "marks": 2,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "217629b04cc7298ebe1884113a5fd3713d5c5357f16b0f8fad090be1577781c6",
+      "mark_asset_path_fingerprint": "e36bad80eb63c9b5fa96d5855731a2976741f9ef5ffa6c79c5f697daa61c06c9",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          10
+        ],
+        "mark_scheme_pdf_pages": [
+          9
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "The source explicitly introduces a different object for (b); its givens are complete and do not use the result in (a).",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Retain each different number machine and its own input/output statements; the second machine is not the first machine\u2019s result.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "b2ef139b-f0a4-4a5c-a91b-94a5300005cd",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q13B",
+      "original_question_number": 13,
+      "question_part": "b",
+      "stored_question_reference": "Q13b",
+      "marks": 2,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "217629b04cc7298ebe1884113a5fd3713d5c5357f16b0f8fad090be1577781c6",
+      "mark_asset_path_fingerprint": "e36bad80eb63c9b5fa96d5855731a2976741f9ef5ffa6c79c5f697daa61c06c9",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          10
+        ],
+        "mark_scheme_pdf_pages": [
+          9
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "The source explicitly introduces a different object for (b); its givens are complete and do not use the result in (a).",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Retain each different number machine and its own input/output statements; the second machine is not the first machine\u2019s result.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "5d944b98-7119-439f-b5c7-f4820986476c",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q14A",
+      "original_question_number": 14,
+      "question_part": "a",
+      "stored_question_reference": "Q14a",
+      "marks": 2,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "d8ad006906157f742f29619aeb85bf80e01fa7476b754b13c38ffc8d5857db49",
+      "mark_asset_path_fingerprint": "7b04e4151b3db2afaa4bc62f3723bb6d00b0b239abe977974c3ab54be6b88cbb",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          11
+        ],
+        "mark_scheme_pdf_pages": [
+          9
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "The source explicitly introduces a different object for (b); its givens are complete and do not use the result in (a).",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Retain the first cuboid dimensions and volume with (a); retain the separate second cuboid and its three dimensions with (b).",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "c3c06dfc-4d1b-46c9-9505-ccb745f8775b",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q14B",
+      "original_question_number": 14,
+      "question_part": "b",
+      "stored_question_reference": "Q14b",
+      "marks": 3,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "d8ad006906157f742f29619aeb85bf80e01fa7476b754b13c38ffc8d5857db49",
+      "mark_asset_path_fingerprint": "7b04e4151b3db2afaa4bc62f3723bb6d00b0b239abe977974c3ab54be6b88cbb",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          11
+        ],
+        "mark_scheme_pdf_pages": [
+          9
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 3,
+        "question_observation": "The source explicitly introduces a different object for (b); its givens are complete and do not use the result in (a).",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Retain the first cuboid dimensions and volume with (a); retain the separate second cuboid and its three dimensions with (b).",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "db73f06e-b594-4b67-ab1d-578fae34c13c",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q15A",
+      "original_question_number": 15,
+      "question_part": "a",
+      "stored_question_reference": "Q15a",
+      "marks": 1,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "f1984c04e4aefd2ca17f66c299652ee10e57f202910f33fd08f5d2c676c6421d",
+      "mark_asset_path_fingerprint": "3f55538e987947dc0381b60b2691c7d2349e51eb1b9a4f153b56c1ba0607b03d",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          12
+        ],
+        "mark_scheme_pdf_pages": [
+          10
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 1,
+        "question_observation": "Separate complete algebra/fraction tasks are printed in the two parts, with no result or shared external context required.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "f1cf84d5-9177-4139-8091-5ff078746a6d",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q15B",
+      "original_question_number": 15,
+      "question_part": "b",
+      "stored_question_reference": "Q15b",
+      "marks": 3,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "f1984c04e4aefd2ca17f66c299652ee10e57f202910f33fd08f5d2c676c6421d",
+      "mark_asset_path_fingerprint": "3f55538e987947dc0381b60b2691c7d2349e51eb1b9a4f153b56c1ba0607b03d",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          12
+        ],
+        "mark_scheme_pdf_pages": [
+          10
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 3,
+        "question_observation": "Separate complete algebra/fraction tasks are printed in the two parts, with no result or shared external context required.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "da264e66-29c4-4491-8f89-f4b531baea17",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q19A",
+      "original_question_number": 19,
+      "question_part": "a",
+      "stored_question_reference": "Q19a",
+      "marks": 3,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "d0e28ed5afffea540f430b6a01967f6135039e40d2a0d86a29464d8877f21c85",
+      "mark_asset_path_fingerprint": "113a45dbc949a6f1d464e917c95f5ed40c3672ce429d08c22545b94682e5141d",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          15
+        ],
+        "mark_scheme_pdf_pages": [
+          13
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 3,
+        "question_observation": "All probabilities, the equal-probability assumption and roll count are supplied before (a).",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Retain the complete probability table, equal-probability assumption and number of rolls.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "a5a927eb-2ad2-43d3-abf2-4c6a62593d21",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q19B",
+      "original_question_number": 19,
+      "question_part": "b",
+      "stored_question_reference": "Q19b",
+      "marks": 1,
+      "classification": "uncertain",
+      "required_earlier_parts": null,
+      "required_shared_resources": null,
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "not_ready",
+      "question_asset_path_fingerprint": "d0e28ed5afffea540f430b6a01967f6135039e40d2a0d86a29464d8877f21c85",
+      "mark_asset_path_fingerprint": "113a45dbc949a6f1d464e917c95f5ed40c3672ce429d08c22545b94682e5141d",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          15
+        ],
+        "mark_scheme_pdf_pages": [
+          13
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 1,
+        "question_observation": "The wording refers to the answer to (a). A qualitative increase may be argued from the supplied assumption change alone, while the MS explicitly references the student\u2019s answer. Context-only separation requires teacher judgement.",
+        "marking_observation": "MS p13 says the answer to (a) increases and permits comparison with the student\u2019s answer. Preserve this uncertainty rather than inventing an automatic dependency decision.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "low",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": [
+        "qualitative_cross_reference",
+        "possible_prerequisite:a"
+      ]
+    },
+    {
+      "database_record_id": "9b88dbd6-f977-482b-943a-5cb9a9e006c8",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q20A",
+      "original_question_number": 20,
+      "question_part": "a",
+      "stored_question_reference": "Q20a",
+      "marks": 2,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "44734b27d419102a5ee18e099fedeba8cfd6345e5a5c59496e4982d0f493a506",
+      "mark_asset_path_fingerprint": "7c4965b17cde4cbe5b0c363b6205cd7434f11797588f0a63b7e3b121dae0bff3",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          16
+        ],
+        "mark_scheme_pdf_pages": [
+          14
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 2,
+        "question_observation": "Separate complete algebra/fraction tasks are printed in the two parts, with no result or shared external context required.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "9792a248-f5f0-4ce5-91ac-8ac745ac5ee2",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q20B",
+      "original_question_number": 20,
+      "question_part": "b",
+      "stored_question_reference": "Q20b",
+      "marks": 3,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "44734b27d419102a5ee18e099fedeba8cfd6345e5a5c59496e4982d0f493a506",
+      "mark_asset_path_fingerprint": "7c4965b17cde4cbe5b0c363b6205cd7434f11797588f0a63b7e3b121dae0bff3",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          16
+        ],
+        "mark_scheme_pdf_pages": [
+          14
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 3,
+        "question_observation": "Separate complete algebra/fraction tasks are printed in the two parts, with no result or shared external context required.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "835993ef-e255-4f45-9487-928c43030254",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q22A",
+      "original_question_number": 22,
+      "question_part": "a",
+      "stored_question_reference": "Q22a",
+      "marks": 3,
+      "classification": "independent",
+      "required_earlier_parts": [],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "needs_crop",
+      "question_asset_path_fingerprint": "d8db9a7d1b9c4aa84df46e6e315b4be87d6c79ccc54f8cbd58d9a988de606907",
+      "mark_asset_path_fingerprint": "7ecc5d93423448c3fcbf6e3335f23d391eb5e45821a20ed6ec71de9fd4e932b6",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          18
+        ],
+        "mark_scheme_pdf_pages": [
+          15
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 3,
+        "question_observation": "The supplied journey distance and speed support the estimate without another part.",
+        "marking_observation": "Source mark scheme has a separately labelled part row; retain all method/accuracy marks and right-hand guidance. Private marking image has not been inspected.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Include the distance/speed introduction, units and instruction to give time in minutes.",
+      "review_flags": []
+    },
+    {
+      "database_record_id": "3f894ca8-1304-44cd-b78c-38e75c5f87b1",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q22B",
+      "original_question_number": 22,
+      "question_part": "b",
+      "stored_question_reference": "Q22b",
+      "marks": 1,
+      "classification": "dependent",
+      "required_earlier_parts": [
+        "835993ef-e255-4f45-9487-928c43030254"
+      ],
+      "required_shared_resources": [],
+      "extraction_readiness": "not_ready",
+      "source_only_extraction_triage": "not_ready",
+      "question_asset_path_fingerprint": "d8db9a7d1b9c4aa84df46e6e315b4be87d6c79ccc54f8cbd58d9a988de606907",
+      "mark_asset_path_fingerprint": "7ecc5d93423448c3fcbf6e3335f23d391eb5e45821a20ed6ec71de9fd4e932b6",
+      "existing_image_crops": null,
+      "existing_whole_image_crop_review": {
+        "mark": "approved",
+        "question": "approved"
+      },
+      "evidence": {
+        "basis": "public_source_counterpart",
+        "question_pdf_pages": [
+          18
+        ],
+        "mark_scheme_pdf_pages": [
+          15
+        ],
+        "mark_scheme_supplement_pages": [],
+        "source_part_marks_verified": 1,
+        "question_observation": "The judgement is about the student\u2019s estimate/rounding in (a). The marking guidance explicitly requires a final answer to (a) and follows through its rounding/process.",
+        "marking_observation": "Source MS p15 explicitly requires a final answer to (a), with reasoning tied to that estimation/rounding method.",
+        "private_question_asset_inspected": false,
+        "private_mark_asset_inspected": false,
+        "source_to_private_bytes_verified": false
+      },
+      "confidence": "medium",
+      "review_status": "source_only_provisional_not_teacher_approved",
+      "part_owned_context": "Keep this part\u2019s full printed prompt, expressions and any local answer space.",
+      "review_flags": [
+        "earlier_method_and_answer"
+      ]
+    }
+  ]
+}

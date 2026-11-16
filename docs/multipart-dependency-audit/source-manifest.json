@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "series": "June 2022",
+      "paper": "1F",
+      "kind": "QP",
+      "url": "https://pmt.physicsandmathstutor.com/download/Maths/GCSE/Past-Papers/Edexcel/Paper-1F/QP/June%202022%20QP.pdf",
+      "sha256": "ac0572cfd2aaab9ad915974ceac333faf291040f3d33ade5e4b7462e4c51d6c5"
+    },
+    {
+      "series": "June 2022",
+      "paper": "1F",
+      "kind": "MS",
+      "url": "https://pmt.physicsandmathstutor.com/download/Maths/GCSE/Past-Papers/Edexcel/Paper-1F/MS/June%202022%20MS.pdf",
+      "sha256": "58f0778bf3ae30f8f8242500606b2c9b952ab1b3f1d3ccf72fe4a2bfaf60f303"
+    },
+    {
+      "series": "November 2024",
+      "paper": "1F",
+      "kind": "QP",
+      "url": "https://pmt.physicsandmathstutor.com/download/Maths/GCSE/Past-Papers/Edexcel/Paper-1F/QP/Nov%202024%20QP.pdf",
+      "sha256": "c99943fdf0673b5944cfe15154b7f1f7775073ba7dc2503b0e01b74ab725dc09"
+    },
+    {
+      "series": "November 2024",
+      "paper": "1F",
+      "kind": "MS",
+      "url": "https://pmt.physicsandmathstutor.com/download/Maths/GCSE/Past-Papers/Edexcel/Paper-1F/MS/Nov%202024%20MS.pdf",
+      "sha256": "43da8cbaaa49a1f49f6eb4118ec72ef91cc9bf653548ca408edaedf9b676aa40"
+    },
+    {
+      "series": "November 2022",
+      "paper": "1H",
+      "kind": "QP",
+      "url": "https://pmt.physicsandmathstutor.com/download/Maths/GCSE/Past-Papers/Edexcel/Paper-1H/QP/Nov%202022%20QP.pdf",
+      "sha256": "629eac62d524ed0f40e9accd7313ca1224feeaf97c29dc4a6192b6013aeab3f1"
+    },
+    {
+      "series": "November 2022",
+      "paper": "1H",
+      "kind": "MS",
+      "url": "https://pmt.physicsandmathstutor.com/download/Maths/GCSE/Past-Papers/Edexcel/Paper-1H/MS/Nov%202022%20MS.pdf",
+      "sha256": "99dfa125d174e13f43a9baa9ff55c28aee6b1c9f05b065612fdad6b04a230556"
+    },
+    {
+      "series": "June 2023",
+      "paper": "1H",
+      "kind": "QP",
+      "url": "https://pmt.physicsandmathstutor.com/download/Maths/GCSE/Past-Papers/Edexcel/Paper-1H/QP/June%202023%20QP.pdf",
+      "sha256": "ba42ee3c79a28cdc829a98ffe2a91974662f57ae2b02161223ef667fe7360da2"
+    },
+    {
+      "series": "June 2023",
+      "paper": "1H",
+      "kind": "MS",
+      "url": "https://pmt.physicsandmathstutor.com/download/Maths/GCSE/Past-Papers/Edexcel/Paper-1H/MS/June%202023%20MS.pdf",
+      "sha256": "ca3c586eae79d43784bdef75dafd15f3b4201eee3b6e48d8633005dc99655f29"
+    },
+    {
+      "series": "November 2022",
+      "paper": "3H",
+      "kind": "QP",
+      "url": "https://pmt.physicsandmathstutor.com/download/Maths/GCSE/Past-Papers/Edexcel/Paper-3H/QP/Nov%202022%20QP.pdf",
+      "sha256": "f664730d10324587ffd7de386e69bc9ee2b50e8560a52b0f28ce3e522c9b04a6"
+    },
+    {
+      "series": "November 2022",
+      "paper": "3H",
+      "kind": "MS",
+      "url": "https://pmt.physicsandmathstutor.com/download/Maths/GCSE/Past-Papers/Edexcel/Paper-3H/MS/Nov%202022%20MS.pdf",
+      "sha256": "43fbed800403b6d603d16b03c706dd973f77cd79827f2dff6eab9168200df4a1"
+    },
+    {
+      "series": "June 2022",
+      "paper": "3H",
+      "kind": "QP",
+      "url": "https://pmt.physicsandmathstutor.com/download/Maths/GCSE/Past-Papers/Edexcel/Paper-3H/QP/June%202022%20QP.pdf",
+      "sha256": "cc3d5067d5a1f9979ded154bb909e8df462388ed0a9ea453a6541fb0d9803fac"
+    },
+    {
+      "series": "June 2022",
+      "paper": "3H",
+      "kind": "MS",
+      "url": "https://pmt.physicsandmathstutor.com/download/Maths/GCSE/Past-Papers/Edexcel/Paper-3H/MS/June%202022%20MS.pdf",
+      "sha256": "8f3418266323cb5b6a630341bcb1b59045ade58e7af8b9ffa7c0e7556528550c"
+    }
+  ]
+}
