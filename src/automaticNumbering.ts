@@ -106,7 +106,12 @@ export function detectAutomaticNumbering(input:NumberingWord[],options:Numbering
   if(proseLeft-right(box)<Math.max(1,box.height*.25))return false;
   if(!/^(?:\([a-z](?:[ivx]+)?\)|[A-Za-z]{2,})/i.test(clean(next.text))&&proseLeft-right(box)<box.height*.6)return false;
   const gaps=others.slice(1).map((item,index)=>item.box.left-right(others[index].box)).filter(value=>value>0);
-  if(gaps.length>=3&&gap<median(gaps)*1.25)return false;
+  // A multipart label is a separate structural token, not the first word of
+  // the prose. Its short number-to-label gap need not exceed later word gaps
+  // (especially the gap before a formula). Keep all absolute gutter, first-row,
+  // exact-total and body-column checks; only omit this prose-spacing heuristic.
+  const multipartLabel=/^\([a-z](?:[ivx]+)?\)$/i.test(clean(next.text))&&next.confidence>=70&&others.slice(1).some(item=>(clean(item.text).match(/[a-z]/gi)?.length??0)>=3&&item.confidence>=60);
+  if(!multipartLabel&&gaps.length>=3&&gap<median(gaps)*1.25)return false;
   // A source number occupies its own leading gutter. A leading quantity in
   // body prose usually shares a left edge with another line of body text.
   const alignedOther=prose.some(item=>item!==next&&Math.abs(item.box.left-box.left)<box.height*.35&&Math.abs(item.box.top-box.top)>box.height);

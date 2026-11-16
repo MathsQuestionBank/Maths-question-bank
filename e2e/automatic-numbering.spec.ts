@@ -8,8 +8,9 @@ import {embedNumberingLayout} from "../src/pngNumberingMetadata";
 const fixtureDirectory=fileURLToPath(new URL("./fixtures/edexcel-numbering/",import.meta.url));
 type Rect={left:number;top:number;width:number;height:number};
 type Layout={version:number;originalNumber:number;imageWidth:number;imageHeight:number;numberRects:Rect[];totalRects:{rect:Rect;marks:number}[];method:string};
-type Fixture={id:string;image:string;series:string;paper:string;tier:string;originalNumber:number;marks:number;layout:Layout};
+type Fixture={id:string;image:string;series:string;paper:string;tier:string;originalNumber:number;marks:number;layout:Layout;multipart?:boolean;sourceIds?:string[]};
 const fixtures:Fixture[]=JSON.parse(await readFile(fixtureDirectory+"layouts.json","utf8"));
+const affected:Fixture=JSON.parse(await readFile(fixtureDirectory+"legacy-multipart.json","utf8"));
 const reported=fixtures.find(fixture=>fixture.id==="november-2024-1f-q14")!;
 const ordered=[reported,...fixtures.filter(fixture=>fixture!==reported)];
 const uid="11111111-1111-4111-8111-111111111111";
@@ -24,14 +25,14 @@ function row(fixture:Fixture,sourcePositions:boolean,crop=emptyCrop,suffix="",ma
  return {id:fixture.id+suffix,question_number:`Q${fixture.originalNumber}${suffix}`,topic:"Number",skill:"Real examination layout",marks,assessment_objective:"AO1",
   exam_papers:{exam_board:"Edexcel",series:fixture.series,paper_code:fixture.paper,tier:fixture.tier},
   question_storage_path:`numbering-fixtures/${fixture.image}`,
-  metadata:{id:`EDX-${tier}-${series}${year}-${fixture.paper}-Q${String(fixture.originalNumber).padStart(2,"0")}${suffix.toUpperCase()}`,tier:fixture.tier,calculator:false,grade:3,tags:[],image_crops:{question:crop},...(sourcePositions?{numbering_positions:{question:fixture.layout}}:{})}
+  metadata:{id:fixture.sourceIds?.[suffix==="b"?1:0]||`EDX-${tier}-${series}${year}-${fixture.paper}-Q${String(fixture.originalNumber).padStart(2,"0")}${suffix.toUpperCase()}`,tier:fixture.tier,calculator:false,grade:3,tags:[],image_crops:{question:crop},...(sourcePositions?{numbering_positions:{question:fixture.layout}}:{})}
  };
 }
 async function openAssessment(page:Page,chosen:Fixture[],sourcePositions:boolean|"embedded",extraCrops:Record<string,typeof emptyCrop>={}){
  let ocrRequests=0;
  page.on("request",request=>{if(new URL(request.url()).pathname.includes("/ocr/"))ocrRequests++});
- const rows=chosen.flatMap(fixture=>fixture===reported?[row(fixture,sourcePositions===true,extraCrops[fixture.id],"a",2),row(fixture,sourcePositions===true,extraCrops[fixture.id],"b",3)]:[row(fixture,sourcePositions===true,extraCrops[fixture.id])]);
- const ids=chosen.map(fixture=>fixture.id+(fixture===reported?"a":""));
+ const rows=chosen.flatMap(fixture=>(fixture===reported||fixture.multipart)?[row(fixture,sourcePositions===true,extraCrops[fixture.id],"a",2),row(fixture,sourcePositions===true,extraCrops[fixture.id],"b",3)]:[row(fixture,sourcePositions===true,extraCrops[fixture.id])]);
+ const ids=chosen.map(fixture=>fixture.id+((fixture===reported||fixture.multipart)?"a":""));
  const cloudId="33333333-3333-4333-8333-333333333333";
  let saved={id:cloudId,title:"Real Edexcel automatic numbering",revision:1,created_at:"2026-11-15T12:00:00Z",configuration:{id:"real-numbering",folder:"Unfiled",minutes:45,nameBox:false,classBox:false,cover:false,renumberStudentQuestions:false,replaceSourceTotals:true,exportMode:"questions"}};
  await page.addInitScript(({token,user})=>localStorage.setItem("sb-ljisttslifnyrbuybfud-auth-token",JSON.stringify({access_token:token,refresh_token:"dummy",expires_at:4102444800,expires_in:999999999,token_type:"bearer",user})),{token:token(),user});
@@ -202,4 +203,35 @@ test("new publication PNG positions work automatically without database metadata
  await expect(page.locator(".mqb-auto-total-text")).toHaveText("(Total for Question 1 is 5 marks)");
  expect(runtime.ocrRequests(),"Source positions inside a new PNG should avoid OCR and a schema migration").toBe(0);
  await savePdf(page,testInfo,"real-edexcel-png-embedded-source-positions");
+});
+
+
+test("legacy multipart indices heading renumbers as question 1 in a five-question assessment",async({page},testInfo)=>{
+ test.setTimeout(180000);await page.setViewportSize({width:1600,height:1800});
+ const chosen=[affected,...fixtures.slice(0,4)];const runtime=await openAssessment(page,chosen,false);
+ const frame=page.locator(".paper-question .mqb-cropped-image").first();
+ await expect(frame).toHaveAttribute("data-image-state","ready");
+ const before=await frame.screenshot();
+ const originalPdf=await savePdf(page,testInfo,"multipart-original");
+ await page.getByRole("checkbox",{name:/Hide original question numbers/}).check();await ready(page);
+ await expect(page.locator(".paper-question")).toHaveCount(5);
+ await expect(page.locator(".paper-question .assessment-question-number")).toHaveText(chosen.map((_,i)=>`Question ${i+1}`));
+ await expect(frame.locator(".mqb-auto-number-text")).toHaveText("1");
+ await expect(frame.locator(".mqb-auto-total-text")).toHaveText("(Total for Question 1 is 5 marks)");
+ await expect(page.locator(".paper-question").first()).toContainText("2022_3H_Q14a, 2022_3H_Q14b");
+ const after=await frame.screenshot(),regions=[...affected.layout.numberRects,...affected.layout.totalRects.map(t=>t.rect)];
+ compareOutsideTargets(await pixelData(before),await pixelData(after),regions,5);
+ const pdf=await savePdf(page,testInfo,"multipart-five-questions-renumbered");
+ const prior=await renderPdfFirstImage(originalPdf,affected),result=await renderPdfFirstImage(pdf,affected);
+ compareOutsideTargets(prior,result,regions,6);
+ expect(result.text).toContain("(Total for Question 1 is 5 marks)");
+ await testInfo.attach("multipart-before.png",{body:before,contentType:"image/png"});await testInfo.attach("multipart-after.png",{body:after,contentType:"image/png"});
+ await writeFile(testInfo.outputPath("multipart-pdf-before.png"),prior.png);await writeFile(testInfo.outputPath("multipart-pdf-after.png"),result.png);
+ const repeated=await savePdf(page,testInfo,"multipart-repeat-export");
+ const repeatedRaster=await renderPdfFirstImage(repeated,affected);expect(Buffer.from(repeatedRaster.pixels).equals(Buffer.from(result.pixels))).toBe(true);
+ await page.getByRole("button",{name:"Save changes to my account",exact:true}).click();
+ const requests=runtime.ocrRequests();await page.reload();await runtime.open();await ready(page);
+ expect(runtime.ocrRequests()).toBe(requests);
+ await expect(page.locator(".mqb-auto-number-text")).toHaveText(["1","2","3","4","5"]);
+ await expect(page.locator(".mqb-auto-total-text")).toHaveText(chosen.map((fixture,i)=>`(Total for Question ${i+1} is ${fixture.marks} ${fixture.marks===1?"mark":"marks"})`));
 });
