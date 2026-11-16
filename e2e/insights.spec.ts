@@ -6,7 +6,7 @@ const user={id:uid,aud:"authenticated",role:"authenticated",email:"owner@example
 const token=()=>{const enc=(x:object)=>Buffer.from(JSON.stringify(x)).toString("base64url");return `${enc({alg:"HS256",typ:"JWT"})}.${enc({exp:4102444800,sub:uid,role:"authenticated",aud:"authenticated"})}.signature`};
 function fixtureRows(){
  let n=0;
- const make=(skill:string,grade=4,tier="Foundation",calculator=false)=>{const id=String(++n),paper=`${calculator?2:1}${tier==="Higher"?"H":"F"}`;return {id,paper_id:`edexcel-${tier}-${paper}`,question_number:id,topic:/Angles|Circle/.test(skill)?"Geometry":/Ratio/.test(skill)?"Ratio":/Expanding|Simultaneous/.test(skill)?"Algebra":"Number",skill,assessment_objective:"AO1",marks:2,question_storage_path:`questions/${id}.png` as string|undefined,mark_scheme_storage_path:`marks/${id}.png` as string|undefined,exam_papers:{exam_board:"Edexcel",series:tier==="Higher"?"November 2023":"June 2022",paper_code:paper,tier:tier as string|undefined},metadata:{id:`2022_${paper}_Q${id}`,tier:tier as string|undefined,calculator:calculator as boolean|undefined,grade,g4:88,crop_review:{question:"approved",mark:"approved"}}};};
+ const make=(skill:string,grade=4,tier="Foundation",calculator=false)=>{const id=String(++n),paper=`${calculator?2:1}${tier==="Higher"?"H":"F"}`;return {id,paper_id:`edexcel-${tier}-${paper}`,question_number:id,topic:/Angles|Circle/.test(skill)?"Geometry":/Ratio/.test(skill)?"Ratio":/Expanding|Simultaneous/.test(skill)?"Algebra":"Number",skill,assessment_objective:"AO1",marks:2,question_storage_path:`questions/${id}.png` as string|undefined,mark_scheme_storage_path:`marks/${id}.png` as string|undefined,exam_papers:{exam_board:"Edexcel",series:tier==="Higher"?"November 2023":"June 2022",paper_code:paper,tier:tier as string|undefined},metadata:{id:`2022_${paper}_Q${id}`,tier:tier as string|undefined,calculator:calculator as boolean|undefined,grade,g1:tier==="Higher"?0:4,g2:tier==="Higher"?1:12,g3:tier==="Higher"?5:25,g4:tier==="Higher"?10:88,g5:tier==="Higher"?15:90,g6:tier==="Higher"?20:null,g7:tier==="Higher"?25:null,g8:tier==="Higher"?50:null,g9:tier==="Higher"?80:null,crop_review:{question:"approved",mark:"approved"}}};};
  const all=Array.from({length:10},(_,i)=>make("Expanding brackets",4,"Foundation",i%2===1));
  // Two rows share one complete question; its question image is shared and marking images differ.
  const sibling=structuredClone(all[0]);sibling.id="part-b";sibling.question_number="1b";sibling.metadata.id="2022_1F_Q1b";sibling.mark_scheme_storage_path="marks/part-b.png";all[0].question_number="1a";all[0].metadata.id="2022_1F_Q1a";all.push(sibling);
@@ -50,7 +50,7 @@ test("owner filters Foundation Grade 4, adjusts quantity thresholds and exports 
  test.setTimeout(60000);const state=await openFixture(page);
  const dashboard=page.locator(".insights-dashboard");
  await expect(page.locator(".insights-stats>div").nth(1).locator("strong")).toHaveText("5");
- await dashboard.getByRole("combobox",{name:"Tier",exact:true}).selectOption("Foundation");await dashboard.getByRole("combobox",{name:"GCSE grade",exact:true}).selectOption("4");await dashboard.getByRole("combobox",{name:"Rows per page",exact:true}).selectOption("10");
+ await dashboard.getByRole("combobox",{name:"Tier",exact:true}).selectOption("Foundation");await dashboard.getByRole("combobox",{name:"Target student grade",exact:true}).selectOption("4");await dashboard.getByRole("combobox",{name:"Rows per page",exact:true}).selectOption("10");
  const table=dashboard.getByRole("table",{name:"Filtered enhanced skill resource coverage",exact:true});
  const expanding=table.getByRole("row").filter({has:page.getByRole("rowheader",{name:"Expanding brackets",exact:true})});
  await expect(expanding).toContainText("Good coverage");await expect(expanding.locator('td[data-label="Complete usable"] strong')).toHaveText("10");await expect(expanding).toContainText("11 mapped records · 10 whole");
@@ -78,10 +78,11 @@ test("owner filters Foundation Grade 4, adjusts quantity thresholds and exports 
  const allDownloadPromise=page.waitForEvent("download");await dashboard.getByRole("button",{name:"Export filtered CSV (6 rows)",exact:true}).click();const allDownload=await allDownloadPromise;const allCsv=await readFile((await allDownload.path())!,"utf8");expect(allCsv.trim().split("\r\n")).toHaveLength(7);expect(allCsv).toContain("Fractions");
  await dashboard.getByLabel("Enhanced skill",{exact:true}).fill("Percentages");await expect(table.getByRole("rowheader")).toHaveCount(1);await expect(table.getByRole("rowheader")).toHaveAccessibleName("Percentages");
  const downloadPromise=page.waitForEvent("download");await dashboard.getByRole("button",{name:"Export filtered CSV (1 rows)",exact:true}).click();const download=await downloadPromise;const csv=await readFile((await download.path())!,"utf8");
- expect(csv).toContain('"Complete usable questions"');expect(csv).toContain('"Percentages","Foundation","4","3","3","3","3"');expect(csv).not.toContain("Expanding brackets");expect(csv.trim().split("\r\n")).toHaveLength(2);
+ expect(csv).toContain('"Complete usable questions"');expect(csv).toContain('"Percentages","Foundation","4","All performance / missing data","3","0","88","3","3","3","3"');expect(csv).not.toContain("Stored GCSE grade");expect(csv).not.toContain("Expanding brackets");expect(csv.trim().split("\r\n")).toHaveLength(2);
  await testInfo.attach("foundation-grade-4-filtered.csv",{path:(await download.path())!,contentType:"text/csv"});
  await dashboard.getByLabel("Enhanced skill",{exact:true}).fill("NoSuchSkill");await expect(dashboard.getByText(/No observed skill mappings match/)).toBeVisible();await expect(dashboard.getByRole("button",{name:"Export filtered CSV (0 rows)",exact:true})).toBeDisabled();
- await dashboard.getByRole("button",{name:"Reset coverage filters",exact:true}).click();await dashboard.getByRole("combobox",{name:"Chart tier",exact:true}).selectOption("Higher");await dashboard.getByRole("button",{name:"Show Grade 7 skills for Higher tiers: 1 usable questions",exact:true}).click();await expect(dashboard.getByRole("combobox",{name:"Tier",exact:true})).toHaveValue("Higher");await expect(dashboard.getByRole("combobox",{name:"GCSE grade",exact:true})).toHaveValue("7");await expect(table.getByRole("rowheader")).toHaveCount(1);await expect(table.getByRole("rowheader")).toHaveAccessibleName("Simultaneous equations");
+ await dashboard.getByRole("button",{name:"Reset coverage filters",exact:true}).click();await dashboard.getByRole("combobox",{name:"Chart tier",exact:true}).selectOption("Higher");await dashboard.getByRole("button",{name:"Explore final Grade 7 performance for Higher tiers: 1 usable questions with data, 0 missing",exact:true}).click();await expect(dashboard.getByRole("combobox",{name:"Tier",exact:true})).toHaveValue("Higher");await expect(dashboard.getByRole("combobox",{name:"Target student grade",exact:true})).toHaveValue("7");await expect(table.getByRole("rowheader")).toHaveCount(1);await expect(table.getByRole("rowheader")).toHaveAccessibleName("Simultaneous equations");
+ await capture(page,testInfo,`${testInfo.project.name}-student-grade-performance`,".insights-analysis-grid");
  await dashboard.getByRole("button",{name:"Find Foundation coverage gaps",exact:true}).click();await expect(dashboard.getByRole("combobox",{name:"Tier",exact:true})).toHaveValue("Foundation");await expect(dashboard.getByRole("combobox",{name:"Sort skills",exact:true})).toHaveValue("least");
  await dashboard.getByText(/Resource readiness ·/).click();await expect(dashboard.getByText("Missing mark scheme path",{exact:true})).toBeVisible();await expect(dashboard.getByText("Outstanding crop review (where assets exist)",{exact:true})).toBeVisible();
  await dashboard.getByText(/Exam series and paper coverage ·/).click();await expect(dashboard.getByRole("table",{name:"Stored examination series and paper coverage",exact:true})).toContainText("November 2023");await expect(dashboard.getByRole("table",{name:"Stored examination series and paper coverage",exact:true})).toContainText("AQA");
@@ -103,13 +104,26 @@ test("approved teacher has no owner Insights entry or dashboard, even with owner
 });
 
 
-test("missing Grade 4 classifications offer an honest empty state and unclassified resources",async({page},testInfo)=>{
- await openFixture(page,true,false,true);const dashboard=page.locator(".insights-dashboard");
- await expect(dashboard.locator(".insights-classification-note")).toContainText("3, 7");
- await dashboard.getByRole("combobox",{name:"Tier",exact:true}).selectOption("Foundation");await dashboard.getByRole("combobox",{name:"GCSE grade",exact:true}).selectOption("4");
- await expect(dashboard.getByText(/No observed skill mappings match/)).toBeVisible();await expect(dashboard.getByRole("button",{name:"Export filtered CSV (0 rows)",exact:true})).toBeDisabled();
+test("target Grade 4 performance remains available despite tier-derived legacy grades 3 and 7",async({page},testInfo)=>{
+ await openFixture(page,true,false,true);const dashboard=page.locator(".insights-dashboard"),table=dashboard.getByRole("table",{name:"Filtered enhanced skill resource coverage",exact:true});
+ await expect(dashboard.locator(".insights-classification-note")).toContainText("g7 = 25");
+ await dashboard.getByRole("combobox",{name:"Tier",exact:true}).selectOption("Foundation");await dashboard.getByRole("combobox",{name:"Target student grade",exact:true}).selectOption("4");
+ await expect(table.getByRole("rowheader")).toHaveCount(5);await expect(table).toContainText("Final Grade 4: 88% median");
+ await dashboard.getByRole("combobox",{name:"Historical average marks",exact:true}).selectOption("high");await expect(table.getByRole("rowheader")).toHaveCount(5);
  await capture(page,testInfo,`${testInfo.project.name}-stored-grade-limit`,'section[aria-labelledby="insights-skills-title"]');
- await dashboard.getByRole("button",{name:"Show all stored grades",exact:true}).click();await expect(dashboard.getByRole("combobox",{name:"GCSE grade",exact:true})).toHaveValue("All");
- await dashboard.getByRole("combobox",{name:"GCSE grade",exact:true}).selectOption("4");await dashboard.getByRole("button",{name:"Show unclassified grades",exact:true}).click();
- await expect(dashboard.getByRole("combobox",{name:"GCSE grade",exact:true})).toHaveValue("Unclassified");await expect(dashboard.getByRole("table",{name:"Filtered enhanced skill resource coverage",exact:true}).getByRole("rowheader")).toHaveAccessibleName("Ratio and proportion");
+ await dashboard.getByRole("combobox",{name:"Tier",exact:true}).selectOption("Higher");await dashboard.getByRole("combobox",{name:"Target student grade",exact:true}).selectOption("7");await expect(table).toContainText("Final Grade 7: 25% median");
+ await dashboard.getByRole("combobox",{name:"Historical average marks",exact:true}).selectOption("high");await expect(dashboard.getByText(/No observed skill mappings match/)).toBeVisible();
+ await dashboard.getByRole("button",{name:"Show all performance bands",exact:true}).click();await expect(table.getByRole("rowheader")).toHaveCount(1);
+ await dashboard.getByRole("combobox",{name:"Historical average marks",exact:true}).selectOption("low");await expect(table).toContainText("25% median");
+});
+
+test("question bank filters student-result performance, including groups outside tier display conventions",async({page})=>{
+ await openFixture(page,false);const cards=page.locator(".v62-result-card");
+ await page.getByRole("combobox",{name:"Tier",exact:true}).selectOption("Higher");await page.getByRole("combobox",{name:"Skill",exact:true}).selectOption("Simultaneous equations");
+ await page.getByRole("combobox",{name:"Target student grade",exact:true}).selectOption("7");
+ await expect(cards).toHaveCount(2);await expect(cards.first()).toContainText("G7: 25%");
+ await page.getByRole("combobox",{name:"Historical average marks",exact:true}).selectOption({label:"25–<45% average marks"});await expect(cards).toHaveCount(2);
+ await page.getByRole("combobox",{name:"Historical average marks",exact:true}).selectOption({label:"70–100% average marks"});await expect(cards).toHaveCount(0);
+ await page.getByRole("combobox",{name:"Historical average marks",exact:true}).selectOption("Any");
+ await page.getByRole("combobox",{name:"Target student grade",exact:true}).selectOption("3");await expect(cards).toHaveCount(2);await expect(cards.first()).toContainText("G3: 5%");
 });

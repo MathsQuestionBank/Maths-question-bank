@@ -106,6 +106,15 @@ describe("targeted shadow saved compatibility",()=>{
   expect(reopened[0]).toEqual(original);expect(reopened[1]).toEqual(next);expect(reopened[1].ids).toEqual(["r1a"]);
   expect(mergeWorksheetBackup([next],[],makeWorksheetBackup([{...next,targetedShadow:{...targetedShadow,difficulty:"easier"}}],[],"2026-11-16")).added).toBe(1);
  });
+ it("round-trips the explicit student grade and basis without inventing one for legacy selections",()=>{
+  const legacyItem=normaliseAssessments([{...legacy,targetedShadow}])[0];
+  expect(legacyItem.targetedShadow?.targetStudentGrade).toBeUndefined();
+  expect(legacyItem.targetedShadow?.matchingBasis).toBeUndefined();
+  const modern={...legacyItem,targetedShadow:{...targetedShadow,targetStudentGrade:4,matchingBasis:"student-grade-performance-v1" as const}};
+  const reopened=parseWorksheetBackup(JSON.parse(JSON.stringify(makeWorksheetBackup([modern],[],"2026-11-16")))).assessments[0];
+  expect(reopened).toEqual(modern);expect(reopened.ids).toEqual(legacy.ids);
+  expect(mergeWorksheetBackup([legacyItem],[],makeWorksheetBackup([modern],[],"2026-11-16")).added).toBe(1);
+ });
  it("ignores damaged optional provenance without losing the assessment",()=>{
   const item=normaliseAssessments([{...legacy,targetedShadow:{version:1,replacements:"damaged"}}])[0];
   expect(item.ids).toEqual(legacy.ids);expect(item.targetedShadow).toBeUndefined();

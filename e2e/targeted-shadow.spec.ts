@@ -12,7 +12,7 @@ function row(id:string,number:string,skill:string,marks=4,grade=6,paper="3H",tot
  id,question_number:number,marks,topic:"Algebra",skill,assessment_objective:"AO1",
  exam_papers:{exam_board:"Edexcel",series:id.startsWith("o")?"June 2022":"June 2023",paper_code:paper,tier:"Higher"},
  question_storage_path:`questions/${questionAsset}.svg`,mark_scheme_storage_path:`marks/${id}.svg`,
- metadata:{id:`${id.startsWith("o")?"2022":"2023"}_${paper}_Q${number}`,tier:"Higher",calculator:true,grade,g6:70,
+ metadata:{id:`${id.startsWith("o")?"2022":"2023"}_${paper}_Q${number}`,tier:"Higher",calculator:true,grade,g4:30,g6:id==="easy"?78:id==="hard"?62:70,g7:85,
  numbering_positions:{question:numberingFixture(900,210,Number(number.match(/\d+/)![0]),{left:8,top:7,width:26,height:22},{left:570,top:180,width:320,height:23},total),mark:numberingFixture(900,210,Number(number.match(/\d+/)![0]),{left:8,top:7,width:26,height:22})}}
  }}
 const skills=["Expanding double brackets","Solving simultaneous equations","Circle theorems","Reverse percentages","Conditional probability"];
@@ -61,6 +61,7 @@ async function fixture(page:Page,configure?:(rows:ReturnType<typeof bank>)=>void
  await page.getByRole("button",{name:"Open / Edit",exact:true}).click();
  await expect(page.locator(".paper-question")).toHaveCount(5);
  await page.getByRole("button",{name:"Create Targeted Shadow Assessment",exact:true}).click();
+ await page.getByRole("combobox",{name:"Targeted shadow target student grade",exact:true}).selectOption("6");
  return {saved,links:()=>links,writes,original};
 }
 async function screenshot(page:Page,testInfo:TestInfo,name:string,selector:string){
@@ -118,7 +119,7 @@ test("teacher targets three of five questions, previews, generates and saves a s
  }
  await page.getByRole("button",{name:"Save to my account",exact:true}).click();
  await expect.poll(()=>state.writes.length).toBe(1);
- expect(state.writes[0]).toMatchObject({p_id:null,p_expected_revision:null,p_question_ids:["r1a","r2","r3"],p_configuration:{linkedOriginalAssessmentId:sourceId,renumberStudentQuestions:true,replaceSourceTotals:true,exportMode:"both",targetedShadow:{originalTitle:state.original.title,difficulty:"same",replacements:[{originalIds:["o1a","o1b"],replacementIds:["r1a","r1b"]},{originalIds:["o2"],replacementIds:["r2"]},{originalIds:["o3"],replacementIds:["r3"]}]}}});
+ expect(state.writes[0]).toMatchObject({p_id:null,p_expected_revision:null,p_question_ids:["r1a","r2","r3"],p_configuration:{linkedOriginalAssessmentId:sourceId,renumberStudentQuestions:true,replaceSourceTotals:true,exportMode:"both",targetedShadow:{originalTitle:state.original.title,difficulty:"same",targetStudentGrade:6,matchingBasis:"student-grade-performance-v1",replacements:[{originalIds:["o1a","o1b"],replacementIds:["r1a","r1b"]},{originalIds:["o2"],replacementIds:["r2"]},{originalIds:["o3"],replacementIds:["r3"]}]}}});
  expect(state.saved[0]).toEqual(state.original);expect(state.links().filter(l=>l.assessment_id===sourceId).map(l=>l.question_id)).toEqual(["o1a","o2","o3","o4","o5"]);
  await page.getByRole("button",{name:"Return to original assessment",exact:true}).click();
  await expect(page.locator(".paper-question")).toHaveCount(5);await expect(page.getByRole("checkbox",{name:/Hide original question numbers/})).not.toBeChecked();
@@ -135,12 +136,12 @@ test("difficulty changes require fresh choices; unmatched questions and cancella
  const article=panel.getByRole("article",{name:"Replacements for question 1",exact:true});
  await article.getByRole("button",{name:"Choose this replacement",exact:true}).first().click();
  await panel.getByRole("combobox",{name:"Targeted shadow difficulty"}).selectOption("easier");
- await expect(article.locator(".targeted-suggestion")).toHaveCount(1);await expect(article.locator(".targeted-summary-facts dd").first()).toContainText("5");
+ await expect(article.locator(".targeted-suggestion")).toHaveCount(1);await expect(article.locator(".targeted-history dd")).toHaveText(["70%","78%"]);
  await expect(panel.getByRole("button",{name:"Generate Shadow Assessment",exact:true})).toBeDisabled();
  await article.getByRole("button",{name:"Choose this replacement",exact:true}).click();
  await article.getByRole("button",{name:"Reject chosen replacement",exact:true}).click();
  await expect(panel.getByRole("button",{name:"Generate Shadow Assessment",exact:true})).toBeDisabled();
- await panel.getByRole("combobox",{name:"Targeted shadow difficulty"}).selectOption("harder");await expect(article.locator(".targeted-summary-facts dd").first()).toContainText("7");
+ await panel.getByRole("combobox",{name:"Targeted shadow difficulty"}).selectOption("harder");await expect(article.locator(".targeted-history dd")).toHaveText(["70%","62%"]);
  await panel.getByRole("combobox",{name:"Targeted shadow difficulty"}).selectOption("same");
  await article.getByRole("button",{name:"Choose this replacement",exact:true}).first().click();
  await panel.getByRole("checkbox",{name:"Target question 5",exact:true}).check();
@@ -158,7 +159,8 @@ test("replacement cards remain readable across desktop tablet and mobile",async(
    if(r.skill===skills[0])r.skill=longSkill;
    if(r.id==="o1a"||r.id==="o1b")r.metadata.g6=82.7;
    if(r.id==="r1a"||r.id==="r1b")r.metadata.g6=88.5;
-   if(r.id==="hard")r.assessment_objective="AO2";
+   if(r.id==="easy")r.metadata.g6=89;
+   if(r.id==="hard"){r.metadata.g6=75;r.assessment_objective="AO2";}
    if(r.id==="r2"){r.metadata.grade=0;r.assessment_objective="";Reflect.deleteProperty(r.metadata,"g6");r.exam_papers.series="Unspecified";}
   }
  });
@@ -214,4 +216,16 @@ test("replacement cards remain readable across desktop tablet and mobile",async(
   await expect(missing.locator(".targeted-history dd")).toHaveText(["70%","No data"]);await expect(missing.locator(".targeted-warnings")).toBeVisible();
   const empty=panel.getByRole("article",{name:"Replacements for question 5",exact:true});await expect(empty).toContainText("No suitable match");await expect(empty.locator(".targeted-suggestion")).toHaveCount(0);await expect(empty.getByRole("group",{name:"Browse alternatives",exact:true})).toHaveCount(0);
  }
+});
+
+test("target student grade is explicit and a change invalidates approvals without inferring a question grade",async({page})=>{
+ await fixture(page);const panel=page.getByRole("region",{name:"Targeted shadow assessment"}),grade=panel.getByRole("combobox",{name:"Targeted shadow target student grade",exact:true});
+ await grade.selectOption("");await panel.getByRole("checkbox",{name:"Target question 1",exact:true}).check();
+ const article=panel.getByRole("article",{name:"Replacements for question 1",exact:true});
+ await expect(article).toContainText("Choose a target student grade");await expect(article.locator(".targeted-suggestion")).toHaveCount(0);
+ await grade.selectOption("6");await panel.getByRole("combobox",{name:"Targeted shadow difficulty"}).selectOption("easier");
+ await expect(article.locator(".targeted-history dd")).toHaveText(["70%","78%"]);await article.getByRole("button",{name:"Choose this replacement",exact:true}).click();
+ await expect(panel.getByRole("button",{name:"Generate Shadow Assessment",exact:true})).toBeEnabled();
+ await grade.selectOption("7");await expect(article).toContainText("No suitable match");await expect(panel.getByRole("button",{name:"Generate Shadow Assessment",exact:true})).toBeDisabled();
+ await grade.selectOption("6");await expect(article.locator(".targeted-suggestion")).toHaveCount(1);await expect(panel.getByRole("button",{name:"Generate Shadow Assessment",exact:true})).toBeDisabled();
 });

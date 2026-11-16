@@ -1,5 +1,5 @@
-import {gradesForTier} from "./gradeBands";
-import {weightedGradePerformance} from "./teacherQuestionStats";
+import {performanceGrades} from "./gradeBands";
+import {performanceAtGrade,weightedGradePerformance} from "./teacherQuestionStats";
 import type {BankQuestion} from "./questionData";
 
 type Part = Pick<BankQuestion,"marks"|"gradePerformance"|"questionNumber"|"sourceId">;
@@ -10,7 +10,7 @@ function partName(part:Part,index:number):string {
 }
 
 export default function TeacherGradePerformance({parts,tier,selectedGrade,className=""}:{parts:readonly Part[];tier:string;selectedGrade:string;className?:string}){
- const grades=selectedGrade==="All grades"?gradesForTier(tier):[Number(selectedGrade)];
+ const grades=selectedGrade==="All grades"?performanceGrades(parts,tier):[Number(selectedGrade)];
  return <div className={`builder-question-performance ${className}`.trim()} aria-label="Historic grade performance for this question">
   <strong>Historic performance — average % of available marks</strong>
   <div className="teacher-grade-rows">
@@ -20,7 +20,7 @@ export default function TeacherGradePerformance({parts,tier,selectedGrade,classN
      <strong>Grade {grade}</strong>
      <div className="builder-performance-values">
       {parts.length>1?parts.map((part,i)=>{
-       const pct=part.gradePerformance[grade];
+       const pct=performanceAtGrade(part,grade);
        return <span key={part.sourceId||part.questionNumber||i}>{partName(part,i)}: {typeof pct==="number"&&Number.isFinite(pct)?`${pct}%`:"No data"}</span>;
       }):null}
       <span className={parts.length>1?"combined-performance":""}>{parts.length>1?"Combined: ":""}{combined===null?"No data":`${combined}%`}</span>
@@ -28,6 +28,6 @@ export default function TeacherGradePerformance({parts,tier,selectedGrade,classN
     </div>;
    })}
   </div>
-  {parts.length>1&&<small>Combined is mark-weighted and only shown when every part has data. Missing values never conceal available part results.</small>}
+  <small>Grades refer to students’ final GCSE results, not question grades. Values are average marks, not the share answering fully correctly.{parts.length>1&&<> Combined is mark-weighted and only shown when every part has data. Missing values never conceal available part results.</>}</small>
  </div>;
 }

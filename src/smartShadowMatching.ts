@@ -1,24 +1,19 @@
 import type {BankQuestion} from "./questionData";
 import {buildAssessmentGroups,checkAssessmentExport,type AssessmentGroup} from "./assessmentGroups";
 import {shadowIsReady} from "./shadowAssessments";
-import {weightedGradePerformance} from "./teacherQuestionStats";
+import {validStudentGrade,weightedGradePerformance} from "./teacherQuestionStats";
 
 export type ShadowDifficulty="same"|"easier"|"harder";
 export type ReplacementMethod="official"|"alternative";
 export type MatchCategory="Strong metadata match"|"Possible match — teacher review recommended";
 export type ShadowSuggestion={group:AssessmentGroup;method:ReplacementMethod;category:MatchCategory;reasons:string[];warnings:string[]};
-export type TargetedShadowInfo={version:1;originalTitle:string;difficulty:ShadowDifficulty;replacements:{originalKey:string;originalIds:string[];replacementKey:string;replacementIds:string[];method:ReplacementMethod}[];unmatchedOriginalIds:string[]};
+export type TargetedShadowInfo={version:1;originalTitle:string;difficulty:ShadowDifficulty;targetStudentGrade?:number;matchingBasis?:"student-grade-performance-v1";replacements:{originalKey:string;originalIds:string[];replacementKey:string;replacementIds:string[];method:ReplacementMethod}[];unmatchedOriginalIds:string[]};
 export type TargetedChoice={originalKey:string;replacementKey:string|null};
 const normal=(s:string)=>s.normalize("NFKC").toLowerCase().replace(/[‐‑–—-]/g," ").replace(/\s+/g," ").trim();
 const absent=(s:string|undefined)=>!s||/^(?:unknown|unspecified|unmapped|standard|n\/a)$/i.test(s.trim());
 const broad=new Set(["algebra","geometry","number","probability","ratio","statistics","ratio and proportion","ratio, proportion and rates of change","geometry and measures","geometry & measures","ratio & proportion","unmapped","unknown","unspecified","n/a"]);
 export function enhancedSkills(group:AssessmentGroup):string[]{return [...new Set(group.parts.flatMap(part=>part.skill.split(";").map(normal).filter(skill=>skill&&!broad.has(skill))))].sort()}
 function skillComplete(group:AssessmentGroup){return group.parts.every(part=>part.skill.split(";").some(skill=>{const s=normal(skill);return !!s&&!broad.has(s)}))}
-export function groupGrade(group:AssessmentGroup):{min:number;max:number;value:number}|null{
- if(group.parts.some(part=>!Number.isInteger(part.grade)||part.grade<1||part.grade>9))return null;
- const grades=group.parts.map(part=>part.grade),marks=group.parts.reduce((sum,part)=>sum+Math.max(0,part.marks),0);
- return {min:Math.min(...grades),max:Math.max(...grades),value:marks?group.parts.reduce((sum,part)=>sum+part.grade*Math.max(0,part.marks),0)/marks:grades.reduce((a,b)=>a+b,0)/grades.length};
-}
 function tier(group:AssessmentGroup):string|null{
  const values=group.parts.map(part=>"sourceTier" in part?part.sourceTier:part.tier);
  return values.every(value=>value===values[0])&&(values[0]==="Higher"||values[0]==="Foundation")?values[0]:null;
@@ -33,7 +28,7 @@ const compare=(a:number[],b:number[])=>{for(let i=0;i<a.length;i++){const n=a[i]
 
 /** Build the whole-question catalogue once; per-question skill intersections
  * avoid scanning the bank for each rendered suggestion. No random ranking. */
-export function createSmartShadowMatcher(all:BankQuestion[],assessmentIds:string[],additionalExcludedIds:string[]=[]){
+export function createSmartShadowMatcher(all:BankQuestion[],assessmentIds:string[],additionalExcludedIds:string[]=[],targetStudentGrade:number|null=null){
  const catalogue=buildAssessmentGroups(all,all.map(q=>q.id));
  const originals=buildAssessmentGroups(all,assessmentIds);
  const byId=new Map(all.map(q=>[q.id,q]));
@@ -70,38 +65,33 @@ export function createSmartShadowMatcher(all:BankQuestion[],assessmentIds:string
   if(!originalTier||candidateTier!==originalTier||calc===null||candidateCalc!==calc)return null;
   const wanted=enhancedSkills(original),skills=enhancedSkills(candidate);
   if(!official&&(!wanted.length||!wanted.every(skill=>skills.includes(skill))))return null;
-  const originalGrade=groupGrade(original),candidateGrade=groupGrade(candidate);
-  const targetGrade=originalGrade?Math.round(originalGrade.value):null;
-  const p=targetGrade?weightedGradePerformance(original.parts,targetGrade):null,c=targetGrade?weightedGradePerformance(candidate.parts,targetGrade):null;
-  const delta=originalGrade&&candidateGrade?candidateGrade.value-originalGrade.value:null;
-  if(difficulty==="same"&&delta!==null&&(Math.abs(delta)>1||Math.abs(candidateGrade!.max-originalGrade!.max)>1||Math.abs(candidateGrade!.min-originalGrade!.min)>1))return null;
-  if(difficulty!=="same"){
-   if(delta===null)return null;
-   const gradeDirection=difficulty==="easier"?delta<0&&delta>=-2&&candidateGrade!.max<=originalGrade!.max:delta>0&&delta<=2&&candidateGrade!.min>=originalGrade!.min;
-   const performanceDirection=delta===0&&p!==null&&c!==null&&(difficulty==="easier"?c-p>=5:p-c>=5);
-   if(!gradeDirection&&!performanceDirection)return null;
-  }
+  if(!validStudentGrade(targetStudentGrade))return null;
+  const p=weightedGradePerformance(original.parts,targetStudentGrade),c=weightedGradePerformance(candidate.parts,targetStudentGrade);
+  const delta=p===null||c===null?null:Math.round((c-p)*10)/10;
+  // Transparent recommendation windows, not calibrated difficulty estimates.
+  // Larger historical mark shares guide easier practice; all parts must report
+  // the same selected student-result group. Never infer a cohort from metadata.grade.
+  if(difficulty==="same"&&delta!==null&&Math.abs(delta)>10)return null;
+  if(difficulty!=="same"&&(delta===null||(difficulty==="easier"?delta<5||delta>20:delta> -5||delta< -20)))return null;
   const reasons=[official?"Complete, approved official shadow linked to every original part.":"Same enhanced skill coverage.","Same tier and compatible calculator requirement."];
   const warnings:string[]=[];
   const exactSkills=skillComplete(original)&&skillComplete(candidate)&&same(wanted,skills);
   if(!skillComplete(original)||!skillComplete(candidate))warnings.push("Enhanced skill metadata is incomplete; review the linked official shadow.");
   else if(!exactSkills)warnings.push("Enhanced skill coverage differs; check the extra demand.");
-  if(delta===null)warnings.push("Grade metadata is incomplete; the difficulty match cannot be verified.");
-  else reasons.push(delta===0&&originalGrade?.min===candidateGrade?.min&&originalGrade?.max===candidateGrade?.max?"Same listed grade range.":`Listed grades are ${difficulty==="same"?"close":difficulty==="easier"?"lower or supported by easier historic performance":"higher or supported by harder historic performance"}; grade alone does not establish equivalent demand.`);
-  if(p===null||c===null)warnings.push("Comparable historic difficulty data is unavailable.");
-  else reasons.push(`Historic performance at final grade ${targetGrade}: ${p}% vs ${c}% of available marks.`);
+  if(delta===null)warnings.push("Complete historical performance at the selected final student grade is unavailable. This is a skill-led suggestion; similar difficulty cannot be established.");
+  else reasons.push(`Average % of available marks for students who achieved final GCSE grade ${targetStudentGrade}: original ${p}%, replacement ${c}%. This is not the percentage answering fully correctly or proof of equivalent demand.`);
   const originalAos=aos(original),candidateAos=aos(candidate),aoMatch=originalAos.length>0&&same(originalAos,candidateAos);
   if(aoMatch)reasons.push("Same assessment objective coverage.");else warnings.push(candidateAos.length&&originalAos.length?"Assessment objective coverage differs.":"Assessment objective metadata is incomplete.");
   if(candidate.marks===original.marks)reasons.push("Same total marks.");else reasons.push(`${candidate.marks} marks instead of ${original.marks}; check the workload.`);
   if(candidate.parts.length===original.parts.length)reasons.push("Same number of mapped parts.");else warnings.push("Question structure differs; review the complete question.");
   if(candidate.parts.some(part=>absent(part.examBoard)||absent(part.series)||absent(part.paperCode)))warnings.push("Some examination source metadata is unavailable.");
   if(candidate.parts.some(part=>part.imagePending))warnings.push("Some images are still loading.");
-  const strong=exactSkills&&delta===0&&originalGrade?.min===candidateGrade?.min&&originalGrade?.max===candidateGrade?.max&&aoMatch&&candidate.marks===original.marks&&candidate.parts.length===original.parts.length&&warnings.length===0;
+  const strong=exactSkills&&delta!==null&&aoMatch&&candidate.marks===original.marks&&candidate.parts.length===original.parts.length&&warnings.length===0;
   const suggestion:ShadowSuggestion={group:candidate,method:official?"official":"alternative",category:strong?"Strong metadata match":"Possible match — teacher review recommended",reasons,warnings};
-  // Grade proximity precedes historic performance/AO/marks. Same-tier and
-  // calculator compatibility are hard gates, never hidden score tradeoffs.
-  const distance=delta===null?10:difficulty==="same"?Math.abs(delta):Math.abs(Math.abs(delta)-1);
-  return {suggestion,rank:[official?0:1,exactSkills?0:1,distance,p===null||c===null?1:0,p===null||c===null?100:Math.abs(p-c),aoMatch?0:1,Math.abs(candidate.marks-original.marks),Math.abs(candidate.parts.length-original.parts.length)]};
+  // Skill-first matching and official priority remain; performance comparisons
+  // concern the teacher-selected result group, never a question's legacy grade.
+  const distance=delta===null?100:difficulty==="same"?Math.abs(delta):Math.abs(Math.abs(delta)-10);
+  return {suggestion,rank:[official?0:1,exactSkills?0:1,delta===null?1:0,distance,aoMatch?0:1,Math.abs(candidate.marks-original.marks),Math.abs(candidate.parts.length-original.parts.length)]};
  }
  function ranked(key:string,difficulty:ShadowDifficulty,reserved:ReadonlySet<string>){
   const original=originals.find(group=>group.key===key);if(!original)return [];
@@ -118,7 +108,7 @@ export function createSmartShadowMatcher(all:BankQuestion[],assessmentIds:string
    const matches=ranked(key,difficulty,reserved),top=matches.slice(0,3).map(item=>item.suggestion);
    const kept=keepKey?matches.find(item=>item.suggestion.group.key===keepKey)?.suggestion:undefined;
    if(kept&&!top.some(item=>item.group.key===keepKey))top.splice(2,1,kept);
-   const reason=!original?"The original question is unavailable.":!skillComplete(original)?"Enhanced skill metadata is missing for one or more parts.":!tier(original)||calculator(original)===null?"Tier or calculator metadata is missing; compatibility cannot be verified.":difficulty!=="same"&&!groupGrade(original)?"Grade metadata is missing; the requested difficulty direction cannot be verified.":"No complete question with the same enhanced skills, compatible tier/calculator and requested difficulty is available outside this assessment and your other choices.";
+   const reason=!original?"The original question is unavailable.":!validStudentGrade(targetStudentGrade)?"Choose a target student grade to compare historical average marks.":!skillComplete(original)?"Enhanced skill metadata is missing for one or more parts.":!tier(original)||calculator(original)===null?"Tier or calculator metadata is missing; compatibility cannot be verified.":difficulty!=="same"&&weightedGradePerformance(original.parts,targetStudentGrade!)===null?"Complete historical performance at the selected student grade is missing; an easier/harder direction cannot be established.":"No complete question with the same enhanced skills, compatible tier/calculator and requested historical-performance window is available outside this assessment and your other choices.";
    return {suggestions:top,available:matches.length,reason:top.length?undefined:reason};
   },
   generate(choices:TargetedChoice[],difficulty:ShadowDifficulty,originalTitle:string){
@@ -133,7 +123,7 @@ export function createSmartShadowMatcher(all:BankQuestion[],assessmentIds:string
     replacements.push({originalKey:original.key,originalIds:original.parts.map(part=>part.id),replacementKey:found.group.key,replacementIds:found.group.parts.map(part=>part.id),method:found.method});
    }
    if(!ids.length)throw Error("Choose at least one suitable replacement before generating.");
-   const info:TargetedShadowInfo={version:1,originalTitle,difficulty,replacements,unmatchedOriginalIds};
+   const info:TargetedShadowInfo={version:1,originalTitle,difficulty,targetStudentGrade:targetStudentGrade!,matchingBasis:"student-grade-performance-v1",replacements,unmatchedOriginalIds};
    return {ids,info,totalMarks:buildAssessmentGroups(all,ids).reduce((sum,group)=>sum+group.marks,0)};
   }
  };

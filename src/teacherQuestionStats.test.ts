@@ -1,5 +1,5 @@
 import {describe,it,expect} from "vitest";
-import {paperNumberFromCode,compareOriginalQuestionNumber,weightedGradePerformance} from "./teacherQuestionStats";
+import {paperNumberFromCode,compareOriginalQuestionNumber,weightedGradePerformance,performanceAtGrade,averageQuestionPerformance} from "./teacherQuestionStats";
 const q=(questionNumber:string,id=questionNumber)=>({id,questionNumber,sourceId:`2022_2H_${questionNumber}`,series:"November 2022",paperCode:"2H"});
 describe("paper filter and original question ordering",()=>{
  it("recognises paper 1, 2, 3 across tiers",()=>{
@@ -29,5 +29,19 @@ describe("historic grade performance",()=>{
  });
  it("retains real zero percentages",()=>{
   expect(weightedGradePerformance([{marks:2,gradePerformance:{9:0}}],9)).toBe(0);
+ });
+});
+
+describe("student-result performance semantics",()=>{
+ it("preserves a full reported grade 1–9 profile and treats g7 = 25 as average mark share",()=>{
+  const values=[0,1,3,8,12,18,25,48,72],part={marks:5,gradePerformance:Object.fromEntries(values.map((v,i)=>[i+1,v]))},before=JSON.stringify(part);
+  for(let grade=1;grade<=9;grade++)expect(weightedGradePerformance([part],grade)).toBe(values[grade-1]);
+  expect(performanceAtGrade(part,7)).toBe(25);expect(JSON.stringify(part)).toBe(before);
+  expect(averageQuestionPerformance([part],"Higher")).toBe(20.8); // unweighted across all 9 reported groups, never a pupil-weighted mean
+ });
+ it("rejects invalid percentages, student grades and part marks without replacing true zero",()=>{
+  for(const value of [NaN,Infinity,-1,101])expect(performanceAtGrade({gradePerformance:{7:value}},7)).toBeNull();
+  for(const grade of [0,10,6.5,NaN])expect(weightedGradePerformance([{marks:2,gradePerformance:{[grade]:50}}],grade)).toBeNull();
+  for(const marks of [0,-1,Infinity,NaN])expect(weightedGradePerformance([{marks,gradePerformance:{7:50}}],7)).toBeNull();
  });
 });
