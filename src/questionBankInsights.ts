@@ -25,6 +25,15 @@ export function coverageStatus(count:number,thresholds:CoverageThresholds=defaul
  const t=validCoverageThresholds(thresholds)?thresholds:defaultCoverageThresholds;
  return count<=0?"No coverage":count<t.developing?"Limited coverage":count<t.good?"Developing coverage":"Good coverage";
 }
+/** Count stored paper identities, never a truncated question source ID.
+ * Linked paper IDs retain unknown-source papers and connect incomplete sibling
+ * metadata; complete source tuples also deduplicate reimported paper records. */
+export function countInsightPapers(all:BankQuestion[]):number {
+ const source=(q:BankQuestion)=>known(q.examBoard)&&known(q.series)&&known(q.paperCode)&&storedTier(q)!=="Unknown"?JSON.stringify([q.examBoard!,q.series,q.paperCode!,storedTier(q)].map(normal)):null;
+ const sourcesById=new Map<string,string>();
+ for(const q of all){const key=source(q);if(q.paperId&&key&&!sourcesById.has(q.paperId))sourcesById.set(q.paperId,key);}
+ return new Set(all.flatMap(q=>{const key=q.paperId?sourcesById.get(q.paperId)||`paper:${q.paperId}`:source(q);return key?[key]:[]})).size;
+}
 export type InsightGroup={group:AssessmentGroup;questionReady:boolean;markReady:boolean;usable:boolean;tier:string;calculator:string};
 export type CoverageRow={key:string;topic:string;skill:string;tier:string;grade:number|null;records:number;questions:number;available:number;usable:number;calculator:number;nonCalculator:number;unknownCalculator:number;status:CoverageStatus};
 export type InsightsModel=ReturnType<typeof buildInsightsModel>;

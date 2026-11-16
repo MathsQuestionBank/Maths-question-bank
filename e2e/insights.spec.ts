@@ -6,7 +6,7 @@ const user={id:uid,aud:"authenticated",role:"authenticated",email:"owner@example
 const token=()=>{const enc=(x:object)=>Buffer.from(JSON.stringify(x)).toString("base64url");return `${enc({alg:"HS256",typ:"JWT"})}.${enc({exp:4102444800,sub:uid,role:"authenticated",aud:"authenticated"})}.signature`};
 function fixtureRows(){
  let n=0;
- const make=(skill:string,grade=4,tier="Foundation",calculator=false)=>{const id=String(++n),paper=`${calculator?2:1}${tier==="Higher"?"H":"F"}`;return {id,question_number:id,topic:/Angles|Circle/.test(skill)?"Geometry":/Ratio/.test(skill)?"Ratio":/Expanding|Simultaneous/.test(skill)?"Algebra":"Number",skill,assessment_objective:"AO1",marks:2,question_storage_path:`questions/${id}.png` as string|undefined,mark_scheme_storage_path:`marks/${id}.png` as string|undefined,exam_papers:{exam_board:"Edexcel",series:tier==="Higher"?"November 2023":"June 2022",paper_code:paper,tier:tier as string|undefined},metadata:{id:`2022_${paper}_Q${id}`,tier:tier as string|undefined,calculator:calculator as boolean|undefined,grade,g4:88,crop_review:{question:"approved",mark:"approved"}}};};
+ const make=(skill:string,grade=4,tier="Foundation",calculator=false)=>{const id=String(++n),paper=`${calculator?2:1}${tier==="Higher"?"H":"F"}`;return {id,paper_id:`edexcel-${tier}-${paper}`,question_number:id,topic:/Angles|Circle/.test(skill)?"Geometry":/Ratio/.test(skill)?"Ratio":/Expanding|Simultaneous/.test(skill)?"Algebra":"Number",skill,assessment_objective:"AO1",marks:2,question_storage_path:`questions/${id}.png` as string|undefined,mark_scheme_storage_path:`marks/${id}.png` as string|undefined,exam_papers:{exam_board:"Edexcel",series:tier==="Higher"?"November 2023":"June 2022",paper_code:paper,tier:tier as string|undefined},metadata:{id:`2022_${paper}_Q${id}`,tier:tier as string|undefined,calculator:calculator as boolean|undefined,grade,g4:88,crop_review:{question:"approved",mark:"approved"}}};};
  const all=Array.from({length:10},(_,i)=>make("Expanding brackets",4,"Foundation",i%2===1));
  // Two rows share one complete question; its question image is shared and marking images differ.
  const sibling=structuredClone(all[0]);sibling.id="part-b";sibling.question_number="1b";sibling.metadata.id="2022_1F_Q1b";sibling.mark_scheme_storage_path="marks/part-b.png";all[0].question_number="1a";all[0].metadata.id="2022_1F_Q1a";all.push(sibling);
@@ -15,8 +15,8 @@ function fixtureRows(){
  const missing=make("Fractions");missing.mark_scheme_storage_path=undefined;all.push(missing);
  const fix=make("Circle measures");fix.metadata.crop_review.question="needs-fix";all.push(fix);
  const h=make("Simultaneous equations",6,"Higher",true),hb=structuredClone(h);h.question_number="21a";h.metadata.id="2023_2H_Q21a";hb.id="higher-b";hb.question_number="21b";hb.metadata.id="2023_2H_Q21b";hb.metadata.grade=7;hb.mark_scheme_storage_path="marks/higher-b.png";all.push(h,hb);
- const aqa=make("Ratio and proportion");aqa.exam_papers.exam_board="AQA";aqa.exam_papers.series="June 2024";aqa.metadata.id="AQA-F-JUNE2024-1F-Q24";all.push(aqa);
- const unknown=make("Unmapped",0);unknown.topic="Unmapped";unknown.assessment_objective="";unknown.exam_papers.tier=undefined;unknown.exam_papers.series="Unspecified";unknown.metadata.tier=undefined;unknown.metadata.calculator=undefined;all.push(unknown);
+ const aqa=make("Ratio and proportion");aqa.paper_id="aqa-june-2024-1f";aqa.exam_papers.exam_board="AQA";aqa.exam_papers.series="June 2024";aqa.metadata.id="AQA-F-JUNE2024-1F-Q24";all.push(aqa);
+ const unknown=make("Unmapped",0);unknown.paper_id="unknown-paper-source";unknown.topic="Unmapped";unknown.assessment_objective="";unknown.exam_papers.tier=undefined;unknown.exam_papers.series="Unspecified";unknown.metadata.tier=undefined;unknown.metadata.calculator=undefined;all.push(unknown);
  return all;
 }
 async function openFixture(page:Page,owner=true,delaySigning=false,sparseGrades=false){
@@ -49,6 +49,7 @@ async function capture(page:Page,testInfo:TestInfo,name:string,selector?:string)
 test("owner filters Foundation Grade 4, adjusts quantity thresholds and exports the exact filtered CSV",async({page},testInfo)=>{
  test.setTimeout(60000);const state=await openFixture(page);
  const dashboard=page.locator(".insights-dashboard");
+ await expect(page.locator(".insights-stats>div").nth(1).locator("strong")).toHaveText("5");
  await dashboard.getByRole("combobox",{name:"Tier",exact:true}).selectOption("Foundation");await dashboard.getByRole("combobox",{name:"GCSE grade",exact:true}).selectOption("4");await dashboard.getByRole("combobox",{name:"Rows per page",exact:true}).selectOption("10");
  const table=dashboard.getByRole("table",{name:"Filtered enhanced skill resource coverage",exact:true});
  const expanding=table.getByRole("row").filter({has:page.getByRole("rowheader",{name:"Expanding brackets",exact:true})});

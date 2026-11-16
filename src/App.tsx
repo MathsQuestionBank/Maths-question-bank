@@ -1,3 +1,4 @@
+import {countInsightPapers} from "./questionBankInsights";
 import QuestionBankInsights from "./QuestionBankInsights";
 import TargetedShadowBuilder from "./TargetedShadowBuilder";
 import { createSmartShadowMatcher, type TargetedChoice, type TargetedShadowInfo } from "./smartShadowMatching";
@@ -300,7 +301,7 @@ const removeGroup=(key:string)=>setSelected(current=>removeAssessmentGroupIds(qu
 const moveAssessmentGroup=(from:number,to:number)=>setSelected(current=>moveAssessmentGroupIds(questions,current,from,to));
 const sortAssessmentByGrade=()=>setSelected(current=>sortAssessmentGroupIds(questions,current,orderSortMode,orderSortGrade));
 const previewQuestion=questions.find(q=>q.id===previewId);
-const bankPapers=new Set(questions.filter(q=>q.sourceId).map(q=>q.sourceId!.slice(0,7))).size;
+const bankPapers=useMemo(()=>countInsightPapers(questions),[questions]);
 const bankMapped=questions.filter(q=>q.topic!=="Unmapped"&&q.skill!=="Unmapped").length;
 const bankImages=questions.filter(q=>q.questionUrl&&q.markSchemeUrl).length;
 const compactQuestionTitle=(q:Question)=>formatQuestionTitle(q);

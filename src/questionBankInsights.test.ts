@@ -1,6 +1,6 @@
 import {describe,it,expect} from "vitest";
 import type {BankQuestion} from "./questionData";
-import {buildInsightsModel,skillCoverage,gradeCoverage,tierCoverage,paperCoverage,emptyCoverageFilters,coverageStatus,validCoverageThresholds,coverageCsv,missingInsightMetadata} from "./questionBankInsights";
+import {buildInsightsModel,skillCoverage,gradeCoverage,tierCoverage,paperCoverage,emptyCoverageFilters,coverageStatus,validCoverageThresholds,coverageCsv,missingInsightMetadata,countInsightPapers} from "./questionBankInsights";
 const q=(id:string,extra:Partial<BankQuestion>={}):BankQuestion=>({id,sourceId:`EDX-F-JUNE2022-1F-Q${id}`,questionNumber:id,examBoard:"Edexcel",paperCode:"1F",topic:"Algebra",skill:"Expanding brackets",tier:"Foundation",sourceTier:"Foundation",calculator:false,sourceCalculator:false,grade:4,marks:2,series:"June 2022",ao:"AO1",challenge:"Standard",prompt:"",answer:"",tags:[],gradePerformance:{4:90},questionPath:`${id}/q.png`,markSchemePath:`${id}/m.png`,imageCrops:{question:{top:0,bottom:0,left:0,right:0},mark:{top:0,bottom:0,left:0,right:0}},cropReview:{question:"approved",mark:"approved"},...extra});
 const multipart=()=>[q("a",{sourceId:"2022_1F_Q14a",questionNumber:"14a",grade:3,marks:2}),q("b",{sourceId:"2022_1F_Q14b",questionNumber:"14b",grade:4,marks:3})];
 const filter=(extra:Partial<typeof emptyCoverageFilters>)=>({...emptyCoverageFilters,...extra});
@@ -92,6 +92,16 @@ describe("question bank insights inventory",()=>{
   const m=buildInsightsModel([...first,...other]);expect(m.groups).toHaveLength(2);expect(paperCoverage(m)).toHaveLength(2);
   expect(skillCoverage(m,filter({board:"AQA",topic:"Geometry",grade:"4"}))[0]).toMatchObject({questions:1,usable:1,calculator:1});
   expect(skillCoverage(m,filter({board:"AQA",topic:"Algebra"}))).toEqual([]);
+ });
+ it("counts full source paper identities instead of prefixes shared by many series and papers",()=>{
+  const all=[q("1",{sourceId:"EDX-F-JUNE2022-1F-Q01",paperId:"one"}),q("2",{sourceId:"EDX-F-JUNE2023-1F-Q01",series:"June 2023",paperId:"two"}),q("3",{sourceId:"EDX-F-JUNE2023-2F-Q01",series:"June 2023",paperCode:"2F",paperId:"three"})];
+  expect(new Set(all.map(q=>q.sourceId!.slice(0,7))).size).toBe(1);expect(countInsightPapers(all)).toBe(3);
+  expect(countInsightPapers([...all,{...all[0],id:"reimport",paperId:"reimport-id"}])).toBe(3);
+ });
+ it("counts unknown-source linked paper IDs without guessing missing source metadata",()=>{
+  const a=q("1",{paperId:"one"}),b=q("2",{paperId:"one",examBoard:undefined,series:"Unspecified",sourceTier:undefined}),c=q("3",{paperId:"unknown",examBoard:undefined,series:"Unspecified",sourceTier:undefined});
+  expect(countInsightPapers([a,b,c])).toBe(2);
+  expect(countInsightPapers([{...c,paperId:undefined}])).toBe(0);
  });
  it("exports all sorted filtered rows with meaningful headings, Unicode, quotes and formula protection",()=>{
   const all=[q("1",{skill:'=HYPERLINK("unsafe")',topic:"Ratio, proportion"}),q("2",{skill:"Angles — triangles"}),q("3",{grade:5})];
