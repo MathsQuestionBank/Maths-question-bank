@@ -95,3 +95,19 @@ describe("saved worksheet library",()=>{
   expect(normaliseAssessments([null,{},legacy])).toHaveLength(1);
  });
 });
+
+describe("targeted shadow saved compatibility",()=>{
+ const targetedShadow={version:1 as const,originalTitle:"Class assessment",difficulty:"same" as const,replacements:[{originalKey:"q1",originalIds:["q1a","q1b"],replacementKey:"r1",replacementIds:["r1a","r1b"],method:"alternative" as const}],unmatchedOriginalIds:["q2"]};
+ it("preserves the parent link, multipart provenance and sequential exports through backup/reopen",()=>{
+  const original=normaliseAssessments([{...legacy,id:"original"}])[0];
+  const next={...original,id:"targeted",name:original.name+" — Targeted Shadow",ids:["r1a"],targetedShadow,linkedOriginalAssessmentId:"original-cloud-id",renumberStudentQuestions:true,exportMode:"both" as const};
+  const list=replaceAssessment([original],next);
+  const reopened=parseWorksheetBackup(JSON.parse(JSON.stringify(makeWorksheetBackup(list,[],"2026-11-16")))).assessments;
+  expect(reopened[0]).toEqual(original);expect(reopened[1]).toEqual(next);expect(reopened[1].ids).toEqual(["r1a"]);
+  expect(mergeWorksheetBackup([next],[],makeWorksheetBackup([{...next,targetedShadow:{...targetedShadow,difficulty:"easier"}}],[],"2026-11-16")).added).toBe(1);
+ });
+ it("ignores damaged optional provenance without losing the assessment",()=>{
+  const item=normaliseAssessments([{...legacy,targetedShadow:{version:1,replacements:"damaged"}}])[0];
+  expect(item.ids).toEqual(legacy.ids);expect(item.targetedShadow).toBeUndefined();
+ });
+});

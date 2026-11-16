@@ -171,6 +171,7 @@ test("all 16 real legacy Foundation and Higher images are OCR-renumbered without
  const cached=await page.evaluate(()=>JSON.parse(localStorage.getItem("mqb-numbering-layouts-v1")||"{}"));
  expect(Object.keys(cached).length).toBeGreaterThanOrEqual(legacy.length);
  await page.getByRole("button",{name:"Save changes to my account",exact:true}).click();
+ await expect(page.locator(".builder-save-status")).toHaveText("Saved to your account");
  const requests=runtime.ocrRequests();await page.reload();await runtime.open();await ready(page);
  expect(runtime.ocrRequests(),"Successful image processing should be reused without starting OCR again").toBe(requests);
  await expect(page.locator(".mqb-auto-total-text")).toHaveText(statements);
@@ -230,6 +231,7 @@ test("legacy multipart indices heading renumbers as question 1 in a five-questio
  const repeated=await savePdf(page,testInfo,"multipart-repeat-export");
  const repeatedRaster=await renderPdfFirstImage(repeated,affected);expect(Buffer.from(repeatedRaster.pixels).equals(Buffer.from(result.pixels))).toBe(true);
  await page.getByRole("button",{name:"Save changes to my account",exact:true}).click();
+ await expect(page.locator(".builder-save-status")).toHaveText("Saved to your account");
  const requests=runtime.ocrRequests();await page.reload();await runtime.open();await ready(page);
  expect(runtime.ocrRequests()).toBe(requests);
  await expect(page.locator(".mqb-auto-number-text")).toHaveText(["1","2","3","4","5"]);

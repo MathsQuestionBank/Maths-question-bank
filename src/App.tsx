@@ -1,3 +1,5 @@
+import TargetedShadowBuilder from "./TargetedShadowBuilder";
+import { createSmartShadowMatcher, type TargetedChoice, type TargetedShadowInfo } from "./smartShadowMatching";
 import {gradesForTier} from "./gradeBands";
 import {useAccountRole} from "./AuthGate";
 import {paperNumberFromCode,compareOriginalQuestionNumber,weightedGradePerformance,averageQuestionPerformance} from "./teacherQuestionStats";
@@ -103,6 +105,9 @@ const [shadowChoice,setShadowChoice]=useState<Record<string,string>>({});
 const [versionFilter,setVersionFilter]=useState("Original questions");
 const [shadowSetChoice,setShadowSetChoice]=useState("Set 1");
 const [shadowMessage,setShadowMessage]=useState("");
+const [targetedOpen,setTargetedOpen]=useState(false);
+const [targetedInfo,setTargetedInfo]=useState<TargetedShadowInfo|undefined>();
+const [originalTargetedDraft,setOriginalTargetedDraft]=useState<{item:SavedAssessment;editing:{cloudId:string;revision:number}|null}|null>(null);
 const [shadowParentId,setShadowParentId]=useState<string|null>(null);
 const [shadowAssessmentSet,setShadowAssessmentSet]=useState<string|null>(null);
 const [assessmentTitle,setAssessmentTitle]=useState("Mathematics Assessment");
@@ -151,15 +156,17 @@ const [currentAssessmentId,setCurrentAssessmentId]=useState<string|null>(null);
 const [cloudItems,setCloudItems]=useState<CloudAssessment[]>([]);
 const [editingCloud,setEditingCloud]=useState<{cloudId:string;revision:number}|null>(null);
 const [cloudWriteStatus,setCloudWriteStatus]=useState("");
+const currentDraft=():SavedAssessment=>({id:currentAssessmentId||"assessment-"+Date.now(),folder:editingCloud?cloudItems.find(x=>x.cloudId===editingCloud.cloudId)?.item.folder||"Unfiled":saved.find(x=>x.id===currentAssessmentId)?.folder||"Unfiled",name:assessmentTitle.trim()||"Untitled assessment",ids:appendAssessmentGroupIds(questions,selected,[]),minutes,nameBox:includeName,classBox:includeClass,paperTier:builderTier,paperCalc:builderCalc,cover,answers:exportMode==="marks"||exportMode==="both",exportMode,teacherSourceMode,performanceGrade,printTeacherStats,renumberStudentQuestions,replaceSourceTotals,numberingMasks,linkedOriginalAssessmentId:shadowParentId||undefined,shadowSet:shadowAssessmentSet||undefined,targetedShadow:targetedInfo});
 const saveToAccount=async(asNew=false)=>{
  if(cloudBusy)return;
- const item:SavedAssessment={id:asNew?"assessment-"+Date.now():currentAssessmentId||"assessment-"+Date.now(),folder:editingCloud?cloudItems.find(x=>x.cloudId===editingCloud.cloudId)?.item.folder||"Unfiled":saved.find(x=>x.id===currentAssessmentId)?.folder||"Unfiled",name:assessmentTitle.trim()||"Untitled assessment",ids:appendAssessmentGroupIds(questions,selected,[]),minutes,nameBox:includeName,classBox:includeClass,paperTier:builderTier,paperCalc:builderCalc,cover,answers:exportMode==="marks"||exportMode==="both",exportMode,teacherSourceMode,performanceGrade,printTeacherStats,renumberStudentQuestions,replaceSourceTotals,numberingMasks,linkedOriginalAssessmentId:shadowParentId||undefined,shadowSet:shadowAssessmentSet||undefined};
+ const item=currentDraft();if(asNew)item.id="assessment-"+Date.now();
  setCloudBusy(true);setCloudWriteStatus("Saving to your account…");
  try{const result=await saveVersionedAssessment(item,asNew?undefined:editingCloud??undefined);setEditingCloud(result);setCloudWriteStatus("Saved to your account");await refreshCloud()}
  catch(e){setCloudWriteStatus(e instanceof Error?e.message:"Save failed. Your open assessment has not been discarded.")}
  finally{setCloudBusy(false)}
 };
 const openCloudForEdit=(entry:CloudAssessment)=>{
+ setOriginalTargetedDraft(null);
  if(entry.revision===undefined){setCloudWriteStatus("Cloud revision unavailable. Reload after upgrading the database.");return}
  openSavedAssessment(entry.item);setEditingCloud({cloudId:entry.cloudId,revision:entry.revision});
 };
@@ -306,6 +313,7 @@ const createShadowCopy=()=>{
   result.missing.length+" unmatched original questions will remain unchanged. Create this mixed shadow copy?"
  ))return;
  const parent=editingCloud?.cloudId||currentAssessmentId;
+ setTargetedInfo(undefined);setTargetedOpen(false);setOriginalTargetedDraft(null);
  setShadowParentId(parent||null);
  setShadowAssessmentSet(set);
  setSelected(result.ids);
@@ -314,6 +322,20 @@ const createShadowCopy=()=>{
  setEditingCloud(null);
  setCloudWriteStatus("");
  setShadowMessage("Created a separate draft with "+result.replaced+" shadow substitutions and "+result.missing.length+" unmatched originals. Save to your account when ready.");
+};
+const generateTargeted=(result:{ids:string[];info:TargetedShadowInfo;totalMarks:number})=>{
+ // Validate again against current records and selection, not a stale UI snapshot.
+ const choices=chosen.flatMap<TargetedChoice>(group=>{
+  const replacement=result.info.replacements.find(choice=>choice.originalKey===group.key);
+  if(replacement)return [{originalKey:group.key,replacementKey:replacement.replacementKey}];
+  return result.info.unmatchedOriginalIds.some(id=>group.parts.some(part=>part.id===id))?[{originalKey:group.key,replacementKey:null}]:[];
+ });
+ const validated=createSmartShadowMatcher(questions,selected).generate(choices,result.info.difficulty,assessmentTitle);
+ setOriginalTargetedDraft({item:currentDraft(),editing:editingCloud?{...editingCloud}:null});
+ setShadowParentId(editingCloud?.cloudId||currentAssessmentId||null);setShadowAssessmentSet(null);setTargetedInfo(validated.info);
+ setCurrentAssessmentId(null);setEditingCloud(null);setSelected(validated.ids);setAssessmentTitle(assessmentTitle+" — Targeted Shadow");
+ setBuilderTier("Any");setBuilderCalc("Any");setRenumberStudentQuestions(true);setReplaceSourceTotals(true);setNumberingMasks({});setMaskEditorGroupKey(null);
+ setExportMode("both");setPrintTeacherStats(false);setPrintError("");setCloudWriteStatus("");setTargetedOpen(false);setShadowMessage("");
 };
 const total=calculateAssessmentMarks(chosen);
 const exportReadiness=checkAssessmentExport(chosen,exportMode);
@@ -358,8 +380,9 @@ const toggle=(id:string)=>setSelected(current=>{
   ?removeAssessmentGroupIds(questions,current,group.key)
   :appendAssessmentGroupIds(questions,current,[id]);
 });
-const navigate=(p:Page)=>{if(p==="builder"&&page!=="builder")setEditingCloud(null);setPage(p);window.scrollTo(0,0)};
+const navigate=(p:Page)=>{setTargetedOpen(false);if(p==="builder"&&page!=="builder")setEditingCloud(null);setPage(p);window.scrollTo(0,0)};
 const openSavedAssessment=(item:SavedAssessment)=>{
+ setTargetedOpen(false);setTargetedInfo(item.targetedShadow);
  setCurrentAssessmentId(item.id);setAssessmentTitle(item.name);setSelected([...item.ids]);setMinutes(item.minutes);
  setIncludeName(item.nameBox??true);setIncludeClass(item.classBox??false);
  setBuilderTier(item.paperTier==="Higher"||item.paperTier==="Foundation"||item.paperTier==="Crossover"?item.paperTier:"Any");
@@ -407,8 +430,11 @@ return <div className="site">
  <div className="builder-overview-stats" aria-label="Assessment summary">
   <div><strong>{chosen.length}</strong><span>Questions</span></div><div><strong>{total}</strong><span>Total marks</span></div><div><strong>{minutes}</strong><span>Minutes</span></div>
  </div>
- <div className="builder-overview-actions"><button className="secondary" onClick={()=>navigate("bank")}>+ Add questions</button><a className="builder-preview-shortcut" href="#assessment-preview">View preview ↓</a></div>
+ <div className="builder-overview-actions"><button className="secondary" onClick={()=>navigate("bank")}>+ Add questions</button><button type="button" className="secondary" disabled={!chosen.length||loadingQuestions} onClick={()=>setTargetedOpen(open=>!open)}>Create Targeted Shadow Assessment</button><a className="builder-preview-shortcut" href="#assessment-preview">View preview ↓</a></div>
 </div>
+{targetedInfo&&<section className="panel targeted-origin-banner print-hide"><h3>Targeted shadow of {targetedInfo.originalTitle}</h3><p>{targetedInfo.replacements.length} replacement questions · {targetedInfo.difficulty} difficulty. Original assessment preserved.{shadowParentId?" Linked to the original assessment.":" Original account link unavailable because the original was not saved."}</p><details><summary>Original and replacement references</summary>{targetedInfo.replacements.map(choice=><p key={choice.originalKey}>{choice.originalIds.map(id=>questions.find(q=>q.id===id)?.sourceId||id).join(", ")} → {choice.replacementIds.map(id=>questions.find(q=>q.id===id)?.sourceId||id).join(", ")} · {choice.method==="official"?"Official shadow":"Smart alternative"}</p>)}</details></section>}
+{originalTargetedDraft&&<button type="button" className="secondary print-hide targeted-return" onClick={()=>{const original=originalTargetedDraft;openSavedAssessment(original.item);setEditingCloud(original.editing);setOriginalTargetedDraft(null)}}>Return to original assessment</button>}
+{targetedOpen&&<TargetedShadowBuilder questions={questions} excludedIds={selected} ids={chosen.flatMap(group=>group.parts.map(part=>part.id))} title={assessmentTitle} onClose={()=>setTargetedOpen(false)} onGenerate={generateTargeted}/>}
 {excluded>0&&<div className="builder-filter-alert print-hide" role="status">{excluded} selected {excluded===1?"question is":"questions are"} excluded by the current paper tier or calculator settings. Change the settings below to include them.</div>}
 <section className="panel filters builder-settings builder-config"><div className="builder-settings-head"><span className="builder-eyebrow">PAPER SETTINGS</span><h2>Configure your paper</h2></div>
 <div className="builder-section"><h3>Assessment details</h3><label>Assessment title<input value={assessmentTitle} onChange={e=>setAssessmentTitle(e.target.value)}/></label><label>Time allowance (minutes)<input type="number" min="1" value={minutes} onChange={e=>setMinutes(Math.max(1,Number(e.target.value)||1))}/></label></div><div className="builder-section"><h3>Paper options</h3><fieldset className="builder-choice"><legend>Paper tier</legend><div className="builder-choice-options">{(["Any","Higher","Foundation","Crossover"] as const).map(value=><button type="button" key={value} className={builderTier===value?"primary small":"secondary small"} aria-pressed={builderTier===value} onClick={()=>setBuilderTier(value)}>{value==="Any"?"Mixed":value}</button>)}</div></fieldset><fieldset className="builder-choice"><legend>Calculator requirement</legend><div className="builder-choice-options">{(["Any","Calculator","Non-calculator"] as const).map(value=><button type="button" key={value} className={builderCalc===value?"primary small":"secondary small"} aria-pressed={builderCalc===value} onClick={()=>setBuilderCalc(value)}>{value==="Any"?"Mixed":value}</button>)}</div></fieldset></div><div className="builder-section"><h3>Teacher information</h3>{readyShadowSets.length>0&&<div className="shadow-builder-actions print-hide"><label>Official shadow set<select value={readyShadowSets.includes(shadowSetChoice)?shadowSetChoice:readyShadowSets[0]} onChange={e=>setShadowSetChoice(e.target.value)}>{readyShadowSets.map(name=><option key={name} value={name}>{name}</option>)}</select></label><button className="secondary full" type="button" disabled={!chosenAll.length} onClick={createShadowCopy}>Create Shadow Assessment</button><p className="hint">Creates a separate editable copy and preserves the original. Only fully reviewed linked shadow questions are substituted.</p>{shadowMessage&&<p role="status">{shadowMessage}</p>}</div>}
@@ -432,7 +458,7 @@ return <div className="site">
  <button className="primary full builder-save-button" disabled={!chosen.length||cloudBusy} onClick={()=>void saveToAccount()}>{cloudBusy?"Saving…":editingCloud?"Save changes to my account":"Save to my account"}</button>
  {(editingCloud||currentAssessmentId)&&<button className="secondary full" disabled={cloudBusy||!chosen.length} onClick={()=>void saveToAccount(true)}>Save as new assessment</button>}
  {cloudWriteStatus&&<p role="status" className="builder-save-status">{cloudWriteStatus}</p>}
- <button className="secondary full builder-new-button" onClick={()=>{setEditingCloud(null);setCurrentAssessmentId(null);setAssessmentTitle("Mathematics Assessment");setSelected([]);setMinutes(45);setIncludeName(true);setIncludeClass(false);setBuilderTier("Any");setBuilderCalc("Any");setCover(true);setRenumberStudentQuestions(false);setReplaceSourceTotals(true);setNumberingMasks({});setMaskEditorGroupKey(null);setExportMode("questions");setTeacherSourceMode("inline");setPrintError("");setPerformanceGrade("All grades");setPrintTeacherStats(false);setShadowParentId(null);setShadowAssessmentSet(null);setShadowMessage("")}}>Start new assessment</button>
+ <button className="secondary full builder-new-button" onClick={()=>{setTargetedOpen(false);setTargetedInfo(undefined);setOriginalTargetedDraft(null);setEditingCloud(null);setCurrentAssessmentId(null);setAssessmentTitle("Mathematics Assessment");setSelected([]);setMinutes(45);setIncludeName(true);setIncludeClass(false);setBuilderTier("Any");setBuilderCalc("Any");setCover(true);setRenumberStudentQuestions(false);setReplaceSourceTotals(true);setNumberingMasks({});setMaskEditorGroupKey(null);setExportMode("questions");setTeacherSourceMode("inline");setPrintError("");setPerformanceGrade("All grades");setPrintTeacherStats(false);setShadowParentId(null);setShadowAssessmentSet(null);setShadowMessage("")}}>Start new assessment</button>
 </div></section>
  {editingMaskAsset&&<AssessmentMaskEditor key={editingMaskAsset.maskKey+editingMaskAsset.src} asset={{...editingMaskAsset,key:editingMaskAsset.maskKey}} mask={numberingMasks[editingMaskAsset.maskKey]||numberingMaskProposal(editingMaskAsset,numbering.results[editingMaskAsset.maskKey])} replaceSourceTotals={replaceSourceTotals&&editingMaskAsset.kind==="question"} onChange={mask=>{const corrected=numbering.acceptManual(editingMaskAsset,mask);setNumberingMasks(previous=>({...previous,[editingMaskAsset.maskKey]:corrected}))}} onClose={()=>setMaskEditorGroupKey(null)}/>}
 <div className="layout builder-layout">
@@ -475,7 +501,7 @@ return <div className="site">
  {cloudWriteStatus&&<p role="status">{cloudWriteStatus}</p>}
  {cloudMessage&&<p role="status">{cloudMessage}</p>}
  <div className="library-toolbar"><label>Folder <select aria-label="Filter account assessments by folder" value={libraryFolder} onChange={e=>setLibraryFolder(e.target.value)}>{["All","Unfiled",...new Set([...folders,...cloudItems.map(x=>x.item.folder)].filter(x=>x!=="Unfiled"))].map(name=><option key={name} value={name}>{name}</option>)}</select></label><label>Create folder <input aria-label="New account folder name" placeholder="e.g. Year 10" value={newFolderName} onChange={e=>setNewFolderName(e.target.value)}/></label><button className="secondary small" disabled={!newFolderName.trim()||cloudBusy} onClick={()=>void addFolder()}>Add folder</button>{folders.includes(libraryFolder)&&<><button className="secondary small" disabled={cloudBusy} onClick={()=>void changeFolderName()}>Rename folder</button><button className="remove" disabled={cloudBusy} onClick={()=>void removeFolder()}>Delete folder</button></>}<span className="hint">{cloudItems.length} assessment(s) saved to your account</span></div>
- {!cloudBusy&&cloudItems.length===0?<div className="empty">No account assessments yet. Build an assessment and save it to your account.</div>:cloudItems.filter(entry=>libraryFolder==="All"||entry.item.folder===libraryFolder).length===0?<div className="empty">No assessments in this folder.</div>:cloudItems.filter(entry=>libraryFolder==="All"||entry.item.folder===libraryFolder).map(entry=><div key={entry.cloudId} className="saved-item library-item"><div><strong>{entry.item.name}</strong>{entry.item.shadowSet&&<p className="hint">Linked shadow assessment · {entry.item.shadowSet}</p>}<p>{entry.item.ids.length} question references · {entry.item.minutes} minutes · {entry.item.folder}</p></div><div className="library-actions"><button className="secondary small" disabled={cloudBusy} onClick={()=>openCloudForEdit(entry)}>Open / Edit</button><button className="secondary small" disabled={cloudBusy} onClick={()=>{const name=window.prompt("Rename assessment",entry.item.name)?.trim();if(name&&name!==entry.item.name)void modifyCloudEntry(entry,{name})}}>Rename</button><label className="library-folder-picker"><span>Folder</span><select aria-label={`Folder for account assessment ${entry.item.name}`} disabled={cloudBusy} value={entry.item.folder} onChange={e=>void modifyCloudEntry(entry,{folder:e.target.value})}>{[...new Set(["Unfiled",...folders,...cloudItems.map(x=>x.item.folder)])].map(name=><option key={name} value={name}>{name}</option>)}</select></label><button className="remove" disabled={cloudBusy} onClick={()=>void deleteCloudEntry(entry)}>Delete</button></div></div>)}
+ {!cloudBusy&&cloudItems.length===0?<div className="empty">No account assessments yet. Build an assessment and save it to your account.</div>:cloudItems.filter(entry=>libraryFolder==="All"||entry.item.folder===libraryFolder).length===0?<div className="empty">No assessments in this folder.</div>:cloudItems.filter(entry=>libraryFolder==="All"||entry.item.folder===libraryFolder).map(entry=><div key={entry.cloudId} className="saved-item library-item"><div><strong>{entry.item.name}</strong>{entry.item.shadowSet&&<p className="hint">Linked shadow assessment · {entry.item.shadowSet}</p>}{entry.item.targetedShadow&&<p className="hint">Targeted shadow · {entry.item.targetedShadow.originalTitle}</p>}<p>{entry.item.ids.length} question references · {entry.item.minutes} minutes · {entry.item.folder}</p></div><div className="library-actions"><button className="secondary small" disabled={cloudBusy} onClick={()=>openCloudForEdit(entry)}>Open / Edit</button><button className="secondary small" disabled={cloudBusy} onClick={()=>{const name=window.prompt("Rename assessment",entry.item.name)?.trim();if(name&&name!==entry.item.name)void modifyCloudEntry(entry,{name})}}>Rename</button><label className="library-folder-picker"><span>Folder</span><select aria-label={`Folder for account assessment ${entry.item.name}`} disabled={cloudBusy} value={entry.item.folder} onChange={e=>void modifyCloudEntry(entry,{folder:e.target.value})}>{[...new Set(["Unfiled",...folders,...cloudItems.map(x=>x.item.folder)])].map(name=><option key={name} value={name}>{name}</option>)}</select></label><button className="remove" disabled={cloudBusy} onClick={()=>void deleteCloudEntry(entry)}>Delete</button></div></div>)}
  {(reconciliation.browserOnly.length>0||reconciliation.conflicts.length>0)&&<div className="panel"><h3>Browser assessments needing attention</h3><p className="hint">These are older assessments saved only in this browser or different from an account copy. They will not be deleted or overwritten automatically.</p>{reconciliation.conflicts.length>0&&<p role="alert">{reconciliation.conflicts.length} browser version(s) differ from an account version. Review before importing.</p>}{reconciliation.browserOnly.length>0&&<button className="secondary small" disabled={cloudBusy} onClick={()=>void importMissingBrowserAssessments()}>Import {reconciliation.browserOnly.length} browser-only assessment(s)</button>}{[...reconciliation.browserOnly,...reconciliation.conflicts.map(x=>x.browser)].map(item=><div className="saved-item" key={item.id}><div><strong>{item.name}</strong><p>{item.ids.length} questions · Browser copy</p></div><button className="secondary small" onClick={()=>{setEditingCloud(null);openSavedAssessment(item)}}>Open browser version</button></div>)}</div>}
  </div>}
 {isOwner&&page==="import"&&<ZipImporter onComplete={()=>{void reloadQuestions()}}/>}{isOwner&&page==="review"&&<CropReviewQueue questions={questions} onUpdate={(id,patch)=>setQuestions(old=>old.map(q=>q.id===id?{...q,...patch}:q))}/>}

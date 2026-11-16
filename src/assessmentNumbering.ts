@@ -23,7 +23,7 @@ const available=(value:string|undefined)=>{
  return /^(?:unspecified|unknown|unmapped)$/i.test(text)?"":text;
 };
 
-function questionSource(q:BankQuestion):string {
+export function formatQuestionSource(q:BankQuestion):string {
  const paper=available(q.paperCode);
  const paperNumber=paper.match(/^([123])[FH]$/i)?.[1];
  // Loaded bank rows distinguish a real tier from the question-bank display's
@@ -43,9 +43,9 @@ export function formatAssessmentSource(group:AssessmentGroup,allQuestions:readon
  if(q.shadowPaperId||q.shadowOfQuestionId){
   const shadow=["Shadow",available(q.shadowSet)].filter(Boolean).join(" ");
   const original=allQuestions.find(original=>original.id===q.shadowOfQuestionId);
-  return original?`${shadow} | Based on: ${questionSource(original)}`:`${shadow} | Original source unavailable`;
+  return original?`${shadow} | Based on: ${formatQuestionSource(original)}`:`${shadow} | Original source unavailable`;
  }
- return questionSource(q);
+ return formatQuestionSource(q);
 }
 
 /** The cropped source already contains the desired number/total when the
