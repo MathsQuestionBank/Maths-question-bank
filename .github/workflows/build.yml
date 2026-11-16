@@ -32,6 +32,7 @@ jobs:
             docs/multipart-dependency-audit/
             docs/multipart-audit-export.md
             docs/insights-skill-audit/
+            docs/bracket-performance-audit/
             docs/find-similar-questions.md
             docs/find-similar-examples/
             docs/grade-interpretation-examples/
