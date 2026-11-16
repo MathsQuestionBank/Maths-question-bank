@@ -30,6 +30,7 @@ jobs:
             docs/smart-shadow-assessments.md
             docs/gcse-grade-interpretation.md
             docs/multipart-dependency-audit/
+            docs/multipart-audit-export.md
             docs/find-similar-questions.md
             docs/find-similar-examples/
             docs/grade-interpretation-examples/

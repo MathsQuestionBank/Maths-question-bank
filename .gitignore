@@ -8,3 +8,8 @@ playwright-report/
 *.tsbuildinfo
 
 public/ocr/
+
+# Local private examination exports must never be versioned.
+private-audit-exports/
+multipart-audit-*.zip
+multipart-audit-*/
