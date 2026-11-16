@@ -1,0 +1,50 @@
+{
+  "inspection_basis": "Public source counterpart PDF text and rendered pages inspected; no private production crop inspected. These observations are evidence against blanket merging, not applied per-record reclassifications.",
+  "source": {
+    "url": "https://pmt.physicsandmathstutor.com/download/Maths/GCSE/Past-Papers/Edexcel/Paper-1F/QP/Nov%202024%20QP.pdf",
+    "sha256": "c99943fdf0673b5944cfe15154b7f1f7775073ba7dc2503b0e01b74ab725dc09",
+    "series": "November 2024",
+    "paper_code": "1F"
+  },
+  "cases": [
+    {
+      "database_record_id": "3b70d8a3-d57c-4a96-8b32-5a05f2e0113f",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q10B",
+      "paper_id": "6d1b9f13-86dc-4161-b376-ba7ce2469e4d",
+      "stored_question_reference": "Q10b",
+      "question_pdf_page": 8,
+      "stored_skill": "Solving equations; Graphs and coordinates",
+      "retained_original_skill": "Graphs and equations of lines",
+      "observation": "Write down the equation of the supplied mirror line; the supplied graph has horizontal mirror line y = -1. This is not solving an equation for an unknown.",
+      "possible_label_after_record_review": "Graphs and equations of lines",
+      "applied_to_runtime": false,
+      "teacher_approved": false
+    },
+    {
+      "database_record_id": "f1cf84d5-9177-4139-8091-5ff078746a6d",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q15B",
+      "paper_id": "6d1b9f13-86dc-4161-b376-ba7ce2469e4d",
+      "stored_question_reference": "Q15b",
+      "question_pdf_page": 12,
+      "stored_skill": "Solving equations",
+      "retained_original_skill": "Solve linear equations",
+      "observation": "Solve 4(3y + 1) = 28: an explicitly linear equation.",
+      "possible_label_after_record_review": "Solving linear equations",
+      "applied_to_runtime": false,
+      "teacher_approved": false
+    },
+    {
+      "database_record_id": "c05acfdd-b689-41f2-8928-53df8cc5d47e",
+      "source_question_id": "EDX-F-NOVEMBER2024-1F-Q26",
+      "paper_id": "6d1b9f13-86dc-4161-b376-ba7ce2469e4d",
+      "stored_question_reference": "Q26",
+      "question_pdf_page": 21,
+      "stored_skill": "Solving equations",
+      "retained_original_skill": "Solve quadratic equations",
+      "observation": "Solve x² - 2x - 15 = 0: an explicitly quadratic equation on this Foundation paper.",
+      "possible_label_after_record_review": "Solving quadratic equations",
+      "applied_to_runtime": false,
+      "teacher_approved": false
+    }
+  ]
+}

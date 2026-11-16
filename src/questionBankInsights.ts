@@ -1,3 +1,4 @@
+import {canonicalInsightSkills,insightSkillRowKey,normalInsightSkill,resolveInsightSkill} from "./insightsSkills";
 import {weightedGradePerformance,validStudentGrade} from "./teacherQuestionStats";
 import type {BankQuestion} from "./questionData";
 import {buildAssessmentGroups,checkAssessmentExport,type AssessmentGroup} from "./assessmentGroups";
@@ -35,7 +36,7 @@ export function countInsightPapers(all:BankQuestion[]):number {
  return new Set(all.flatMap(q=>{const key=q.paperId?sourcesById.get(q.paperId)||`paper:${q.paperId}`:source(q);return key?[key]:[]})).size;
 }
 export type InsightGroup={group:AssessmentGroup;questionReady:boolean;markReady:boolean;usable:boolean;tier:string;calculator:string};
-export type CoverageRow={key:string;topic:string;skill:string;tier:string;targetStudentGrade:number|null;performanceBand:string;withPerformance:number;missingPerformance:number;medianPercent:number|null;records:number;questions:number;available:number;usable:number;calculator:number;nonCalculator:number;unknownCalculator:number;status:CoverageStatus};
+export type CoverageRow={key:string;canonicalSkillId:string;originalLabels:string[];reviewReason:string|null;topics:string[];tiers:string[];topic:string;skill:string;tier:string;targetStudentGrade:number|null;performanceBand:string;withPerformance:number;missingPerformance:number;medianPercent:number|null;records:number;questions:number;available:number;usable:number;calculator:number;nonCalculator:number;unknownCalculator:number;status:CoverageStatus};
 export type InsightsModel=ReturnType<typeof buildInsightsModel>;
 
 /** Reuse export's distinct-asset/shared-image rules, without downloading or
@@ -59,29 +60,42 @@ export function buildInsightsModel(all:BankQuestion[]){
  const metadataIssues=new Map<string,number>();
  for(const q of records)for(const issue of missingInsightMetadata(q))metadataIssues.set(issue,(metadataIssues.get(issue)||0)+1);
  const series=new Set(records.filter(q=>known(q.series)).map(q=>normal(q.series)));
- const skillNames=new Map<string,string>();for(const q of records)for(const skill of splitInsightSkills(q))if(!skillNames.has(normal(skill)))skillNames.set(normal(skill),skill);
+ const skillMemberships=new Map(records.map(q=>[q.id,canonicalInsightSkills(q)]));
+ const skillNames=new Map<string,string>(),skillOriginals=new Map<string,Set<string>>(),reviewSkills=new Set<string>();
+ for(const skills of skillMemberships.values())for(const skill of skills){
+  const previous=skillNames.get(skill.id);
+  // Prefer a mixed-case original over an all-capitals variant, deterministically.
+  const order=(s:string)=>(s===s.toUpperCase()?"1":"0")+s;
+  if(!previous||order(skill.label).localeCompare(order(previous),"en-GB")<0)skillNames.set(skill.id,skill.label);
+  if(!skillOriginals.has(skill.id))skillOriginals.set(skill.id,new Set());
+  for(const label of skill.originalLabels)skillOriginals.get(skill.id)!.add(label);
+  if(skill.reviewReason)reviewSkills.add(skill.id);
+ }
  const readiness={records:records.length,questionImages:records.filter(q=>q.questionPath).length,markImages:records.filter(q=>q.markSchemePath).length,bothImages:records.filter(q=>q.questionPath&&q.markSchemePath).length,missingQuestion:records.filter(q=>!q.questionPath).length,missingMark:records.filter(q=>!q.markSchemePath).length,unavailableLinks:records.filter(q=>q.questionPath&&!q.questionUrl||q.markSchemePath&&!q.markSchemeUrl).length,incompleteMetadata:records.filter(q=>missingInsightMetadata(q).length).length,cropOutstanding:records.filter(q=>q.questionPath&&q.cropReview.question!=="approved"||q.markSchemePath&&q.cropReview.mark!=="approved").length,cropNeedsFix:records.filter(q=>q.questionPath&&q.cropReview.question==="needs-fix"||q.markSchemePath&&q.cropReview.mark==="needs-fix").length};
- return {records,groups,byPart,readiness,metadataIssues:[...metadataIssues].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])),excluded:all.length-records.length,skillNames,skills:[...skillNames.values()].sort((a,b)=>a.localeCompare(b)),series:series.size,topics:[...new Set(records.map(q=>known(q.topic)?q.topic.trim():"Unmapped"))].sort(),boards:[...new Set(records.filter(q=>known(q.examBoard)).map(q=>q.examBoard!.trim()))].sort()};
+ return {records,groups,byPart,readiness,metadataIssues:[...metadataIssues].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])),excluded:all.length-records.length,skillMemberships,skillOriginals,reviewSkills,skillNames,skills:[...skillNames.values()].sort((a,b)=>a.localeCompare(b)),series:series.size,topics:[...new Set(records.map(q=>known(q.topic)?q.topic.trim():"Unmapped"))].sort(),boards:[...new Set(records.filter(q=>known(q.examBoard)).map(q=>q.examBoard!.trim()))].sort()};
 }
 export function skillCoverage(model:InsightsModel,filters:CoverageFilters=emptyCoverageFilters,thresholds:CoverageThresholds=defaultCoverageThresholds,sort:CoverageSort="least"):CoverageRow[]{
  const targetStudentGrade=validStudentGrade(Number(filters.targetGrade))?Number(filters.targetGrade):null;
- const buckets=new Map<string,{row:CoverageRow;groups:Set<InsightGroup>}>();
+ const buckets=new Map<string,{row:CoverageRow;groups:Set<InsightGroup>;records:Set<string>;originals:Set<string>;topics:Set<string>;tiers:Set<string>}>();
+ const query=normalInsightSkill(filters.skill),querySkill=resolveInsightSkill(filters.skill);
  for(const q of model.records){
   const tier=storedTier(q),topic=known(q.topic)?q.topic.trim():"Unmapped",calc=storedCalculator(q);
   if(filters.tier!=="All"&&tier!==filters.tier||filters.topic!=="All"&&normal(topic)!==normal(filters.topic)||filters.calculator!=="All"&&calc!==filters.calculator||filters.board!=="All"&&normal(q.examBoard||"")!==normal(filters.board))continue;
   const whole=model.byPart.get(q.id)!;
   if(targetStudentGrade!==null&&!matchesPerformanceBand(weightedGradePerformance(whole.group.parts,targetStudentGrade),filters.performanceBand))continue;
-  for(const raw of splitInsightSkills(q)){
-   if(filters.skill&&!normal(raw).includes(normal(filters.skill)))continue;
-   const skill=model.skillNames.get(normal(raw))||raw;
-   const key=JSON.stringify([normal(topic),normal(skill),tier]);
-   if(!buckets.has(key))buckets.set(key,{row:{key,topic,skill,tier,targetStudentGrade,performanceBand:targetStudentGrade===null?"All":filters.performanceBand,withPerformance:0,missingPerformance:0,medianPercent:null,records:0,questions:0,available:0,usable:0,calculator:0,nonCalculator:0,unknownCalculator:0,status:"No coverage"},groups:new Set()});
-   const entry=buckets.get(key)!;entry.row.records++;entry.groups.add(model.byPart.get(q.id)!);
+  for(const membership of model.skillMemberships.get(q.id)||[]){
+   const skill=model.skillNames.get(membership.id)!;
+   if(query&&querySkill.id!==membership.id&&!normalInsightSkill(skill).includes(query)&&![...model.skillOriginals.get(membership.id)||[]].some(raw=>normalInsightSkill(raw).includes(query)))continue;
+   const key=insightSkillRowKey(membership,topic,tier);
+   if(!buckets.has(key))buckets.set(key,{row:{key,canonicalSkillId:membership.id,originalLabels:[],reviewReason:membership.reviewReason,topics:[],tiers:[],topic:"",skill,tier:"",targetStudentGrade,performanceBand:targetStudentGrade===null?"All":filters.performanceBand,withPerformance:0,missingPerformance:0,medianPercent:null,records:0,questions:0,available:0,usable:0,calculator:0,nonCalculator:0,unknownCalculator:0,status:"No coverage"},groups:new Set(),records:new Set(),originals:new Set(),topics:new Set(),tiers:new Set()});
+   const entry=buckets.get(key)!;entry.records.add(q.id);entry.groups.add(whole);entry.topics.add(topic);entry.tiers.add(tier);
+   for(const original of membership.originalLabels)entry.originals.add(original);
   }
  }
- const rows=[...buckets.values()].map(({row,groups})=>{
-  row.questions=groups.size;
-  for(const g of groups){if(g.questionReady){row.available++;if(g.calculator==="Calculator")row.calculator++;else if(g.calculator==="Non-calculator")row.nonCalculator++;else row.unknownCalculator++;}if(g.usable)row.usable++;}
+ const rows=[...buckets.values()].map(({row,groups,records,originals,topics,tiers})=>{
+  row.originalLabels=[...originals].sort();row.topics=[...topics].sort();row.tiers=[...tiers].sort();
+  row.topic=row.topics.join(" | ");row.tier=row.tiers.join(" | ");row.records=records.size;row.questions=groups.size;
+  for(const g of groups){if(g.questionReady){row.available++;if(g.calculator==="Calculator"){row.calculator++;}else if(g.calculator==="Non-calculator"){row.nonCalculator++;}else row.unknownCalculator++;}if(g.usable)row.usable++;}
   if(targetStudentGrade!==null){const values=[...groups].filter(g=>g.usable).map(g=>weightedGradePerformance(g.group.parts,targetStudentGrade)).filter((v):v is number=>v!==null);row.withPerformance=values.length;row.missingPerformance=row.usable-values.length;row.medianPercent=median(values);}
   row.status=coverageStatus(row.usable,thresholds);return row;
  });
@@ -114,7 +128,7 @@ export function tierCoverage(model:InsightsModel,thresholds:CoverageThresholds){
  return ["Foundation","Higher","Unknown"].map(tier=>{
   const groups=model.groups.filter(g=>g.tier===tier),records=model.records.filter(q=>storedTier(q)===tier);
   const skills=new Map<string,Set<InsightGroup>>();
-  for(const q of records)for(const skill of splitInsightSkills(q)){const key=normal(skill);if(!skills.has(key))skills.set(key,new Set());const g=model.byPart.get(q.id)!;if(g.usable)skills.get(key)!.add(g);}
+  for(const q of records)for(const skill of model.skillMemberships.get(q.id)||[]){const key=skill.id;if(!skills.has(key))skills.set(key,new Set());const g=model.byPart.get(q.id)!;if(g.usable)skills.get(key)!.add(g);}
   const perSkill=[...skills.values()].map(set=>set.size);
   return {tier,records:records.length,questions:groups.length,usable:groups.filter(g=>g.usable).length,skills:skills.size,limitedSkills:perSkill.filter(n=>n<thresholds.developing).length,calculator:groups.filter(g=>g.usable&&g.calculator==="Calculator").length,nonCalculator:groups.filter(g=>g.usable&&g.calculator==="Non-calculator").length,unknownCalculator:groups.filter(g=>g.usable&&g.calculator==="Unknown").length};
  });
@@ -133,6 +147,6 @@ const csvCell=(value:string|number)=>{
  return '"'+text.replace(/"/g,'""')+'"';
 };
 export function coverageCsv(rows:CoverageRow[],thresholds:CoverageThresholds,board="All"){
- const headers=["Topic","Enhanced skill","Tier","Target final student GCSE grade","Historical performance filter","Usable questions with complete cohort performance","Usable questions missing complete cohort performance","Median question average % of available marks","Mapped records","Grouped whole questions","Question-image available questions","Complete usable questions","Calculator available questions","Non-calculator available questions","Unknown calculator available questions","Coverage status (usable quantity)","Developing starts at","Good starts at","Exam board filter"];
- return "\uFEFF"+[headers,...rows.map(r=>[r.topic,r.skill,r.tier,r.targetStudentGrade??"Not selected",performanceBandLabels[r.performanceBand]||r.performanceBand,r.targetStudentGrade===null?"Not selected":r.withPerformance,r.targetStudentGrade===null?"Not selected":r.missingPerformance,r.medianPercent??"No data",r.records,r.questions,r.available,r.usable,r.calculator,r.nonCalculator,r.unknownCalculator,r.status,thresholds.developing,thresholds.good,board])].map(row=>row.map(csvCell).join(",")).join("\r\n");
+ const headers=["Topic","Enhanced skill","Tier","Target final student GCSE grade","Historical performance filter","Usable questions with complete cohort performance","Usable questions missing complete cohort performance","Median question average % of available marks","Mapped records","Grouped whole questions","Question-image available questions","Complete usable questions","Calculator available questions","Non-calculator available questions","Unknown calculator available questions","Coverage status (usable quantity)","Developing starts at","Good starts at","Exam board filter","Canonical skill key","Original skill labels (JSON)","Skill label resolution","Skill label review reason","Original topics (JSON)","Original tiers (JSON)"];
+ return "\uFEFF"+[headers,...rows.map(r=>[r.topic,r.skill,r.tier,r.targetStudentGrade??"Not selected",performanceBandLabels[r.performanceBand]||r.performanceBand,r.targetStudentGrade===null?"Not selected":r.withPerformance,r.targetStudentGrade===null?"Not selected":r.missingPerformance,r.medianPercent??"No data",r.records,r.questions,r.available,r.usable,r.calculator,r.nonCalculator,r.unknownCalculator,r.status,thresholds.developing,thresholds.good,board,r.canonicalSkillId,JSON.stringify(r.originalLabels),r.reviewReason?"Needs review — unmerged":"Canonical / retained",r.reviewReason||"",JSON.stringify(r.topics),JSON.stringify(r.tiers)])].map(row=>row.map(csvCell).join(",")).join("\r\n");
 }
