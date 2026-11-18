@@ -102,29 +102,41 @@ function compareOutsideTargets(before:{width:number;height:number;pixels:Uint8Cl
  expect(changedOutside,"Mathematics, parts, diagrams, rules and working area outside detected print must be unchanged").toBeLessThanOrEqual(8);
  return {changedOutside,changedInside,width:before.width,height:before.height};
 }
-async function renderPdfFirstImage(pdf:Buffer,fixture:Fixture){
+/** Reconstruct the first source bitmap from its contiguous printed viewports.
+ * A complete question can span pages; compare ALL its pixels, not just page 1. */
+async function renderPdfFirstImage(pdf:Buffer,fixture:Fixture,browserPage:Page){
+ const slices=await browserPage.locator('.paper-question').first().locator('.assessment-image-viewport').evaluateAll(nodes=>nodes.map(n=>({top:Number(n.getAttribute('data-slice-top')),bottom:Number(n.getAttribute('data-slice-bottom'))})));
+ const sourceSlices=slices.length?slices:[{top:0,bottom:fixture.layout.imageHeight}];
  const document=await getDocument({data:new Uint8Array(pdf)}).promise;
- const page=await document.getPage(1),viewport=page.getViewport({scale:2}),operators=await page.getOperatorList();
- let transform=[1,0,0,1,0,0],stack:number[][]=[],bounds:number[]|undefined;
- for(let index=0;index<operators.fnArray.length;index++){
-  const fn=operators.fnArray[index],args=operators.argsArray[index];
-  if(fn===OPS.save)stack.push([...transform]);
-  else if(fn===OPS.restore)transform=stack.pop()||[1,0,0,1,0,0];
-  else if(fn===OPS.transform)transform=Util.transform(transform,args);
-  else if(fn===OPS.paintImageXObject&&args[1]===fixture.layout.imageWidth&&args[2]===fixture.layout.imageHeight&&!bounds){
-   const a=[transform[4],transform[5]],b=[transform[0]+transform[2]+transform[4],transform[1]+transform[3]+transform[5]];
-   const rect=viewport.convertToViewportRectangle([a[0],a[1],b[0],b[1]]);
-   bounds=[Math.min(rect[0],rect[2]),Math.min(rect[1],rect[3]),Math.abs(rect[2]-rect[0]),Math.abs(rect[3]-rect[1])];
+ let reconstructed:ReturnType<typeof createCanvas>|undefined,count=0;
+ const texts:string[]=[];
+ for(let pageNumber=1;pageNumber<=document.numPages&&count<sourceSlices.length;pageNumber++){
+  const page=await document.getPage(pageNumber),viewport=page.getViewport({scale:2}),operators=await page.getOperatorList();
+  let transform=[1,0,0,1,0,0],stack:number[][]=[],bounds:number[]|undefined;
+  for(let index=0;index<operators.fnArray.length;index++){
+   const fn=operators.fnArray[index],args=operators.argsArray[index];
+   if(fn===OPS.save)stack.push([...transform]);
+   else if(fn===OPS.restore)transform=stack.pop()||[1,0,0,1,0,0];
+   else if(fn===OPS.transform)transform=Util.transform(transform,args);
+   else if(fn===OPS.paintImageXObject&&args[1]===fixture.layout.imageWidth&&args[2]===fixture.layout.imageHeight&&!bounds){
+    const a=[transform[4],transform[5]],b=[transform[0]+transform[2]+transform[4],transform[1]+transform[3]+transform[5]];
+    const rect=viewport.convertToViewportRectangle([a[0],a[1],b[0],b[1]]);
+    bounds=[Math.min(rect[0],rect[2]),Math.min(rect[1],rect[3]),Math.abs(rect[2]-rect[0]),Math.abs(rect[3]-rect[1])];
+   }
   }
+  if(!bounds)continue;
+  const [left,top,width,height]=bounds;
+  if(!reconstructed){reconstructed=createCanvas(Math.round(width),Math.round(height));const ctx=reconstructed.getContext('2d');ctx.fillStyle='white';ctx.fillRect(0,0,reconstructed.width,reconstructed.height);}
+  const slice=sourceSlices[count++],from=slice.top/fixture.layout.imageHeight*height,to=slice.bottom/fixture.layout.imageHeight*height;
+  const canvas=createCanvas(Math.ceil(viewport.width),Math.ceil(viewport.height));
+  await page.render({canvas:canvas as any,canvasContext:canvas.getContext('2d') as any,viewport}).promise;
+  reconstructed.getContext('2d').drawImage(canvas,left,top+from,width,to-from,0,from,reconstructed.width,to-from);
+  texts.push((await page.getTextContent()).items.map(item=>'str' in item?item.str:'').join(' '));
  }
- expect(bounds,"Actual PDF must contain the original full-resolution examination bitmap").toBeTruthy();
- const canvas=createCanvas(Math.ceil(viewport.width),Math.ceil(viewport.height)),context=canvas.getContext("2d");
- await page.render({canvas:canvas as any,canvasContext:context as any,viewport}).promise;
- const [left,top,width,height]=bounds!,x=Math.round(left),y=Math.round(top),w=Math.round(width),h=Math.round(height);
- const image=createCanvas(w,h);image.getContext("2d").drawImage(canvas,x,y,w,h,0,0,w,h);
- const text=(await page.getTextContent()).items.map(item=>"str" in item?item.str:"").join(" ");
- const pixels=image.getContext("2d").getImageData(0,0,w,h).data,png=image.toBuffer("image/png");
- await document.destroy();return {width:w,height:h,pixels,png,text};
+ expect(reconstructed,'Actual PDF must contain the original full-resolution examination bitmap').toBeTruthy();
+ expect(count,'Every contiguous source viewport must appear in the PDF').toBe(sourceSlices.length);
+ const image=reconstructed!,pixels=image.getContext('2d').getImageData(0,0,image.width,image.height).data,png=image.toBuffer('image/png');
+ await document.destroy();return {width:image.width,height:image.height,pixels,png,text:texts.join(' ')};
 }
 
 test.beforeEach(async({},testInfo)=>test.skip(testInfo.project.name!=="chromium","Real OCR/PDF raster regression runs once on desktop Chromium"));
@@ -145,7 +157,7 @@ test("source coordinates automatically replace real Edexcel numbers and totals a
  const targets=[...reported.layout.numberRects,...reported.layout.totalRects.map(total=>total.rect)];
  const previewComparison=compareOutsideTargets(await pixelData(before),await pixelData(after),targets);
  const automaticPdf=await savePdf(page,testInfo,"real-edexcel-automatic-16-layouts");
- const originalRaster=await renderPdfFirstImage(originalPdf,reported),automaticRaster=await renderPdfFirstImage(automaticPdf,reported);
+ const originalRaster=await renderPdfFirstImage(originalPdf,reported,page),automaticRaster=await renderPdfFirstImage(automaticPdf,reported,page);
  const pdfComparison=compareOutsideTargets(originalRaster,automaticRaster,targets,5);
  await writeFile(testInfo.outputPath("q14-pixel-comparison.json"),JSON.stringify({preview:previewComparison,pdf:pdfComparison,sourceRegions:targets},null,2));
  expect(automaticRaster.text).toContain("Question 1");expect(automaticRaster.text).toContain("(Total for Question 1 is 5 marks)");
@@ -165,7 +177,7 @@ test("all 16 real legacy Foundation and Higher images are OCR-renumbered without
  await expect(page.locator(".mqb-auto-total-text")).toHaveText(statements);
  expect(runtime.ocrRequests(),"A real legacy bitmap must exercise self-hosted OCR").toBeGreaterThan(0);
  const pdf=await savePdf(page,testInfo,"real-legacy-q14-automatic");
- const raster=await renderPdfFirstImage(pdf,reported);
+ const raster=await renderPdfFirstImage(pdf,reported,page);
  expect(raster.text).toContain("(Total for Question 1 is 5 marks)");
  await saveImage(testInfo,"real-legacy-q14-pdf.png",raster.png);
  const cached=await page.evaluate(()=>JSON.parse(localStorage.getItem("mqb-numbering-layouts-v1")||"{}"));
@@ -223,13 +235,13 @@ test("legacy multipart indices heading renumbers as question 1 in a five-questio
  const after=await frame.screenshot(),regions=[...affected.layout.numberRects,...affected.layout.totalRects.map(t=>t.rect)];
  compareOutsideTargets(await pixelData(before),await pixelData(after),regions,5);
  const pdf=await savePdf(page,testInfo,"multipart-five-questions-renumbered");
- const prior=await renderPdfFirstImage(originalPdf,affected),result=await renderPdfFirstImage(pdf,affected);
+ const prior=await renderPdfFirstImage(originalPdf,affected,page),result=await renderPdfFirstImage(pdf,affected,page);
  compareOutsideTargets(prior,result,regions,6);
  expect(result.text).toContain("(Total for Question 1 is 5 marks)");
  await testInfo.attach("multipart-before.png",{body:before,contentType:"image/png"});await testInfo.attach("multipart-after.png",{body:after,contentType:"image/png"});
  await writeFile(testInfo.outputPath("multipart-pdf-before.png"),prior.png);await writeFile(testInfo.outputPath("multipart-pdf-after.png"),result.png);
  const repeated=await savePdf(page,testInfo,"multipart-repeat-export");
- const repeatedRaster=await renderPdfFirstImage(repeated,affected);expect(Buffer.from(repeatedRaster.pixels).equals(Buffer.from(result.pixels))).toBe(true);
+ const repeatedRaster=await renderPdfFirstImage(repeated,affected,page);expect(Buffer.from(repeatedRaster.pixels).equals(Buffer.from(result.pixels))).toBe(true);
  await page.getByRole("button",{name:"Save changes to my account",exact:true}).click();
  await expect(page.locator(".builder-save-status")).toHaveText("Saved to your account");
  const requests=runtime.ocrRequests();await page.reload();await runtime.open();await ready(page);

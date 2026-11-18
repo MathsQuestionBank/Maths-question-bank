@@ -359,10 +359,10 @@ useEffect(()=>{
  if(page!=="builder")return;
  const paper=document.querySelector<HTMLElement>("#assessment-preview .paper");
  if(!paper)return;
- const update=()=>setPaperImagesReady(!paper.querySelector('[data-image-state="loading"],[data-image-state="error"],[data-numbering-state="invalid"]')&&paper.querySelectorAll('img').length===printAssets.length);
+ const update=()=>setPaperImagesReady(!paper.querySelector('[data-image-state="loading"],[data-image-state="error"],[data-numbering-state="invalid"],[data-pagination-state="loading"]')&&paper.querySelectorAll('.assessment-image-block').length===printAssets.length);
  update();
  const observer=new MutationObserver(update);
- observer.observe(paper,{subtree:true,childList:true,attributes:true,attributeFilter:["data-image-state","data-numbering-state"]});
+ observer.observe(paper,{subtree:true,childList:true,attributes:true,attributeFilter:["data-image-state","data-numbering-state","data-pagination-state"]});
  return()=>observer.disconnect();
 },[page,printAssetIdentity]);
 const exportReady=exportReadiness.ready&&pendingPrintReviews.length===0&&numbering.pending.length===0&&unavailableSelected.length===0&&paperImagesReady;

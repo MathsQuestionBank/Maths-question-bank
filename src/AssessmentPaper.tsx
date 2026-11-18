@@ -3,7 +3,7 @@ import { projectNumberingRect } from "./automaticNumbering";
 import { assessmentQuestionNumber, formatAssessmentSource } from "./assessmentNumbering";
 import { assessmentGroupImages, type AssessmentExportMode, type AssessmentGroup } from "./assessmentGroups";
 import { assessmentPrintAssets, type AssessmentPrintAsset } from "./assessmentExport";
-import { CroppedImage } from "./CropEditor";
+import AssessmentImage from "./AssessmentImage";
 import { defaultNumberingMask, type NumberingMask } from "./numberingMasks";
 import type { BankQuestion } from "./questionData";
 import type { TeacherSourceMode } from "./worksheetLibrary";
@@ -20,8 +20,19 @@ export default function AssessmentPaper(p:Props){
   const automatic=result?.status==="ready"?result.layout:undefined;
   const mask=result?.status==="manual"?result.mask:p.masks[asset.maskKey]||defaultNumberingMask;
   const manual=asset.needsReview&&result?.status==="manual";
+  const firstImage=assessmentGroupImages(group,kind)[0]?.key===image.key;
+  // Reserve printable space for the actual template: inline assessment title,
+  // question heading, teacher source and (optional) historical statistics.
+  let firstPageHeightMm=249;
+  if(!firstImage)firstPageHeightMm=255;
+  else if(p.printTeacherStats&&(kind==="mark"||p.mode==="teacher"))firstPageHeightMm=175;
+  else if(p.mode==="teacher"&&p.teacherSourceMode==="inline")firstPageHeightMm=i===0&&!p.cover?195:239;
+  else if(kind==="mark"&&i===0)firstPageHeightMm=230;
+  else if(i===0&&!p.cover)firstPageHeightMm=220;
+  const continuationLabel=`${kind==="question"?"Question":"Mark scheme"} ${number(group,i)} — continued (${group.marks} ${group.marks===1?"mark":"marks"} total)`;
   return <div className="assessment-image-block" key={asset.maskKey}>
-   <CroppedImage src={asset.src} crop={asset.crop} alt={`${kind==="question"?"Question":"Mark scheme"} ${number(group,i)}${image.partLabel?` (${image.partLabel})`:""}`} automaticNumbering={asset.needsReview?automatic:undefined} replacementNumber={number(group,i)} replacementMarks={group.marks} replaceAutomaticTotals={p.replaceSourceTotals&&kind==="question"} coverOriginalNumber={manual} coverOriginalFooter={manual&&p.replaceSourceTotals&&kind==="question"} numberingMask={mask}/>
+   {!firstImage&&<div className="assessment-continuation-heading">{continuationLabel}</div>}
+   <AssessmentImage firstPageHeightMm={firstPageHeightMm} continuationLabel={continuationLabel} src={asset.src} crop={asset.crop} alt={`${kind==="question"?"Question":"Mark scheme"} ${number(group,i)}${image.partLabel?` (${image.partLabel})`:""}`} automaticNumbering={asset.needsReview?automatic:undefined} replacementNumber={number(group,i)} replacementMarks={group.marks} replaceAutomaticTotals={p.replaceSourceTotals&&kind==="question"} coverOriginalNumber={manual} coverOriginalFooter={manual&&p.replaceSourceTotals&&kind==="question"} numberingMask={mask}/>
    {asset.needsReview&&result?.status==="unsupported"&&<div className="assessment-mask-review print-hide"><button type="button" className="secondary small" onClick={()=>p.onReview(asset)}>Review original print for {asset.label}</button></div>}
    {asset.needsReview&&(result?.status==="ready"||result?.status==="manual")&&<div className="assessment-mask-adjust print-hide"><button type="button" className="secondary small" onClick={()=>p.onReview(asset)}>Advanced adjustment for {asset.label}</button></div>}
   </div>;

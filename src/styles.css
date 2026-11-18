@@ -678,8 +678,9 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
  .paper-inline-fields>p{margin:0 0 3mm}
  .paper-inline-fields .name-line{margin-top:8mm}
  .assessment-image-block{break-inside:avoid;page-break-inside:avoid}
- /* Keep a tall crop on A4 with its aspect ratio intact. Native pixels go to PDF. */
- .paper .mqb-cropped-image{width:min(100%,calc(180mm * var(--mqb-crop-ratio,1)))!important;margin-inline:auto}
+ /* Full print width preserves examination-paper scale. Tall source images are
+    divided into contiguous viewports by AssessmentImage, never fitted by height. */
+ .paper .mqb-cropped-image{width:100%!important;margin-inline:auto}
  .paper .mqb-cropped-image>img{max-width:none!important;object-fit:fill}
  .paper-question,.mark-scheme-item{overflow:visible}
  .working-space{height:18mm}
@@ -779,3 +780,25 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
 .insights-original-labels ul {padding-left:18px}
 .insights-original-labels code {white-space:pre-wrap;font-size:.8rem}
 .insights-label-review {color:#8a4a20;font-weight:600}
+
+/* Readable, contiguous source-image pages. The cropped source is unchanged. */
+.assessment-paged-image.is-paginated>.assessment-source-image{display:none}
+.assessment-image-viewport{position:relative;width:100%;overflow:hidden}
+.assessment-image-translation{position:absolute;top:0;left:0;width:100%}
+.assessment-continuation-heading{font-size:13px;font-weight:650;line-height:1.4;margin:0 0 3mm;break-after:avoid}
+.assessment-image-page.is-continuation{border-top:1px dashed #bccbd3;margin-top:24px;padding-top:12px}
+.assessment-pagination-warning{padding:10px 12px;background:#fff5df;border-left:3px solid #ad761e;font-size:13px;line-height:1.5}
+@media print{
+ .paper-question,.mark-scheme-item,.assessment-image-block{break-inside:auto!important;page-break-inside:auto!important}
+ .paper-question .paper-row{display:block}
+ .paper-question:not(:has(.assessment-image-block)),.mark-scheme-item:not(:has(.assessment-image-block)){break-inside:avoid!important;page-break-inside:avoid!important}
+ .assessment-source-image,.assessment-image-page{break-inside:avoid;page-break-inside:avoid}
+ .assessment-image-page.is-continuation{break-before:page;page-break-before:always;border:0;margin:0;padding:0}
+ .assessment-question-heading{break-after:avoid-page}
+ .mark-scheme{margin:0!important;padding:0!important;border:0!important}
+ .mark-scheme>h2{font-size:20px;margin:0 0 4mm}
+ .paper-inline-fields{padding-bottom:3mm;margin-bottom:3mm}
+ .paper-question:has(.assessment-image-block),.mark-scheme-item:has(.assessment-image-block){padding-top:3mm;padding-bottom:0}
+ .paper-question:has(.assessment-image-block)>.working-space{display:none}
+ .assessment-image-viewport{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+}
