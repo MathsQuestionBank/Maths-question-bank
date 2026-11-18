@@ -1,0 +1,254 @@
+[
+  {
+    "priority": "P1",
+    "family": "Equations",
+    "metadata_candidate_records": 225,
+    "distinct_stored_labels": 60,
+    "content_verified_as_family_audit": 0,
+    "action": "Separate linear / quadratic / simultaneous / identities; generic labels remain unresolved. Original specification and title cannot prove the required method.",
+    "frequent_labels": [
+      [
+        "Solving equations",
+        97
+      ],
+      [
+        "Solve two simultaneous equations",
+        18
+      ],
+      [
+        "Translate situations or procedures into algebraic expressions, formulae or equations",
+        16
+      ],
+      [
+        "Algebraic manipulation",
+        13
+      ],
+      [
+        "Formulae and substitution",
+        13
+      ],
+      [
+        "Graphs and equations of lines",
+        13
+      ],
+      [
+        "Rounding and bounds",
+        13
+      ],
+      [
+        "Solve quadratic equations",
+        12
+      ]
+    ]
+  },
+  {
+    "priority": "P1",
+    "family": "Factorisation",
+    "metadata_candidate_records": 44,
+    "distinct_stored_labels": 22,
+    "content_verified_as_family_audit": 0,
+    "action": "Distinguish common factor, monic/non-monic quadratic and difference of squares; do not infer from tier.",
+    "frequent_labels": [
+      [
+        "Factors and multiples",
+        13
+      ],
+      [
+        "Algebraic manipulation",
+        13
+      ],
+      [
+        "Factorise expressions",
+        10
+      ],
+      [
+        "Factorise a linear expression",
+        2
+      ],
+      [
+        "Factorise an algebraic expression fully",
+        2
+      ],
+      [
+        "Find an LCM from prime factorisations",
+        2
+      ],
+      [
+        "Expand and simplify two brackets",
+        2
+      ],
+      [
+        "Factorising linear expressions",
+        1
+      ]
+    ]
+  },
+  {
+    "priority": "P1",
+    "family": "Algebraic simplification",
+    "metadata_candidate_records": 213,
+    "distinct_stored_labels": 51,
+    "content_verified_as_family_audit": 0,
+    "action": "Separate collection, multiplication, index laws, cancellation and expansion. Broad records may legitimately have multiple skills.",
+    "frequent_labels": [
+      [
+        "Algebraic manipulation",
+        77
+      ],
+      [
+        "Index notation",
+        39
+      ],
+      [
+        "Simplify and manipulate algebraic expressions and fractions",
+        26
+      ],
+      [
+        "Fractions",
+        16
+      ],
+      [
+        "Solving equations",
+        13
+      ],
+      [
+        "Formulae and substitution",
+        13
+      ],
+      [
+        "Simplify and manipulate expressions using laws of indices",
+        13
+      ],
+      [
+        "Factors and multiples",
+        13
+      ]
+    ]
+  },
+  {
+    "priority": "P2",
+    "family": "Fractions, percentages and ratio",
+    "metadata_candidate_records": 711,
+    "distinct_stored_labels": 164,
+    "content_verified_as_family_audit": 0,
+    "action": "Separate arithmetic and algebraic fractions, conversions, percentage change / reverse percentages and ratio / direct / inverse proportion.",
+    "frequent_labels": [
+      [
+        "Apply four operations",
+        98
+      ],
+      [
+        "Percentages",
+        90
+      ],
+      [
+        "Fractions",
+        87
+      ],
+      [
+        "Ratio and sharing",
+        55
+      ],
+      [
+        "Direct and inverse proportion",
+        44
+      ],
+      [
+        "Solve problems involving direct and inverse proportion",
+        33
+      ],
+      [
+        "BIDMAS and inverse operations",
+        30
+      ],
+      [
+        "Simplify and manipulate algebraic expressions and fractions",
+        26
+      ]
+    ]
+  },
+  {
+    "priority": "P2",
+    "family": "Graphs and coordinates",
+    "metadata_candidate_records": 269,
+    "distinct_stored_labels": 77,
+    "content_verified_as_family_audit": 0,
+    "action": "Separate plotting, interpretation, line equations, gradient, transformations and statistical graphs; inspect diagrams.",
+    "frequent_labels": [
+      [
+        "Graphs and coordinates",
+        98
+      ],
+      [
+        "Cumulative frequency graphs",
+        18
+      ],
+      [
+        "Distance-time graphs, velocity-time graphs",
+        14
+      ],
+      [
+        "Graphs and equations of lines",
+        13
+      ],
+      [
+        "Solving equations",
+        12
+      ],
+      [
+        "Graphs of quadratic functions",
+        12
+      ],
+      [
+        "Gradients and intercepts of linear functions",
+        10
+      ],
+      [
+        "Area under graph",
+        9
+      ]
+    ]
+  },
+  {
+    "priority": "P2",
+    "family": "Probability and statistics",
+    "metadata_candidate_records": 305,
+    "distinct_stored_labels": 47,
+    "content_verified_as_family_audit": 0,
+    "action": "Separate probability techniques and statistics; split semicolon fragments only with source evidence.",
+    "frequent_labels": [
+      [
+        "Probability",
+        66
+      ],
+      [
+        "Averages and spread",
+        45
+      ],
+      [
+        "Statistical diagrams",
+        37
+      ],
+      [
+        "Probabilities of an exhaustive set of outcomes",
+        37
+      ],
+      [
+        "Data and sampling",
+        19
+      ],
+      [
+        "Cumulative frequency graphs",
+        18
+      ],
+      [
+        "Sampling",
+        13
+      ],
+      [
+        "Conditional probability",
+        12
+      ]
+    ]
+  }
+]

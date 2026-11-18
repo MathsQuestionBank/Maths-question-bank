@@ -1,4 +1,4 @@
-import {canonicalInsightSkills,insightSkillRowKey,normalInsightSkill,resolveInsightSkill} from "./insightsSkills";
+import {canonicalInsightSkills,insightSkillRowKey,insightSkillMatchesText} from "./insightsSkills";
 import {weightedGradePerformance,validStudentGrade} from "./teacherQuestionStats";
 import type {BankQuestion} from "./questionData";
 import {buildAssessmentGroups,checkAssessmentExport,type AssessmentGroup} from "./assessmentGroups";
@@ -77,7 +77,6 @@ export function buildInsightsModel(all:BankQuestion[]){
 export function skillCoverage(model:InsightsModel,filters:CoverageFilters=emptyCoverageFilters,thresholds:CoverageThresholds=defaultCoverageThresholds,sort:CoverageSort="least"):CoverageRow[]{
  const targetStudentGrade=validStudentGrade(Number(filters.targetGrade))?Number(filters.targetGrade):null;
  const buckets=new Map<string,{row:CoverageRow;groups:Set<InsightGroup>;records:Set<string>;originals:Set<string>;topics:Set<string>;tiers:Set<string>}>();
- const query=normalInsightSkill(filters.skill),querySkill=resolveInsightSkill(filters.skill);
  for(const q of model.records){
   const tier=storedTier(q),topic=known(q.topic)?q.topic.trim():"Unmapped",calc=storedCalculator(q);
   if(filters.tier!=="All"&&tier!==filters.tier||filters.topic!=="All"&&normal(topic)!==normal(filters.topic)||filters.calculator!=="All"&&calc!==filters.calculator||filters.board!=="All"&&normal(q.examBoard||"")!==normal(filters.board))continue;
@@ -85,7 +84,7 @@ export function skillCoverage(model:InsightsModel,filters:CoverageFilters=emptyC
   if(targetStudentGrade!==null&&!matchesPerformanceBand(weightedGradePerformance(whole.group.parts,targetStudentGrade),filters.performanceBand))continue;
   for(const membership of model.skillMemberships.get(q.id)||[]){
    const skill=model.skillNames.get(membership.id)!;
-   if(query&&querySkill.id!==membership.id&&!normalInsightSkill(skill).includes(query)&&![...model.skillOriginals.get(membership.id)||[]].some(raw=>normalInsightSkill(raw).includes(query)))continue;
+   if(!insightSkillMatchesText({...membership,label:skill},filters.skill,model.skillOriginals.get(membership.id)))continue;
    const key=insightSkillRowKey(membership,topic,tier);
    if(!buckets.has(key))buckets.set(key,{row:{key,canonicalSkillId:membership.id,originalLabels:[],reviewReason:membership.reviewReason,topics:[],tiers:[],topic:"",skill,tier:"",targetStudentGrade,performanceBand:targetStudentGrade===null?"All":filters.performanceBand,withPerformance:0,missingPerformance:0,medianPercent:null,records:0,questions:0,available:0,usable:0,calculator:0,nonCalculator:0,unknownCalculator:0,status:"No coverage"},groups:new Set(),records:new Set(),originals:new Set(),topics:new Set(),tiers:new Set()});
    const entry=buckets.get(key)!;entry.records.add(q.id);entry.groups.add(whole);entry.topics.add(topic);entry.tiers.add(tier);

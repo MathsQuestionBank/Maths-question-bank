@@ -1,0 +1,1201 @@
+{
+  "snapshotDate": "2026-11-16",
+  "records": 3181,
+  "wholeQuestions": 2257,
+  "usable": 2257,
+  "source": "Read-only authorised question metadata snapshot; no production writes. Full/private metadata not included.",
+  "counting": "Whole examination questions once per skill; different paper/tier sources remain separate. Metadata coverage is not a certification of standalone crop quality.",
+  "beforeBrackets": {
+    "Foundation": [
+      {
+        "skill": "Expand and simplify double brackets",
+        "records": 1,
+        "wholeQuestions": 1,
+        "usable": 1,
+        "originalLabels": [
+          "Expand and simplify double brackets"
+        ]
+      },
+      {
+        "skill": "Expand and simplify two linear brackets",
+        "records": 1,
+        "wholeQuestions": 1,
+        "usable": 1,
+        "originalLabels": [
+          "Expand and simplify two linear brackets"
+        ]
+      },
+      {
+        "skill": "Expand and simplify two brackets",
+        "records": 2,
+        "wholeQuestions": 2,
+        "usable": 2,
+        "originalLabels": [
+          "Expand and simplify two brackets"
+        ]
+      },
+      {
+        "skill": "Expand brackets and collect like terms",
+        "records": 2,
+        "wholeQuestions": 2,
+        "usable": 2,
+        "originalLabels": [
+          "Expand brackets and collect like terms"
+        ]
+      },
+      {
+        "skill": "Expanding single brackets",
+        "records": 3,
+        "wholeQuestions": 3,
+        "usable": 3,
+        "originalLabels": [
+          "Expand a single bracket",
+          "Expanding single brackets"
+        ]
+      }
+    ],
+    "Higher": [
+      {
+        "skill": "Expand an expression using negative index laws",
+        "records": 1,
+        "wholeQuestions": 1,
+        "usable": 1,
+        "originalLabels": [
+          "Expand an expression using negative index laws"
+        ]
+      },
+      {
+        "skill": "Expand and simplify three linear brackets",
+        "records": 1,
+        "wholeQuestions": 1,
+        "usable": 1,
+        "originalLabels": [
+          "Expand and simplify three linear brackets"
+        ]
+      },
+      {
+        "skill": "Expand three linear brackets",
+        "records": 1,
+        "wholeQuestions": 1,
+        "usable": 1,
+        "originalLabels": [
+          "Expand three linear brackets"
+        ]
+      },
+      {
+        "skill": "Expand three linear brackets and compare coefficients",
+        "records": 1,
+        "wholeQuestions": 1,
+        "usable": 1,
+        "originalLabels": [
+          "Expand three linear brackets and compare coefficients"
+        ]
+      },
+      {
+        "skill": "Expand expressions",
+        "records": 13,
+        "wholeQuestions": 13,
+        "usable": 13,
+        "originalLabels": [
+          "Expand expressions",
+          "Expand expressions "
+        ]
+      }
+    ]
+  },
+  "afterBrackets": {
+    "Foundation": [
+      {
+        "skill": "Expand 2 single brackets and simplify",
+        "records": 3,
+        "wholeQuestions": 3,
+        "usable": 3,
+        "originalLabels": [
+          "Algebraic manipulation",
+          "Expand brackets and collect like terms"
+        ]
+      },
+      {
+        "skill": "Expand double brackets and simplify",
+        "records": 5,
+        "wholeQuestions": 5,
+        "usable": 5,
+        "originalLabels": [
+          "Algebraic manipulation",
+          "Expand and simplify double brackets",
+          "Expand and simplify two brackets",
+          "Expand and simplify two linear brackets"
+        ]
+      },
+      {
+        "skill": "Expand single bracket",
+        "records": 8,
+        "wholeQuestions": 8,
+        "usable": 8,
+        "originalLabels": [
+          "Algebraic manipulation",
+          "Expand a single bracket",
+          "Expanding single brackets",
+          "Factors and multiples"
+        ]
+      }
+    ],
+    "Higher": [
+      {
+        "skill": "Expand an expression using negative index laws",
+        "records": 1,
+        "wholeQuestions": 1,
+        "usable": 1,
+        "originalLabels": [
+          "Expand an expression using negative index laws"
+        ]
+      },
+      {
+        "skill": "Expand and simplify three linear brackets",
+        "records": 1,
+        "wholeQuestions": 1,
+        "usable": 1,
+        "originalLabels": [
+          "Expand and simplify three linear brackets"
+        ]
+      },
+      {
+        "skill": "Expand double brackets and simplify",
+        "records": 1,
+        "wholeQuestions": 1,
+        "usable": 1,
+        "originalLabels": [
+          "Expand expressions"
+        ]
+      },
+      {
+        "skill": "Expand three linear brackets",
+        "records": 1,
+        "wholeQuestions": 1,
+        "usable": 1,
+        "originalLabels": [
+          "Expand three linear brackets"
+        ]
+      },
+      {
+        "skill": "Expand three linear brackets and compare coefficients",
+        "records": 1,
+        "wholeQuestions": 1,
+        "usable": 1,
+        "originalLabels": [
+          "Expand three linear brackets and compare coefficients"
+        ]
+      },
+      {
+        "skill": "Expand single bracket",
+        "records": 2,
+        "wholeQuestions": 2,
+        "usable": 2,
+        "originalLabels": [
+          "Expand an expression using negative index laws",
+          "Expand expressions"
+        ]
+      },
+      {
+        "skill": "Expand 2 single brackets and simplify",
+        "records": 3,
+        "wholeQuestions": 3,
+        "usable": 3,
+        "originalLabels": [
+          "Algebraic manipulation",
+          "Expand expressions",
+          "Simplify and manipulate algebraic expressions and fractions"
+        ]
+      },
+      {
+        "skill": "Expand expressions",
+        "records": 10,
+        "wholeQuestions": 10,
+        "usable": 10,
+        "originalLabels": [
+          "Expand expressions",
+          "Expand expressions "
+        ]
+      }
+    ]
+  },
+  "originalGradeCalculation": {
+    "All": [
+      {
+        "grade": 1,
+        "withData": 1259,
+        "missingData": 998,
+        "medianPercent": 20
+      },
+      {
+        "grade": 2,
+        "withData": 1259,
+        "missingData": 998,
+        "medianPercent": 38
+      },
+      {
+        "grade": 3,
+        "withData": 2050,
+        "missingData": 207,
+        "medianPercent": 34.7
+      },
+      {
+        "grade": 4,
+        "withData": 2256,
+        "missingData": 1,
+        "medianPercent": 48
+      },
+      {
+        "grade": 5,
+        "withData": 2256,
+        "missingData": 1,
+        "medianPercent": 67
+      },
+      {
+        "grade": 6,
+        "withData": 997,
+        "missingData": 1260,
+        "medianPercent": 52.3
+      },
+      {
+        "grade": 7,
+        "withData": 997,
+        "missingData": 1260,
+        "medianPercent": 67.7
+      },
+      {
+        "grade": 8,
+        "withData": 997,
+        "missingData": 1260,
+        "medianPercent": 82
+      },
+      {
+        "grade": 9,
+        "withData": 997,
+        "missingData": 1260,
+        "medianPercent": 93
+      }
+    ],
+    "Foundation": [
+      {
+        "grade": 1,
+        "withData": 1259,
+        "missingData": 1,
+        "medianPercent": 20
+      },
+      {
+        "grade": 2,
+        "withData": 1259,
+        "missingData": 1,
+        "medianPercent": 38
+      },
+      {
+        "grade": 3,
+        "withData": 1259,
+        "missingData": 1,
+        "medianPercent": 56
+      },
+      {
+        "grade": 4,
+        "withData": 1259,
+        "missingData": 1,
+        "medianPercent": 72
+      },
+      {
+        "grade": 5,
+        "withData": 1259,
+        "missingData": 1,
+        "medianPercent": 85
+      },
+      {
+        "grade": 6,
+        "withData": 0,
+        "missingData": 1260,
+        "medianPercent": null
+      },
+      {
+        "grade": 7,
+        "withData": 0,
+        "missingData": 1260,
+        "medianPercent": null
+      },
+      {
+        "grade": 8,
+        "withData": 0,
+        "missingData": 1260,
+        "medianPercent": null
+      },
+      {
+        "grade": 9,
+        "withData": 0,
+        "missingData": 1260,
+        "medianPercent": null
+      }
+    ],
+    "Higher": [
+      {
+        "grade": 1,
+        "withData": 0,
+        "missingData": 997,
+        "medianPercent": null
+      },
+      {
+        "grade": 2,
+        "withData": 0,
+        "missingData": 997,
+        "medianPercent": null
+      },
+      {
+        "grade": 3,
+        "withData": 791,
+        "missingData": 206,
+        "medianPercent": 7.7
+      },
+      {
+        "grade": 4,
+        "withData": 997,
+        "missingData": 0,
+        "medianPercent": 17
+      },
+      {
+        "grade": 5,
+        "withData": 997,
+        "missingData": 0,
+        "medianPercent": 34.6
+      },
+      {
+        "grade": 6,
+        "withData": 997,
+        "missingData": 0,
+        "medianPercent": 52.3
+      },
+      {
+        "grade": 7,
+        "withData": 997,
+        "missingData": 0,
+        "medianPercent": 67.7
+      },
+      {
+        "grade": 8,
+        "withData": 997,
+        "missingData": 0,
+        "medianPercent": 82
+      },
+      {
+        "grade": 9,
+        "withData": 997,
+        "missingData": 0,
+        "medianPercent": 93
+      }
+    ]
+  },
+  "comparisons": [
+    {
+      "tier": "All",
+      "sameQuestions": false,
+      "baseCount": 2257,
+      "availableGrades": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "representedTiers": [
+        "Foundation",
+        "Higher"
+      ],
+      "sharedTierGrades": [
+        3,
+        4,
+        5
+      ],
+      "grades": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "rows": [
+        {
+          "grade": 1,
+          "withData": 1259,
+          "missingData": 998,
+          "availableAtGrade": 1259,
+          "missingAtGrade": 998,
+          "medianPercent": 20,
+          "populationSha256": "d0f6668dddf015f948caa5b066cb653195128bb9b21a1892bd0179b2f6dc6926"
+        },
+        {
+          "grade": 2,
+          "withData": 1259,
+          "missingData": 998,
+          "availableAtGrade": 1259,
+          "missingAtGrade": 998,
+          "medianPercent": 38,
+          "populationSha256": "d0f6668dddf015f948caa5b066cb653195128bb9b21a1892bd0179b2f6dc6926"
+        },
+        {
+          "grade": 3,
+          "withData": 2050,
+          "missingData": 207,
+          "availableAtGrade": 2050,
+          "missingAtGrade": 207,
+          "medianPercent": 34.7,
+          "populationSha256": "16e7d45d27fb4121e796a038087a2bccd55ed03b8d32eff4002af2a9809f651e"
+        },
+        {
+          "grade": 4,
+          "withData": 2256,
+          "missingData": 1,
+          "availableAtGrade": 2256,
+          "missingAtGrade": 1,
+          "medianPercent": 48,
+          "populationSha256": "52bbcc42c2396b50db09021a589de6635d46f0f7e6277c68d177b294799507b7"
+        },
+        {
+          "grade": 5,
+          "withData": 2256,
+          "missingData": 1,
+          "availableAtGrade": 2256,
+          "missingAtGrade": 1,
+          "medianPercent": 67,
+          "populationSha256": "52bbcc42c2396b50db09021a589de6635d46f0f7e6277c68d177b294799507b7"
+        },
+        {
+          "grade": 6,
+          "withData": 997,
+          "missingData": 1260,
+          "availableAtGrade": 997,
+          "missingAtGrade": 1260,
+          "medianPercent": 52.3,
+          "populationSha256": "740feb86f827f4a5aaac41974414a7abf56225f7ee62f45e7839145882c074f5"
+        },
+        {
+          "grade": 7,
+          "withData": 997,
+          "missingData": 1260,
+          "availableAtGrade": 997,
+          "missingAtGrade": 1260,
+          "medianPercent": 67.7,
+          "populationSha256": "740feb86f827f4a5aaac41974414a7abf56225f7ee62f45e7839145882c074f5"
+        },
+        {
+          "grade": 8,
+          "withData": 997,
+          "missingData": 1260,
+          "availableAtGrade": 997,
+          "missingAtGrade": 1260,
+          "medianPercent": 82,
+          "populationSha256": "740feb86f827f4a5aaac41974414a7abf56225f7ee62f45e7839145882c074f5"
+        },
+        {
+          "grade": 9,
+          "withData": 997,
+          "missingData": 1260,
+          "availableAtGrade": 997,
+          "missingAtGrade": 1260,
+          "medianPercent": 93,
+          "populationSha256": "740feb86f827f4a5aaac41974414a7abf56225f7ee62f45e7839145882c074f5"
+        }
+      ],
+      "warning": null
+    },
+    {
+      "tier": "Foundation",
+      "sameQuestions": false,
+      "baseCount": 1260,
+      "availableGrades": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "representedTiers": [
+        "Foundation"
+      ],
+      "sharedTierGrades": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "grades": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "rows": [
+        {
+          "grade": 1,
+          "withData": 1259,
+          "missingData": 1,
+          "availableAtGrade": 1259,
+          "missingAtGrade": 1,
+          "medianPercent": 20,
+          "populationSha256": "d0f6668dddf015f948caa5b066cb653195128bb9b21a1892bd0179b2f6dc6926"
+        },
+        {
+          "grade": 2,
+          "withData": 1259,
+          "missingData": 1,
+          "availableAtGrade": 1259,
+          "missingAtGrade": 1,
+          "medianPercent": 38,
+          "populationSha256": "d0f6668dddf015f948caa5b066cb653195128bb9b21a1892bd0179b2f6dc6926"
+        },
+        {
+          "grade": 3,
+          "withData": 1259,
+          "missingData": 1,
+          "availableAtGrade": 1259,
+          "missingAtGrade": 1,
+          "medianPercent": 56,
+          "populationSha256": "d0f6668dddf015f948caa5b066cb653195128bb9b21a1892bd0179b2f6dc6926"
+        },
+        {
+          "grade": 4,
+          "withData": 1259,
+          "missingData": 1,
+          "availableAtGrade": 1259,
+          "missingAtGrade": 1,
+          "medianPercent": 72,
+          "populationSha256": "d0f6668dddf015f948caa5b066cb653195128bb9b21a1892bd0179b2f6dc6926"
+        },
+        {
+          "grade": 5,
+          "withData": 1259,
+          "missingData": 1,
+          "availableAtGrade": 1259,
+          "missingAtGrade": 1,
+          "medianPercent": 85,
+          "populationSha256": "d0f6668dddf015f948caa5b066cb653195128bb9b21a1892bd0179b2f6dc6926"
+        },
+        {
+          "grade": 6,
+          "withData": 0,
+          "missingData": 1260,
+          "availableAtGrade": 0,
+          "missingAtGrade": 1260,
+          "medianPercent": null,
+          "populationSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        {
+          "grade": 7,
+          "withData": 0,
+          "missingData": 1260,
+          "availableAtGrade": 0,
+          "missingAtGrade": 1260,
+          "medianPercent": null,
+          "populationSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        {
+          "grade": 8,
+          "withData": 0,
+          "missingData": 1260,
+          "availableAtGrade": 0,
+          "missingAtGrade": 1260,
+          "medianPercent": null,
+          "populationSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        {
+          "grade": 9,
+          "withData": 0,
+          "missingData": 1260,
+          "availableAtGrade": 0,
+          "missingAtGrade": 1260,
+          "medianPercent": null,
+          "populationSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        }
+      ],
+      "warning": null
+    },
+    {
+      "tier": "Higher",
+      "sameQuestions": false,
+      "baseCount": 997,
+      "availableGrades": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "representedTiers": [
+        "Higher"
+      ],
+      "sharedTierGrades": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "grades": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "rows": [
+        {
+          "grade": 1,
+          "withData": 0,
+          "missingData": 997,
+          "availableAtGrade": 0,
+          "missingAtGrade": 997,
+          "medianPercent": null,
+          "populationSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        {
+          "grade": 2,
+          "withData": 0,
+          "missingData": 997,
+          "availableAtGrade": 0,
+          "missingAtGrade": 997,
+          "medianPercent": null,
+          "populationSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        {
+          "grade": 3,
+          "withData": 791,
+          "missingData": 206,
+          "availableAtGrade": 791,
+          "missingAtGrade": 206,
+          "medianPercent": 7.7,
+          "populationSha256": "3145bdaaea0e40e876693101ab3c714f8894fbfb33d8f9196b76ea60a124547a"
+        },
+        {
+          "grade": 4,
+          "withData": 997,
+          "missingData": 0,
+          "availableAtGrade": 997,
+          "missingAtGrade": 0,
+          "medianPercent": 17,
+          "populationSha256": "740feb86f827f4a5aaac41974414a7abf56225f7ee62f45e7839145882c074f5"
+        },
+        {
+          "grade": 5,
+          "withData": 997,
+          "missingData": 0,
+          "availableAtGrade": 997,
+          "missingAtGrade": 0,
+          "medianPercent": 34.6,
+          "populationSha256": "740feb86f827f4a5aaac41974414a7abf56225f7ee62f45e7839145882c074f5"
+        },
+        {
+          "grade": 6,
+          "withData": 997,
+          "missingData": 0,
+          "availableAtGrade": 997,
+          "missingAtGrade": 0,
+          "medianPercent": 52.3,
+          "populationSha256": "740feb86f827f4a5aaac41974414a7abf56225f7ee62f45e7839145882c074f5"
+        },
+        {
+          "grade": 7,
+          "withData": 997,
+          "missingData": 0,
+          "availableAtGrade": 997,
+          "missingAtGrade": 0,
+          "medianPercent": 67.7,
+          "populationSha256": "740feb86f827f4a5aaac41974414a7abf56225f7ee62f45e7839145882c074f5"
+        },
+        {
+          "grade": 8,
+          "withData": 997,
+          "missingData": 0,
+          "availableAtGrade": 997,
+          "missingAtGrade": 0,
+          "medianPercent": 82,
+          "populationSha256": "740feb86f827f4a5aaac41974414a7abf56225f7ee62f45e7839145882c074f5"
+        },
+        {
+          "grade": 9,
+          "withData": 997,
+          "missingData": 0,
+          "availableAtGrade": 997,
+          "missingAtGrade": 0,
+          "medianPercent": 93,
+          "populationSha256": "740feb86f827f4a5aaac41974414a7abf56225f7ee62f45e7839145882c074f5"
+        }
+      ],
+      "warning": null
+    },
+    {
+      "tier": "Foundation",
+      "sameQuestions": true,
+      "baseCount": 1260,
+      "availableGrades": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "representedTiers": [
+        "Foundation"
+      ],
+      "sharedTierGrades": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "grades": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "rows": [
+        {
+          "grade": 1,
+          "withData": 1259,
+          "missingData": 1,
+          "availableAtGrade": 1259,
+          "missingAtGrade": 1,
+          "medianPercent": 20,
+          "populationSha256": "d0f6668dddf015f948caa5b066cb653195128bb9b21a1892bd0179b2f6dc6926"
+        },
+        {
+          "grade": 2,
+          "withData": 1259,
+          "missingData": 1,
+          "availableAtGrade": 1259,
+          "missingAtGrade": 1,
+          "medianPercent": 38,
+          "populationSha256": "d0f6668dddf015f948caa5b066cb653195128bb9b21a1892bd0179b2f6dc6926"
+        },
+        {
+          "grade": 3,
+          "withData": 1259,
+          "missingData": 1,
+          "availableAtGrade": 1259,
+          "missingAtGrade": 1,
+          "medianPercent": 56,
+          "populationSha256": "d0f6668dddf015f948caa5b066cb653195128bb9b21a1892bd0179b2f6dc6926"
+        },
+        {
+          "grade": 4,
+          "withData": 1259,
+          "missingData": 1,
+          "availableAtGrade": 1259,
+          "missingAtGrade": 1,
+          "medianPercent": 72,
+          "populationSha256": "d0f6668dddf015f948caa5b066cb653195128bb9b21a1892bd0179b2f6dc6926"
+        },
+        {
+          "grade": 5,
+          "withData": 1259,
+          "missingData": 1,
+          "availableAtGrade": 1259,
+          "missingAtGrade": 1,
+          "medianPercent": 85,
+          "populationSha256": "d0f6668dddf015f948caa5b066cb653195128bb9b21a1892bd0179b2f6dc6926"
+        }
+      ],
+      "warning": null
+    },
+    {
+      "tier": "Higher",
+      "sameQuestions": true,
+      "baseCount": 997,
+      "availableGrades": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "representedTiers": [
+        "Higher"
+      ],
+      "sharedTierGrades": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "grades": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "rows": [
+        {
+          "grade": 3,
+          "withData": 791,
+          "missingData": 206,
+          "availableAtGrade": 791,
+          "missingAtGrade": 206,
+          "medianPercent": 7.7,
+          "populationSha256": "3145bdaaea0e40e876693101ab3c714f8894fbfb33d8f9196b76ea60a124547a"
+        },
+        {
+          "grade": 4,
+          "withData": 791,
+          "missingData": 206,
+          "availableAtGrade": 997,
+          "missingAtGrade": 0,
+          "medianPercent": 18,
+          "populationSha256": "3145bdaaea0e40e876693101ab3c714f8894fbfb33d8f9196b76ea60a124547a"
+        },
+        {
+          "grade": 5,
+          "withData": 791,
+          "missingData": 206,
+          "availableAtGrade": 997,
+          "missingAtGrade": 0,
+          "medianPercent": 35.8,
+          "populationSha256": "3145bdaaea0e40e876693101ab3c714f8894fbfb33d8f9196b76ea60a124547a"
+        },
+        {
+          "grade": 6,
+          "withData": 791,
+          "missingData": 206,
+          "availableAtGrade": 997,
+          "missingAtGrade": 0,
+          "medianPercent": 53,
+          "populationSha256": "3145bdaaea0e40e876693101ab3c714f8894fbfb33d8f9196b76ea60a124547a"
+        },
+        {
+          "grade": 7,
+          "withData": 791,
+          "missingData": 206,
+          "availableAtGrade": 997,
+          "missingAtGrade": 0,
+          "medianPercent": 69,
+          "populationSha256": "3145bdaaea0e40e876693101ab3c714f8894fbfb33d8f9196b76ea60a124547a"
+        },
+        {
+          "grade": 8,
+          "withData": 791,
+          "missingData": 206,
+          "availableAtGrade": 997,
+          "missingAtGrade": 0,
+          "medianPercent": 82.5,
+          "populationSha256": "3145bdaaea0e40e876693101ab3c714f8894fbfb33d8f9196b76ea60a124547a"
+        },
+        {
+          "grade": 9,
+          "withData": 791,
+          "missingData": 206,
+          "availableAtGrade": 997,
+          "missingAtGrade": 0,
+          "medianPercent": 93.3,
+          "populationSha256": "3145bdaaea0e40e876693101ab3c714f8894fbfb33d8f9196b76ea60a124547a"
+        }
+      ],
+      "warning": null
+    },
+    {
+      "tier": "All",
+      "sameQuestions": true,
+      "baseCount": 2257,
+      "availableGrades": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "representedTiers": [
+        "Foundation",
+        "Higher"
+      ],
+      "sharedTierGrades": [
+        3,
+        4,
+        5
+      ],
+      "grades": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "rows": [
+        {
+          "grade": 1,
+          "withData": 0,
+          "missingData": 2257,
+          "availableAtGrade": 1259,
+          "missingAtGrade": 998,
+          "medianPercent": null,
+          "populationSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        {
+          "grade": 2,
+          "withData": 0,
+          "missingData": 2257,
+          "availableAtGrade": 1259,
+          "missingAtGrade": 998,
+          "medianPercent": null,
+          "populationSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        {
+          "grade": 3,
+          "withData": 0,
+          "missingData": 2257,
+          "availableAtGrade": 2050,
+          "missingAtGrade": 207,
+          "medianPercent": null,
+          "populationSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        {
+          "grade": 4,
+          "withData": 0,
+          "missingData": 2257,
+          "availableAtGrade": 2256,
+          "missingAtGrade": 1,
+          "medianPercent": null,
+          "populationSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        {
+          "grade": 5,
+          "withData": 0,
+          "missingData": 2257,
+          "availableAtGrade": 2256,
+          "missingAtGrade": 1,
+          "medianPercent": null,
+          "populationSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        {
+          "grade": 6,
+          "withData": 0,
+          "missingData": 2257,
+          "availableAtGrade": 997,
+          "missingAtGrade": 1260,
+          "medianPercent": null,
+          "populationSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        {
+          "grade": 7,
+          "withData": 0,
+          "missingData": 2257,
+          "availableAtGrade": 997,
+          "missingAtGrade": 1260,
+          "medianPercent": null,
+          "populationSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        {
+          "grade": 8,
+          "withData": 0,
+          "missingData": 2257,
+          "availableAtGrade": 997,
+          "missingAtGrade": 1260,
+          "medianPercent": null,
+          "populationSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        {
+          "grade": 9,
+          "withData": 0,
+          "missingData": 2257,
+          "availableAtGrade": 997,
+          "missingAtGrade": 1260,
+          "medianPercent": null,
+          "populationSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        }
+      ],
+      "warning": "No whole questions have complete data for every selected grade. Choose fewer grades or a single tier; no percentages have been inferred."
+    },
+    {
+      "tier": "All",
+      "sameQuestions": true,
+      "baseCount": 2257,
+      "availableGrades": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "representedTiers": [
+        "Foundation",
+        "Higher"
+      ],
+      "sharedTierGrades": [
+        3,
+        4,
+        5
+      ],
+      "grades": [
+        3,
+        4,
+        5
+      ],
+      "rows": [
+        {
+          "grade": 3,
+          "withData": 2050,
+          "missingData": 207,
+          "availableAtGrade": 2050,
+          "missingAtGrade": 207,
+          "medianPercent": 34.7,
+          "populationSha256": "16e7d45d27fb4121e796a038087a2bccd55ed03b8d32eff4002af2a9809f651e"
+        },
+        {
+          "grade": 4,
+          "withData": 2050,
+          "missingData": 207,
+          "availableAtGrade": 2256,
+          "missingAtGrade": 1,
+          "medianPercent": 51.8,
+          "populationSha256": "16e7d45d27fb4121e796a038087a2bccd55ed03b8d32eff4002af2a9809f651e"
+        },
+        {
+          "grade": 5,
+          "withData": 2050,
+          "missingData": 207,
+          "availableAtGrade": 2256,
+          "missingAtGrade": 1,
+          "medianPercent": 71,
+          "populationSha256": "16e7d45d27fb4121e796a038087a2bccd55ed03b8d32eff4002af2a9809f651e"
+        }
+      ],
+      "warning": null
+    },
+    {
+      "tier": "Higher",
+      "sameQuestions": true,
+      "baseCount": 997,
+      "availableGrades": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "representedTiers": [
+        "Higher"
+      ],
+      "sharedTierGrades": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "grades": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "rows": [
+        {
+          "grade": 4,
+          "withData": 997,
+          "missingData": 0,
+          "availableAtGrade": 997,
+          "missingAtGrade": 0,
+          "medianPercent": 17,
+          "populationSha256": "740feb86f827f4a5aaac41974414a7abf56225f7ee62f45e7839145882c074f5"
+        },
+        {
+          "grade": 5,
+          "withData": 997,
+          "missingData": 0,
+          "availableAtGrade": 997,
+          "missingAtGrade": 0,
+          "medianPercent": 34.6,
+          "populationSha256": "740feb86f827f4a5aaac41974414a7abf56225f7ee62f45e7839145882c074f5"
+        },
+        {
+          "grade": 6,
+          "withData": 997,
+          "missingData": 0,
+          "availableAtGrade": 997,
+          "missingAtGrade": 0,
+          "medianPercent": 52.3,
+          "populationSha256": "740feb86f827f4a5aaac41974414a7abf56225f7ee62f45e7839145882c074f5"
+        },
+        {
+          "grade": 7,
+          "withData": 997,
+          "missingData": 0,
+          "availableAtGrade": 997,
+          "missingAtGrade": 0,
+          "medianPercent": 67.7,
+          "populationSha256": "740feb86f827f4a5aaac41974414a7abf56225f7ee62f45e7839145882c074f5"
+        },
+        {
+          "grade": 8,
+          "withData": 997,
+          "missingData": 0,
+          "availableAtGrade": 997,
+          "missingAtGrade": 0,
+          "medianPercent": 82,
+          "populationSha256": "740feb86f827f4a5aaac41974414a7abf56225f7ee62f45e7839145882c074f5"
+        },
+        {
+          "grade": 9,
+          "withData": 997,
+          "missingData": 0,
+          "availableAtGrade": 997,
+          "missingAtGrade": 0,
+          "medianPercent": 93,
+          "populationSha256": "740feb86f827f4a5aaac41974414a7abf56225f7ee62f45e7839145882c074f5"
+        }
+      ],
+      "warning": null
+    }
+  ]
+}
