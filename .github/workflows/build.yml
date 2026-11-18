@@ -17,6 +17,8 @@ jobs:
       - run: npm run test
       - run: npm run build
       - run: npx playwright install --with-deps chromium
+      - name: Check private shadow ZIP staging on desktop and mobile
+        run: node tools/test-shadow-bundle-upload.mjs
       - run: npm run test:smoke
       - name: Upload assessment PDF examples and screenshots
         if: always()
