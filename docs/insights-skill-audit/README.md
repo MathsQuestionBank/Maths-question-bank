@@ -1,5 +1,7 @@
 # Insights skill-label audit and controlled wording map
 
+Follow-up: [source-backed bracket classifications and same-question historical performance](../bracket-performance-audit/README.md). This PR #95 report remains the original dated label-audit snapshot.
+
 The audit covers **all 3,181 existing Edexcel GCSE Foundation/Higher examination records** in the authorised read-only snapshot of 16 November 2026. It standardises labels **only in Insights**. No database records, assessment behaviour, matching logic, question content or original metadata are overwritten.
 
 There are two separate causes of repeated coverage rows: spelling/wording/spacing variants, and the previous table key `(topic, skill, tier)`, which split an identical label across source topics and tiers. The new table unions those partitions for unambiguous canonical/retained labels. **Broad or truncated labels explicitly flagged for review retain their original topic/tier rows.** Repeated “Solving equations” rows therefore remain intentionally visible and marked as unresolved; they have not been guessed into a linear-equation category.
