@@ -1,11 +1,14 @@
-import {useEffect,useState} from "react";
+import {lazy,Suspense,useEffect,useState} from "react";
 import ShadowBundleUploader from "./ShadowBundleUploader";
 import {supabase} from "./supabase";
+import {isBundlePath} from "./shadowQa";
+
+const ShadowQaReview=lazy(()=>import("./ShadowQaReview"));
 
 const BUCKET="exam-materials-private";
 const MAX_BYTES=30*1024*1024;
 type OriginalPaper={id:string;exam_board:string;qualification:string;series:string;tier:string|null;paper_code:string};
-type ShadowIntake={id:string;original_paper_id:string;shadow_set:string;question_source_path:string;mark_scheme_source_path:string;question_format:string;mark_scheme_format:string;status:string};
+type ShadowIntake={id:string;original_paper_id:string;intake_manifest_path:string;shadow_set:string;question_source_path:string;mark_scheme_source_path:string;question_format:string;mark_scheme_format:string;status:string};
 type Format="pdf"|"docx"|"doc";
 const slug=(s:string)=>s.trim().toLowerCase().replace(/[^a-z0-9-]+/g,"-").replace(/^-+|-+$/g,"").slice(0,60);
 const format=(file:File|null):Format|null=>{
@@ -25,6 +28,7 @@ async function validSource(file:File|null):Promise<boolean>{
 export default function ShadowPaperImporter(){
  const [originals,setOriginals]=useState<OriginalPaper[]>([]);
  const [existing,setExisting]=useState<ShadowIntake[]>([]);
+ const [reviewId,setReviewId]=useState<string|null>(null);
  const [originalId,setOriginalId]=useState("");
  const [shadowSet,setShadowSet]=useState("Set 1");
  const [questionFile,setQuestionFile]=useState<File|null>(null);
@@ -39,7 +43,7 @@ export default function ShadowPaperImporter(){
   if(authError||!user||ownerError||owner!==true){setOwnerReady(false);throw Error("Only an approved owner can stage shadow resources.");}
   const [papers,intakes]=await Promise.all([
    supabase.from("exam_papers").select("id,exam_board,qualification,series,tier,paper_code").order("series",{ascending:false}).order("paper_code"),
-   supabase.from("shadow_papers").select("id,original_paper_id,shadow_set,question_source_path,mark_scheme_source_path,question_format,mark_scheme_format,status").order("created_at",{ascending:false})
+   supabase.from("shadow_papers").select("id,original_paper_id,shadow_set,intake_manifest_path,question_source_path,mark_scheme_source_path,question_format,mark_scheme_format,status").order("created_at",{ascending:false})
   ]);
   if(papers.error||intakes.error)throw Error(papers.error?.message||intakes.error?.message);
   const available=(papers.data||[]) as OriginalPaper[];
@@ -130,14 +134,19 @@ export default function ShadowPaperImporter(){
   <h3 style={{marginTop:22}}>Archived shadow sets</h3>
   {existing.length===0?<p className="hint">No shadow sets archived yet.</p>:existing.map(item=>{
    const paper=originals.find(p=>p.id===item.original_paper_id);
-   return <div className="saved-item" key={item.id}>
+   return <div key={item.id}><div className="saved-item">
     <div><strong>{paper?label(paper):"Original paper"} · {item.shadow_set}</strong>
      <p>{item.status.replace(/-/g," ")} · Questions: {item.question_format.toUpperCase()} · Mark scheme: {item.mark_scheme_format.toUpperCase()}</p>
     </div>
     <div className="library-actions">
      <button className="secondary small" onClick={()=>void view(item.question_source_path)}>View source QP</button>
      <button className="secondary small" onClick={()=>void view(item.mark_scheme_source_path)}>View source MS</button>
+     {["awaiting-review","in-review"].includes(item.status)&&isBundlePath(item.intake_manifest_path,item.original_paper_id)&&
+      <button type="button" className="secondary small" aria-expanded={reviewId===item.id}
+       onClick={()=>setReviewId(reviewId===item.id?null:item.id)}>{reviewId===item.id?"Close QA review":"Review QA"}</button>}
     </div>
+    </div>
+    {reviewId===item.id&&<Suspense fallback={<p role="status">Loading QA review…</p>}><ShadowQaReview key={item.id} intake={item}/></Suspense>}
    </div>
   })}
  </section>;
