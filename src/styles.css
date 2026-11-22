@@ -825,3 +825,13 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
 /* Override the dashboard's general grid labels for compact checkbox controls. */
 .insights-dashboard label.historical-comparison-toggle,.insights-dashboard .historical-grade-selection label {display:inline-flex;flex-direction:row;align-items:center;gap:8px;margin:0;min-height:32px}
 .insights-dashboard .historical-comparison-toggle input,.insights-dashboard .historical-grade-selection input {width:18px;height:18px;min-height:18px;flex:0 0 18px;margin:0;padding:0}
+
+/* Separate KS3 pilot page: seven primary navigation entries and simple question printing. */
+.site-nav{grid-template-columns:repeat(7,minmax(0,1fr))}
+@media(max-width:850px){.site-nav{display:flex;overflow-x:auto}.site-nav button{flex:0 0 auto}}
+@media print{
+ .site-nav{display:none!important}
+ .ks3-area{display:block!important;border:0!important;box-shadow:none!important;padding:14mm!important}
+ .ks3-area article{break-inside:avoid;page-break-inside:avoid}
+ .ks3-area .print-hide{display:none!important}
+}
