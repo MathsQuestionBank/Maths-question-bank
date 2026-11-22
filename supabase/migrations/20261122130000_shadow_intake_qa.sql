@@ -26,7 +26,7 @@ create table public.shadow_qa_attestations (
   intake_id uuid not null references public.shadow_papers(id) on delete restrict,
   bundle_hash text not null check (bundle_hash ~ '^[0-9a-f]{64}$'),
   manifest_hash text not null check (manifest_hash ~ '^[0-9a-f]{64}$'),
-  rule_version text not null check (rule_version ~ '^shadow-qa-2[.][0-9a-f]{64}$'),
+  rule_version text not null check (rule_version ~ '^shadow-qa-3[.][0-9a-f]{64}$'),
   questions jsonb not null check (jsonb_typeof(questions) = 'array'),
   verified_by text not null check (length(btrim(verified_by)) between 1 and 200),
   created_at timestamptz not null default now(),
@@ -34,6 +34,53 @@ create table public.shadow_qa_attestations (
 );
 alter table public.shadow_qa_attestations enable row level security;
 revoke all on public.shadow_qa_attestations from public, anon, authenticated, service_role;
+
+-- The login is provisioned separately and inherits only this capability.
+create role mqb_shadow_qa_verifier nologin;
+create function public.attest_shadow_qa_report(p_intake uuid, p_report jsonb) returns void
+language plpgsql security definer set search_path = ''
+as $$
+declare
+  registered_path text;
+  registered_status text;
+  existing jsonb;
+begin
+  if not pg_has_role(session_user, 'mqb_shadow_qa_verifier', 'member') then
+    raise exception 'Dedicated QA verifier required' using errcode = '42501';
+  end if;
+  if jsonb_typeof(p_report) is distinct from 'object' or length(p_report::text) > 300000
+    or coalesce(p_report->>'bundleHash','') !~ '^[0-9a-f]{64}$'
+    or coalesce(p_report->>'manifestHash','') !~ '^[0-9a-f]{64}$'
+    or coalesce(p_report->>'ruleVersion','') !~ '^shadow-qa-3[.][0-9a-f]{64}$'
+    or jsonb_typeof(p_report->'questions') is distinct from 'array' then
+    raise exception 'Invalid verifier report';
+  end if;
+  if jsonb_array_length(p_report->'questions') not between 1 and 50 then
+    raise exception 'Invalid verifier question count';
+  end if;
+  select intake_manifest_path, status into registered_path, registered_status
+    from public.shadow_papers where id = p_intake for update;
+  if registered_status is null or registered_status not in ('awaiting-review', 'in-review')
+    or registered_path is null
+    or registered_path not like ('%/bundles/' || (p_report->>'bundleHash') || '/intake.json') then
+    raise exception 'The verifier report does not match the registered intake';
+  end if;
+  select questions into existing from public.shadow_qa_attestations
+    where intake_id = p_intake and bundle_hash = p_report->>'bundleHash'
+      and manifest_hash = p_report->>'manifestHash' and rule_version = p_report->>'ruleVersion';
+  if found then
+    if existing is distinct from p_report->'questions' then
+      raise exception 'An attested version cannot be changed';
+    end if;
+    return;
+  end if;
+  insert into public.shadow_qa_attestations (intake_id, bundle_hash, manifest_hash, rule_version, questions, verified_by)
+  values (p_intake, p_report->>'bundleHash', p_report->>'manifestHash', p_report->>'ruleVersion',
+    p_report->'questions', session_user);
+end;
+$$;
+revoke all on function public.attest_shadow_qa_report(uuid,jsonb) from public, anon, authenticated, service_role;
+grant execute on function public.attest_shadow_qa_report(uuid,jsonb) to mqb_shadow_qa_verifier;
 
 -- Direct writes have no grant. This operation serializes each intake and derives
 -- the sample and approved question list from its stored evidence and events.

@@ -1,6 +1,7 @@
 import type { Bundle } from "./shadowBundle";
+import { foundationCheck } from "./shadowQaFoundation";
 
-export const shadowQaRuleVersion = "shadow-qa-2";
+export const shadowQaRuleVersion = "shadow-qa-3";
 export const linkKinds = ["exact-replacement", "skill-variant", "lower-demand-variant", "unsuitable"] as const;
 export type LinkKind = typeof linkKinds[number];
 export type Part = { question: string; marks: number; topic: string; skill: string; proposed_original_question_id: string };
@@ -15,7 +16,8 @@ export type QaQuestion = {
  links: LinkEvidence[];
  annotation?: string;
 };
-type Calculation = readonly [readonly (number | "+" | "-" | "*" | "/")[], number | readonly [number, number]];
+type Arithmetic = readonly [readonly (number | "+" | "-" | "*" | "/")[], number | readonly [number, number]];
+type Calculation = Arithmetic | { readonly method: string; readonly input: unknown; readonly expected: unknown };
 export type Rule = {
  mathematics: string;
  marking: string;
@@ -74,8 +76,10 @@ export function parseShadowQaPack(value: unknown): RulePack {
   if (rule.calculations !== undefined) {
    if (!isObject(rule.calculations) || Object.keys(rule.calculations).length > 26) throw Error("Invalid part calculations.");
    for (const [part, calculation] of Object.entries(rule.calculations)) {
-    if (!/^Q[0-9]{2}[a-z]*$/.test(part) || Number(part.slice(1, 3)) !== Number(number)
-     || !Array.isArray(calculation) || calculation.length !== 2) throw Error("Invalid independent calculation.");
+    if (!/^Q[0-9]{2}[a-z]*$/.test(part) || Number(part.slice(1, 3)) !== Number(number)) throw Error("Invalid independent calculation.");
+    if (isObject(calculation) && typeof calculation.method === "string" && /^[a-z-]{1,30}$/.test(calculation.method)
+     && "input" in calculation && "expected" in calculation) continue;
+    if (!Array.isArray(calculation) || calculation.length !== 2) throw Error("Invalid independent calculation.");
     const [tokens, expected] = calculation;
     const integer = (value: unknown) => typeof value === "number" && Number.isSafeInteger(value) && Math.abs(value) <= 1e9;
     if (!Array.isArray(tokens) || tokens.length < 3 || tokens.length > 50
@@ -88,7 +92,7 @@ export function parseShadowQaPack(value: unknown): RulePack {
  return value as unknown as RulePack;
 }
 
-function arithmeticPass(calculation: Calculation) {
+function arithmeticPass(calculation: Arithmetic) {
  const [tokens, expected] = calculation;
  const stack: Array<[bigint, bigint]> = [];
  for (const token of tokens) {
@@ -127,7 +131,10 @@ export function evaluateShadowQa(
   const hasLabels = parts.every(part => part.skill.split(";").every(label => taxonomy.has(label.trim())));
   const missing = parts.filter(part => !rule?.calculations?.[part.question]).map(part => part.question);
   const mathPass = !!rule && missing.length === 0
-   && parts.every(part => arithmeticPass(rule.calculations![part.question]));
+   && parts.every(part => {
+    const check = rule.calculations![part.question];
+    return "method" in check ? foundationCheck(check.method, check.input, check.expected) : arithmeticPass(check);
+   });
   const markingPass = mathPass && !rule?.markingException;
   const skillPass = !!rule && hasLabels;
   return {

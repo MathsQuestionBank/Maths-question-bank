@@ -32,9 +32,29 @@ This version evaluates reviewed, source-bound evidence. It does not infer mathem
 
 ## Server trust boundary
 
-An approved owner can submit a candidate report. The RPC only accepts automatic QA passes and records teacher decisions when the exact question report is independently attested in `shadow_qa_attestations`. The database compares the intake ID, bundle SHA-256, manifest SHA-256, rule version and complete question array. The version is `shadow-qa-2.<evidence-pack-sha256>`. Changing any evidence, outcome, classification, link or question list invalidates the attestation. Samples and batch membership are derived by the database.
+An approved owner can submit a candidate report. The RPC only accepts automatic QA passes and records teacher decisions when the exact question report is independently attested in `shadow_qa_attestations`. The database compares the intake ID, bundle SHA-256, manifest SHA-256, rule version and complete question array. The version is `shadow-qa-3.<evidence-pack-sha256>`. Changing any evidence, outcome, classification, link or question list invalidates the attestation. Samples and batch membership are derived by the database.
 
-A database administrator or separately authorised verifier must independently check the report against the private sources and pack before inserting the exact question array and provenance through a privileged database connection. Browser roles, including the Supabase service role via the Data API, have no grants on that table. The PR supplies no hosted verifier or signer. Until the verifier records a matching attestation, the dashboard displays a provisional report with decisions locked. A trusted report may include unsupported questions as exceptions for individual approval. Previously issued packs using a single `calculation` field need reviewed per-part checks before they can be used for automatic QA.
+### Run the verifier
+
+Provision a dedicated PostgreSQL login through the database administration process and grant it membership in the migration's `mqb_shadow_qa_verifier` role. That role can execute `attest_shadow_qa_report` and has no direct table-write grant. Keep its login secret in the verifier job. The browser, ordinary authenticated users and Supabase service role cannot execute the attestation function. Submission uses the authenticated PostgreSQL login as provenance. An identical retry is idempotent. A different report for the same intake, bundle, manifest and evidence version is rejected.
+
+Provide the approved source-reader bindings `MQB_IMPORT_EMAIL` and `MQB_IMPORT_PASSWORD` to the private runner. Supply `MQB_QA_APPROVED_PACK_SHA256` from a separately controlled verifier job configuration after reviewing the pack's transcription and rubric against the sources. The upload owner must have no access to the verifier database login or to this approval configuration. The verifier compares the approved digest before reading the intake and recomputes the complete report from the private staged bytes and current original-question evidence. It accepts no browser-generated final report.
+
+Run from the repository root with Node 20 or later.
+
+```sh
+npx vite-node --script tools/verify-shadow-qa.mjs INTAKE_UUID /private/evidence.json
+```
+
+The command above is read-only. Add `--attest` and inject `MQB_QA_VERIFIER_DATABASE_URL` for the dedicated login to register the result in an authorised database. The CLI requires TLS certificate verification. For a local QA drill, `--report-file /private/new-report.json` writes the recomputed report to a new private file and performs no database writes. Keep source materials, evidence packs, reports and credentials outside the repository and CI artifacts.
+
+The owner then selects the same evidence pack in **Review QA**. A matching recomputed report opens the sample before batch approval. A source, evidence or report change needs a new verification. Unsupported questions in an attested report remain eligible only for individual teacher decisions.
+
+### Supported mathematical methods
+
+The per-part `calculations` entries accept exact rational arithmetic or a named checker with `method`, `input` and `expected`. Foundation methods cover place-value rounding, ordering, principal square roots and integer powers, marked minor angles and angles around a point, simplified ratios, median and range, unit-rate comparison, translations, arithmetic sequences, set complements and event probabilities, integer-coefficient linear equations and upper-bound inequalities, graph lines, parallel lines and coverage comparisons. They evaluate mathematical properties against structured source inputs. Geometry input must identify the actual marked rays or plotted coordinates. Missing, unknown or ambiguous checks remain exceptions, including open chart construction and unclear marking allowances.
+
+This workflow still needs a private, reviewed transcription for each new paper. It has no general PDF-to-proof extraction or hosted runner. The least-privilege CLI is suitable for a separate controlled job once those inputs are available.
 
 ## Sampling and decisions
 
