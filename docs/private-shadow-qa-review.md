@@ -1,6 +1,14 @@
 # Private shadow QA review
 
-Apply the additive Supabase migration `20261122130000_shadow_intake_qa.sql` through the normal release process before testing review writes. It creates an owner-readable, append-only `shadow_qa_events` table and a database-admin-only attestation table, and an owner-checked RPC. The RPC selects the audit sample and approves the batch atomically. Existing storage and question policies are unchanged. The review flow leaves the intake status, source manifest, original question records and selectable question records alone.
+Apply the additive Supabase migration `20261122133000_shadow_intake_qa.sql` through the normal release process before testing review writes. It creates an owner-readable, append-only `shadow_qa_events` table and a database-admin-only attestation table, and an owner-checked RPC. The RPC selects the audit sample and approves the batch atomically. Existing storage and question policies are unchanged. The review flow leaves the intake status, source manifest, original question records and selectable question records alone.
+
+## Target migration preflight
+
+The target ledger ends at `20261122131859_ks3_private_review_staging` at the time of this review. It does not list either repository file with version `20261101`. The target already has the shadow intake table, the Word/PDF fields and the associated status constraint. The two historical files have a dependency order: create the intake table, then add Word support. Preserve the historical filenames and production ledger. Reconcile the complete history and apply only the new QA migration through an explicitly scoped release, with a fresh ledger check first.
+
+Preflight must include an isolated Supabase clone or branch with the production schema and permissions and synthetic data. Run the migration as the intended migration role, then verify the owner review RPC, a dedicated verifier login, RLS and denial of direct writes for all API roles. The repository test rehearses the relevant legacy SQL and target-style default grants in disposable PostgreSQL. It does not exercise Supabase-managed deployment.
+
+Confirm the Cloudflare Pages project's production branch controls and Git integration from its dashboard. The repository Build workflow runs tests and does not deploy Pages. If Pages automatically builds `main`, pause that integration with the release owner's approval before a merge intended to precede deployment.
 
 In **Import Exam Papers → Import Official Shadow Papers**, open **Review QA** beside a ZIP-staged intake. The owner can supply a reviewed evidence JSON file prepared from their private source review. The app reads the staged objects, reconstructs the bundle in memory, reruns the staging validator and checks the registered bundle hash. It checks the live taxonomy and the byte identity of cited original question crops, then evaluates the evidence. The pack hash identifies the evidence version in the audit trail.
 

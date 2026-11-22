@@ -44,7 +44,8 @@ const validated = await inspectShadowBundle(await zip.generateAsync({ type: "uin
 const bundle = validated.hash;
 const manifest = validated.files.find(file => file.path === "intake.json").hash;
 const version = character => "shadow-qa-3." + character.repeat(64);
-const migration = new URL("../supabase/migrations/20261122130000_shadow_intake_qa.sql", import.meta.url);
+const migrations = new URL("../supabase/migrations/", import.meta.url);
+const questionId = "77777777-7777-7777-7777-777777777777";
 try {
  await db.exec(`
   create role anon;
@@ -57,13 +58,40 @@ try {
   create function auth.uid() returns uuid language sql stable as
     $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
   create function public.is_approved_owner() returns boolean language sql stable as $$select auth.uid()='${owner}'::uuid$$;
-  create table public.shadow_papers(id uuid primary key,status text,intake_manifest_path text);
-  create table public.questions(id int primary key);
-  insert into public.questions values (7);
+  -- Match the defaults inspected on the target for tables, sequences and functions.
+  alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
+  alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
+  alter default privileges in schema public grant execute on functions to anon, authenticated, service_role;
+  create table public.exam_papers(id uuid primary key);
+  create table public.questions(id uuid primary key);
+  alter table public.questions enable row level security;
+  create policy synthetic_question_read on public.questions for select to authenticated using (true);
+  create table public.assessment_questions(question_id uuid references public.questions(id) on delete restrict);
+  insert into public.exam_papers values ('${sourcePaper.id}');
+  insert into public.questions values ('${questionId}');
+  insert into public.assessment_questions values ('${questionId}');
   insert into auth.users values ('${owner}'),('${member}');
-  insert into public.shadow_papers values ('${intake}','awaiting-review','private/bundles/${bundle}/intake.json');
  `);
- await db.exec(await readFile(migration, "utf8"));
+ // The legacy migration names share a version. Replay their SQL in dependency
+ // order, without using or modifying the production migration ledger.
+ for (const name of ["20261101_shadow_papers.sql", "20261101_shadow_word_sources.sql"]) {
+  await db.exec(await readFile(new URL(name, migrations), "utf8"));
+ }
+ const insertIntake = (id, path, set) => db.query(`
+  insert into public.shadow_papers
+   (id,original_paper_id,shadow_set,question_source_path,mark_scheme_source_path,intake_manifest_path,status,uploaded_by)
+  values ($1,$2,$3,'private/question.pdf','private/mark.pdf',$4,'awaiting-review',$5)`,
+  [id, sourcePaper.id, set, path, owner]);
+ await insertIntake(intake, `private/bundles/${bundle}/intake.json`, "Set 1");
+ const existingAccess = async () => (await db.query(`
+  select c.relname, c.relrowsecurity, c.relacl::text,
+   (select jsonb_agg(pg_get_constraintdef(x.oid) order by x.conname) from pg_constraint x where x.conrelid = c.oid) constraints,
+   (select jsonb_agg(to_jsonb(p) order by p.policyname) from pg_policies p where p.schemaname = 'public' and p.tablename = c.relname) policies
+  from pg_class c where c.oid in ('public.questions'::regclass, 'public.assessment_questions'::regclass, 'public.shadow_papers'::regclass)
+  order by c.relname`)).rows;
+ const before = await existingAccess();
+ await db.exec(await readFile(new URL("20261122133000_shadow_intake_qa.sql", migrations), "utf8"));
+ assert.deepEqual(await existingAccess(), before);
  await db.exec("grant mqb_shadow_qa_verifier to test_verifier");
  let last = null;
  async function record(kind, payload, expected = last) {
@@ -164,11 +192,34 @@ try {
  assert.deepEqual((await db.query("select payload->'numbers' numbers from public.shadow_qa_events where kind='batch'")).rows[0].numbers, [1, 2, 3, 4, 5]);
  await assert.rejects(record("batch", {}), /completed audit/);
  await assert.rejects(record("run", report), /already been reviewed/);
+ const directWrites = [
+  `insert into public.shadow_qa_events(intake_id,kind,payload,actor_id) values ('${intake}','run','{}','${owner}')`,
+  `update public.shadow_qa_events set payload = '{}' where id = ${originalRun}`,
+  `delete from public.shadow_qa_events where id = ${originalRun}`,
+ ];
+ for (const role of ["service_role", "authenticated", "test_verifier"]) {
+  await db.exec(`reset role; set role ${role}`);
+  for (const statement of directWrites) {
+   await assert.rejects(db.exec(statement), error => error.code === "42501");
+  }
+  await assert.rejects(db.query("select nextval('public.shadow_qa_events_id_seq')"), error => error.code === "42501");
+  if (role !== "authenticated") {
+   await assert.rejects(db.query("select count(*) from public.shadow_qa_events"), error => error.code === "42501");
+   await assert.rejects(record("batch", {}), error => error.code === "42501");
+  }
+  if (role === "service_role") {
+   await assert.rejects(registerVerifiedQa(db.query.bind(db), intake, report), error => error.code === "42501");
+  }
+ }
+ await useOwner();
  await db.exec(`set request.jwt.claim.sub='${member}'`);
  assert.equal((await db.query("select count(*) from public.shadow_qa_events")).rows[0].count, 0);
  await db.exec("reset role");
  assert.equal((await db.query("select status from public.shadow_papers")).rows[0].status, "awaiting-review");
- assert.deepEqual((await db.query("select * from public.questions")).rows, [{ id: 7 }]);
+ assert.deepEqual((await db.query("select id,shadow_paper_id,shadow_of_question_id from public.questions")).rows,
+  [{ id: questionId, shadow_paper_id: null, shadow_of_question_id: null }]);
+ assert.deepEqual((await db.query("select question_id from public.assessment_questions")).rows, [{ question_id: questionId }]);
+ assert.deepEqual(await existingAccess(), before);
  assert.equal((await db.query("select kind from public.shadow_qa_events where id=$1", [originalRun])).rows[0].kind, "run");
  const privateReportPath = process.env.MQB_QA_TEST_PRIVATE_REPORT;
  if (privateReportPath) {
@@ -176,8 +227,7 @@ try {
   // disposable PGlite; private bytes are never committed or printed.
   const privateReport = JSON.parse(await readFile(privateReportPath, "utf8"));
   const pilotId = "66666666-6666-6666-6666-666666666666";
-  await db.query("insert into public.shadow_papers values ($1,'awaiting-review',$2)", [pilotId,
-   `private/bundles/${privateReport.bundleHash}/intake.json`]);
+  await insertIntake(pilotId, `private/bundles/${privateReport.bundleHash}/intake.json`, "Set 2");
   await asVerifier(connection => registerVerifiedQa(connection.query.bind(connection), pilotId, privateReport));
   let pilotEvent = null;
   async function pilotRecord(kind, payload) {

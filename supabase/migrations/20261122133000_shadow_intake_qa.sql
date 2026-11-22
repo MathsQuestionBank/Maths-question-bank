@@ -15,7 +15,8 @@ create unique index shadow_qa_events_run_version on public.shadow_qa_events (
   intake_id, (payload->>'bundleHash'), (payload->>'ruleVersion'), (payload->>'batchVerified')
 ) where kind = 'run';
 alter table public.shadow_qa_events enable row level security;
-revoke all on public.shadow_qa_events from public, anon, authenticated;
+revoke all on public.shadow_qa_events from public, anon, authenticated, service_role;
+revoke all on sequence public.shadow_qa_events_id_seq from public, anon, authenticated, service_role;
 grant select on public.shadow_qa_events to authenticated;
 create policy shadow_qa_events_owner_read on public.shadow_qa_events
   for select to authenticated using ((select public.is_approved_owner()));
@@ -290,5 +291,5 @@ begin
   return new_id;
 end;
 $$;
-revoke all on function public.record_shadow_qa_event(uuid, bigint, text, jsonb) from public, anon, authenticated;
+revoke all on function public.record_shadow_qa_event(uuid, bigint, text, jsonb) from public, anon, authenticated, service_role;
 grant execute on function public.record_shadow_qa_event(uuid, bigint, text, jsonb) to authenticated;
