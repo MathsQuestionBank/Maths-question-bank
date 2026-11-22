@@ -11,6 +11,7 @@ import {useAccountRole} from "./AuthGate";
 import {performanceAtGrade,paperNumberFromCode,compareOriginalQuestionNumber,weightedGradePerformance,averageQuestionPerformance} from "./teacherQuestionStats";
 import TeacherGradePerformance from "./TeacherGradePerformance";
 import AssessmentPaper from "./AssessmentPaper";
+import KS3ProblemSolving from "./KS3ProblemSolving";
 import { useAutomaticNumbering } from "./useAutomaticNumbering";
 import { numberingMaskProposal } from "./numberingProcessing";
 import AssessmentMaskEditor from "./AssessmentMaskEditor";
@@ -33,12 +34,13 @@ import { reconcileAssessments } from "./assessmentReconciliation";
 import { saveVersionedAssessment, deleteVersionedAssessment } from "./versionedAssessments";
 import { loadAccountFolders, createAccountFolder, changeAccountFolder } from "./accountFolders";
 
-type Page = "home" | "bank" | "builder" | "saved" | "qualifications" | "further" | "statistics" | "account" | "import" | "insights" | "review" | "audit-export";
+type Page = "home" | "ks3" | "bank" | "builder" | "saved" | "qualifications" | "further" | "statistics" | "account" | "import" | "insights" | "review" | "audit-export";
 type Question = BankQuestion;
 const groups=["Algebra","Geometry","Number","Probability","Ratio","Statistics"];
-const navigation:{page:Page;label:string}[]=[{page:"bank",label:"Question Bank"},{page:"builder",label:"Assessment Builder"},{page:"saved",label:"My Worksheets"},{page:"further",label:"Further Maths"},{page:"statistics",label:"Statistics"},{page:"account",label:"Account"}];
+const navigation:{page:Page;label:string}[]=[{page:"bank",label:"Question Bank"},{page:"ks3",label:"KS3 Problem Solving"},{page:"builder",label:"Assessment Builder"},{page:"saved",label:"My Worksheets"},{page:"further",label:"Further Maths"},{page:"statistics",label:"Statistics"},{page:"account",label:"Account"}];
 const tiles:{page:Page;icon:string;name:string;desc:string}[]=[
 {page:"bank",icon:"⌕",name:"Enhanced Skills Mapped Question Bank",desc:"Search GCSE questions by skill, topic, student-grade performance and assessment objective."},
+{page:"ks3",icon:"∴",name:"KS3 Problem Solving",desc:"White Rose Maths V2-aligned problem-solving resources for Years 7–9."},
 {page:"builder",icon:"▤",name:"Assessment Builder",desc:"Select questions and create printable assessments and mark schemes."},
 {page:"saved",icon:"▣",name:"My Assessments",desc:"Open assessments saved to your account."},
 {page:"qualifications",icon:"∑",name:"More Qualifications",desc:"Further Mathematics and GCSE Statistics question banks."}
@@ -419,7 +421,7 @@ return <div className="site">
 <nav className="site-nav" aria-label="Main navigation">{navigation.map(item=><button type="button" key={item.page} aria-current={page===item.page||(["import","review","insights","audit-export"].includes(page)&&item.page==="account")?"page":undefined} onClick={()=>navigate(item.page)}>{item.label}</button>)}</nav>
 <main className="main">
 {page==="home"?<><section className="hero"><span className="eyebrow">MATHS QUESTION BANK</span><h1>Find questions. Build better assessments.</h1><p>Choose a tool to get started.</p></section><h2 className="dashboard-title">What would you like to do?</h2><div className="dashboard-grid">{tiles.map(t=><button className="dashboard-tile" key={t.page} onClick={()=>navigate(t.page)}><span className="tile-icon">{t.icon}</span><strong>{t.name}</strong><span>{t.desc}</span><span className="tile-arrow">Explore →</span></button>)}</div><div className="notice"><strong>Early preview:</strong> The mapped exam-question metadata is now in your private Supabase database. Import your existing V6.2 ZIP using the owner-only Import Exam Papers tool to add question images and mark schemes securely.</div><section className="owner-info"><h2>Owner tools</h2><div className="dashboard-grid"><button className="dashboard-tile" onClick={()=>navigate("import")}><span className="tile-icon">⇧</span><strong>Import Exam Papers</strong><span>Upload your V6.2 ZIP securely to private storage.</span><span className="tile-arrow">Open →</span></button><button className="dashboard-tile" onClick={()=>navigate("review")}><span className="tile-icon">✓</span><strong>Review image crops</strong><span>Check imported question images and mark schemes.</span><span className="tile-arrow">Open →</span></button><button className="dashboard-tile" onClick={()=>navigate("insights")}><span className="tile-icon">▥</span><strong>Question Bank Insights</strong><span>Review question, grade and enhanced skills coverage.</span><span className="tile-arrow">Open →</span></button></div></section></>:
-<><div className="page-top">{page!=="bank"&&<button className="back-link" onClick={()=>navigate("bank")}>← Question Bank</button>}<h1>{page==="bank"?"Question Bank":page==="builder"?"Assessment Builder":page==="saved"?"My Worksheets":page==="qualifications"?"More Qualifications":page==="further"?"Further Maths":page==="statistics"?"GCSE Statistics":page==="account"?"Account":page==="import"?"Import Exam Papers":page==="review"?"Review image crops":page==="audit-export"?"Multipart audit export":"Question Bank Insights"}</h1></div>
+<><div className="page-top">{page!=="bank"&&<button className="back-link" onClick={()=>navigate("bank")}>← Question Bank</button>}<h1>{page==="bank"?"Question Bank":page==="builder"?"Assessment Builder":page==="saved"?"My Worksheets":page==="qualifications"?"More Qualifications":page==="further"?"Further Maths":page==="statistics"?"GCSE Statistics":page==="ks3"?"KS3 Problem Solving":page==="account"?"Account":page==="import"?"Import Exam Papers":page==="review"?"Review image crops":page==="audit-export"?"Multipart audit export":"Question Bank Insights"}</h1></div>
 {page==="bank"&&<><div className="panel wide-filters"><h2>Find questions</h2><div className="filter-grid">
 <label>Tier<select value={tier} onChange={e=>{setTier(e.target.value)}}>{options(["All","Foundation","Higher"])}</select></label>
 <label>Topic<select value={topic} onChange={e=>setTopic(e.target.value)}>{options(["All",...groups])}</select></label>
@@ -536,6 +538,7 @@ return <div className="site">
 </div>)}
 </section>}
 </section>}
+{page==="ks3"&&<KS3ProblemSolving/>}
 {page==="further"&&<section className="panel saved-panel"><h2>Further Mathematics</h2><p>Dedicated question bank planned. Questions will be added when appropriately licensed or original content is available.</p></section>}
 {page==="statistics"&&<section className="panel saved-panel"><h2>GCSE Statistics</h2><p>Dedicated question bank planned. Questions will be added when appropriately licensed or original content is available.</p></section>}
 {page==="qualifications"&&<div className="dashboard-grid"><div className="dashboard-tile static-tile"><span className="tile-icon">∑</span><strong>Further Mathematics</strong><span>Dedicated question bank planned. Questions will be added when appropriately licensed or original content is available.</span></div><div className="dashboard-tile static-tile"><span className="tile-icon">▥</span><strong>GCSE Statistics</strong><span>Dedicated question bank planned. Questions will be added when appropriately licensed or original content is available.</span></div></div>}
