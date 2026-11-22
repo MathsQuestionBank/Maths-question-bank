@@ -90,7 +90,7 @@ try {
   from pg_class c where c.oid in ('public.questions'::regclass, 'public.assessment_questions'::regclass, 'public.shadow_papers'::regclass)
   order by c.relname`)).rows;
  const before = await existingAccess();
- await db.exec(await readFile(new URL("20261122133000_shadow_intake_qa.sql", migrations), "utf8"));
+ await db.exec(await readFile(new URL("20261122141500_shadow_intake_qa.sql", migrations), "utf8"));
  assert.deepEqual(await existingAccess(), before);
  await db.exec("grant mqb_shadow_qa_verifier to test_verifier");
  let last = null;
