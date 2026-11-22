@@ -1,0 +1,186 @@
+{
+  "curriculum": "department-2026-27",
+  "year": 7,
+  "unit": "7.1",
+  "unitTitle": "Sequences",
+  "referenceScheme": "White Rose Maths V2",
+  "sourceDocuments": [
+    {
+      "filename": "Year-7-Autumn-1-Sequences-Exemplar-Questions-and-Answers.pptx",
+      "kind": "exemplar",
+      "slides": 51,
+      "questionAnswerPairs": 25,
+      "rights": "third-party-reference-only"
+    },
+    {
+      "filename": "Y7-Sequences-LA-guidance.pdf",
+      "kind": "lower-attainment-guidance",
+      "pages": 3,
+      "rights": "third-party-reference-only"
+    },
+    {
+      "filename": "Y7-Autumn-1-Sequences-HA-Guidance-new.pdf",
+      "kind": "higher-attainment-guidance",
+      "pages": 16,
+      "activities": 7,
+      "rights": "third-party-reference-only"
+    }
+  ],
+  "steps": [
+    {
+      "id": "y7-7.1-01",
+      "label": "Describe and continue diagrammatic sequences",
+      "attainment": "core",
+      "scaffold": "Concrete models, compare successive diagrams, use supplied first terms",
+      "exemplarSlides": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "extensionActivities": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "id": "y7-7.1-02",
+      "label": "Predict and check subsequent terms",
+      "attainment": "core",
+      "scaffold": "Build terms physically before predicting",
+      "exemplarSlides": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "extensionActivities": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "id": "y7-7.1-03",
+      "label": "Represent sequences using tables and graphs",
+      "attainment": "core",
+      "scaffold": "Provide partly completed tables, focus on relationship not arithmetic",
+      "exemplarSlides": [
+        14,
+        15
+      ],
+      "extensionActivities": [
+        4
+      ]
+    },
+    {
+      "id": "y7-7.1-04",
+      "label": "Distinguish linear and non-linear sequences",
+      "attainment": "core",
+      "scaffold": "Explore constant versus changing differences with calculator support",
+      "exemplarSlides": [
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "extensionActivities": [
+        4
+      ]
+    },
+    {
+      "id": "y7-7.1-05",
+      "label": "Continue numerical linear sequences",
+      "attainment": "core",
+      "scaffold": "Use difference calculations and concrete representations",
+      "exemplarSlides": [
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33
+      ],
+      "extensionActivities": [
+        5
+      ]
+    },
+    {
+      "id": "y7-7.1-06",
+      "label": "Continue numerical non-linear sequences",
+      "attainment": "core",
+      "scaffold": "Use known rules, calculators, and initially simpler sequence families",
+      "exemplarSlides": [
+        34,
+        35,
+        36,
+        37,
+        38,
+        39
+      ],
+      "extensionActivities": [
+        5
+      ]
+    },
+    {
+      "id": "y7-7.1-07",
+      "label": "Explain numerical term-to-term rules in words",
+      "attainment": "core",
+      "scaffold": "Reinforce terminology and verbal explanation alongside previous steps",
+      "exemplarSlides": [
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47
+      ],
+      "extensionActivities": [
+        6
+      ]
+    },
+    {
+      "id": "y7-7.1-08",
+      "label": "Find missing values in sequences",
+      "attainment": "higher-step",
+      "scaffold": "If appropriate, use obvious missing-term examples before more demanding positions",
+      "exemplarSlides": [
+        48,
+        49,
+        50,
+        51
+      ],
+      "extensionActivities": [
+        7
+      ]
+    }
+  ],
+  "publicationNote": "This is a navigational index and paraphrased guidance only; no White Rose question statements, solutions, drawings, or slide assets are included. Validate alignment with the department scheme before production import."
+}
