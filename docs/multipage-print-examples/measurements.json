@@ -1,0 +1,128 @@
+{
+  "scope": "Synthetic fixture plus locally rendered public source counterparts; not a verification of the exact production crops. No private stored assets or signed URLs are included.",
+  "baseline_commit": "941f367dcd6a9045de92313e68df7ab9ccbcb095",
+  "sources": {
+    "8": {
+      "width": 1030,
+      "height": 1254,
+      "source_sha256": "0790504eaf368cd4c07221350da233e926a72c97150a5c34b0c103a64b9e1a77",
+      "source_pages": [
+        8
+      ],
+      "analysis_crops": [
+        [
+          40,
+          53,
+          555,
+          680
+        ]
+      ],
+      "url": "https://pmt.physicsandmathstutor.com/download/Maths/GCSE/Past-Papers/Edexcel/Paper-2H/QP/June%202017%20QP.pdf"
+    },
+    "11": {
+      "width": 1030,
+      "height": 2688,
+      "source_sha256": "842558d29436668d26fa15807cbbe1ba316e917112bd3cad445e281d167d130e",
+      "source_pages": [
+        10,
+        11
+      ],
+      "analysis_crops": [
+        [
+          40,
+          53,
+          555,
+          775
+        ],
+        [
+          40,
+          53,
+          555,
+          675
+        ]
+      ],
+      "url": "https://pmt.physicsandmathstutor.com/download/Maths/GCSE/Past-Papers/Edexcel/Paper-2H/QP/June%202019%20QP.pdf"
+    }
+  },
+  "outputs": {
+    "before-synthetic": {
+      "pages": 2,
+      "native_images": [],
+      "font_samples": [
+        {
+          "sample": "Read the cumulative frequency graph.",
+          "font_pt": 13.27,
+          "page": 1
+        },
+        {
+          "sample": "Grouped travel times for 60 people.",
+          "font_pt": 5.1,
+          "page": 2
+        }
+      ]
+    },
+    "before-public": {
+      "pages": 2,
+      "native_images": [
+        {
+          "page": 1,
+          "width_px": 1030,
+          "height_px": 1254,
+          "printed_width_mm": 147.9,
+          "native_pixels_unchanged": true
+        },
+        {
+          "page": 2,
+          "width_px": 1030,
+          "height_px": 2688,
+          "printed_width_mm": 69.06,
+          "native_pixels_unchanged": true
+        }
+      ],
+      "font_samples": []
+    },
+    "after-synthetic": {
+      "pages": 3,
+      "native_images": [],
+      "font_samples": [
+        {
+          "sample": "Read the cumulative frequency graph.",
+          "font_pt": 13.28,
+          "page": 1
+        },
+        {
+          "sample": "Grouped travel times for 60 people.",
+          "font_pt": 13.27,
+          "page": 2
+        }
+      ]
+    },
+    "after-public": {
+      "pages": 3,
+      "native_images": [
+        {
+          "page": 1,
+          "width_px": 1030,
+          "height_px": 1254,
+          "printed_width_mm": 180.18,
+          "native_pixels_unchanged": true
+        },
+        {
+          "page": 2,
+          "width_px": 1030,
+          "height_px": 2688,
+          "printed_width_mm": 180.18,
+          "native_pixels_unchanged": true
+        },
+        {
+          "page": 3,
+          "width_px": 1030,
+          "height_px": 2688,
+          "printed_width_mm": 180.18,
+          "native_pixels_unchanged": true
+        }
+      ],
+      "font_samples": []
+    }
+  }
+}

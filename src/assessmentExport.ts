@@ -30,7 +30,7 @@ export async function prepareAssessmentImages(paper:HTMLElement):Promise<void>{
   }catch{throw new Error("An assessment image could not be loaded. Retry the image or refresh the Question Bank before exporting.")}
   finally{clearTimeout(timer)}
  }));
- if(paper.querySelector('[role="alert"]'))throw new Error("An assessment image is unavailable. Retry it before exporting.");
+ if(paper.querySelector('[role="alert"],[data-pagination-state="loading"]'))throw new Error("An assessment image is unavailable. Retry it before exporting.");
  await document.fonts.ready;
  // Let CroppedImage commit its measured crop geometry before print captures it.
  await new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));
