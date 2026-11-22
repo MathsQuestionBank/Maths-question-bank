@@ -25,6 +25,7 @@ export default function KS3QuestionExtractionReview(){
   const [drafts,setDrafts]=useState<ReviewedDraft[]>([]);
   const [active,setActive]=useState(0);
   const [totalSlides,setTotalSlides]=useState(0);
+  const [sourceSlides,setSourceSlides]=useState<string[]>([]);
   const [busy,setBusy]=useState(false);
   const [error,setError]=useState("");
   const [message,setMessage]=useState("");
@@ -44,12 +45,13 @@ export default function KS3QuestionExtractionReview(){
   const patch=(data:Partial<ReviewedDraft>)=>setDrafts(rows=>rows.map((r,i)=>i===active?{...r,...data}:r));
   const extract=async()=>{
     if(!source||busy)return;
-    setBusy(true);setError("");setMessage("");setDrafts([]);setActive(0);
+    setBusy(true);setError("");setMessage("");setDrafts([]);setSourceSlides([]);setActive(0);
     try{
       const {data,error:downloadError}=await supabase.storage.from(bucket).download(source.storage_path);
       if(downloadError||!data)throw new Error(downloadError?.message||"Cannot download private source");
       const slides=await extractAllSlides(data);
       setTotalSlides(slides.length);
+      setSourceSlides(slides);
       const proposals=makeReviewDrafts(slides);
       const {data:existing,error:existingError}=await supabase.from("ks3_extracted_question_drafts")
         .select("source_question_slide,source_answer_slide,question_text,answer_text,step_label,difficulty,support,answer_status,review_status")
@@ -99,7 +101,7 @@ export default function KS3QuestionExtractionReview(){
     <h2>Year 7 question extraction and review</h2>
     <p>Read previously stored exemplar PowerPoints. Pairing is tentative: many slides reuse question wording and may include diagrams or answers that text extraction cannot capture. Save as private drafts only; these questions are not yet printable or published.</p>
     <div className="filter-grid">
-      <label>Choose topic<select value={sourceId} disabled={busy} onChange={e=>{setSourceId(e.target.value);setDrafts([]);setMessage("");setError("");}}>
+      <label>Choose topic<select value={sourceId} disabled={busy} onChange={e=>{setSourceId(e.target.value);setDrafts([]);setSourceSlides([]);setMessage("");setError("");}}>
         {sources.map(s=><option key={s.id} value={s.id}>{s.unit_code} — {topicNames[s.unit_code]||s.original_filename}</option>)}
       </select></label>
       <label>Source PowerPoint<output>{source?.original_filename||"No exemplar sources found"}</output></label>
@@ -117,7 +119,7 @@ export default function KS3QuestionExtractionReview(){
       </div>
       <div className="filter-grid">
         <label>Answer slide number (blank if none)<input type="number" min={1} max={totalSlides} value={current.answerSlide??""}
-          onChange={e=>patch({answerSlide:e.target.value?Number(e.target.value):null,review:"needs-review"})}/></label>
+          onChange={e=>{const page=e.target.value?Number(e.target.value):null;patch({answerSlide:page,answerText:page?sourceSlides[page-1]||"": "",answerStatus:page?"source-unverified":"missing",review:"needs-review"});}}/></label>
         <label>Curriculum step / learning objective<input value={current.stepLabel} onChange={e=>patch({stepLabel:e.target.value,review:"needs-review"})}/></label>
         <label>Difficulty<select value={current.difficulty} onChange={e=>patch({difficulty:e.target.value as ReviewedDraft["difficulty"]})}>{difficulties.map(v=><option key={v}>{v}</option>)}</select></label>
         <label>Scaffolding<select value={current.support} onChange={e=>patch({support:e.target.value as ReviewedDraft["support"]})}>{supports.map(v=><option key={v}>{v}</option>)}</select></label>
