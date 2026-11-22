@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import KS3ResourceImporter from "./KS3ResourceImporter";
+import KS3BulkSources from "./KS3BulkSources";
 
 type Year = 7 | 8 | 9;
 type Term = "Autumn" | "Spring" | "Summer";
@@ -74,5 +75,5 @@ export default function KS3ProblemSolving() {
       {showSolutions[q.id] && <p className="print-hide"><strong>Worked solution: </strong>{q.solution}</p>}
     </article>)}
     <p className="print-hide" style={{fontSize:12}}>Pilot content is original to MathsQuestionBank. White Rose alignment is a curriculum reference, not an endorsement or licence to reproduce its teaching materials.</p>
-  </section><KS3ResourceImporter/></>;
+  </section><KS3BulkSources/><KS3ResourceImporter/></>;
 }
