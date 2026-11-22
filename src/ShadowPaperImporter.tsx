@@ -1,4 +1,5 @@
 import {useEffect,useState} from "react";
+import ShadowBundleUploader from "./ShadowBundleUploader";
 import {supabase} from "./supabase";
 
 const BUCKET="exam-materials-private";
@@ -29,18 +30,20 @@ export default function ShadowPaperImporter(){
  const [questionFile,setQuestionFile]=useState<File|null>(null);
  const [markFile,setMarkFile]=useState<File|null>(null);
  const [busy,setBusy]=useState(false);
+ const [ownerReady,setOwnerReady]=useState(false);
  const [ready,setReady]=useState(false);
  const [message,setMessage]=useState("");
  const refresh=async()=>{
   const {data:{user},error:authError}=await supabase.auth.getUser();
   const {data:owner,error:ownerError}=await supabase.rpc("is_approved_owner");
-  if(authError||!user||ownerError||owner!==true)throw Error("Only an approved owner can stage shadow resources.");
+  if(authError||!user||ownerError||owner!==true){setOwnerReady(false);throw Error("Only an approved owner can stage shadow resources.");}
   const [papers,intakes]=await Promise.all([
    supabase.from("exam_papers").select("id,exam_board,qualification,series,tier,paper_code").order("series",{ascending:false}).order("paper_code"),
    supabase.from("shadow_papers").select("id,original_paper_id,shadow_set,question_source_path,mark_scheme_source_path,question_format,mark_scheme_format,status").order("created_at",{ascending:false})
   ]);
   if(papers.error||intakes.error)throw Error(papers.error?.message||intakes.error?.message);
   const available=(papers.data||[]) as OriginalPaper[];
+  setOwnerReady(true);
   setOriginals(available);
   setOriginalId(current=>current||available[0]?.id||"");
   setExisting((intakes.data||[]) as ShadowIntake[]);
@@ -105,6 +108,7 @@ export default function ShadowPaperImporter(){
    window.open(data.signedUrl,"_blank","noopener,noreferrer");
   }catch(e){setMessage(e instanceof Error?e.message:String(e))}
  };
+ if(!ownerReady)return <section className="panel" style={{padding:22}}><h2>Import Official Shadow Papers</h2><p role="status">{message||"Verifying approved owner access…"}</p></section>;
  return <section className="panel" style={{padding:22}}>
   <h2>Import Official Shadow Papers</h2>
   <p className="hint">Upload Pearson shadow source files against a published original paper. PDF, DOCX and DOC files can be mixed. Word sources are archived for subsequent conversion to PDF by Codex; no browser-based Word rendering or automatic publication is attempted.</p>
@@ -112,6 +116,8 @@ export default function ShadowPaperImporter(){
    <label>Original exam paper<select aria-label="Original exam paper for shadow" value={originalId} disabled={busy} onChange={e=>{setOriginalId(e.target.value);setReady(false)}}>{originals.map(p=><option key={p.id} value={p.id}>{label(p)}</option>)}</select></label>
    <label>Shadow set<input aria-label="Shadow set name" value={shadowSet} disabled={busy} onChange={e=>{setShadowSet(e.target.value);setReady(false)}} placeholder="Set 1"/></label>
   </div>
+  <ShadowBundleUploader original={selected} set={shadowSet} disabled={busy} onBusy={setBusy} onStaged={refresh}/>
+  <h3>Or archive source documents only</h3>
   <div className="library-toolbar">
    <label>Shadow question paper<input aria-label="Shadow question paper file" type="file" accept=".pdf,.docx,.doc" disabled={busy} onChange={e=>{setQuestionFile(e.target.files?.[0]||null);setReady(false)}}/></label>
    <label>Shadow mark scheme<input aria-label="Shadow mark scheme file" type="file" accept=".pdf,.docx,.doc" disabled={busy} onChange={e=>{setMarkFile(e.target.files?.[0]||null);setReady(false)}}/></label>
