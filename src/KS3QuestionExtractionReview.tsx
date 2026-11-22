@@ -43,6 +43,12 @@ export default function KS3QuestionExtractionReview(){
     return()=>{live=false};
   },[owner]);
   const patch=(data:Partial<ReviewedDraft>)=>setDrafts(rows=>rows.map((r,i)=>i===active?{...r,...data}:r));
+  const openSource=async()=>{
+    if(!source)return;
+    const {data,error:e}=await supabase.storage.from(bucket).createSignedUrl(source.storage_path,120);
+    if(e||!data){setError(e?.message||"Could not open private PowerPoint");return;}
+    window.open(data.signedUrl,"_blank","noopener,noreferrer");
+  };
   const extract=async()=>{
     if(!source||busy)return;
     setBusy(true);setError("");setMessage("");setDrafts([]);setSourceSlides([]);setActive(0);
@@ -106,7 +112,7 @@ export default function KS3QuestionExtractionReview(){
       </select></label>
       <label>Source PowerPoint<output>{source?.original_filename||"No exemplar sources found"}</output></label>
     </div>
-    <button type="button" className="secondary" disabled={!source||busy} onClick={()=>void extract()}>{busy?"Working…":"Extract and open question candidates"}</button>
+    <div style={{display:"flex",gap:10,flexWrap:"wrap",margin:"14px 0"}}><button type="button" className="secondary" disabled={!source||busy} onClick={()=>void extract()}>{busy?"Working…":"Extract and open question candidates"}</button><button type="button" className="secondary" disabled={!source||busy} onClick={()=>void openSource()}>Open original PowerPoint for visual checking</button></div>
     {!!drafts.length&&<>
       <p><strong>{drafts.length} proposed records</strong> from {totalSlides} slides · {drafts.filter(x=>x.review==="approved").length} teacher-approved · {drafts.filter(x=>x.answerStatus==="missing").length} marked missing answers.</p>
       <p><strong>Review warning:</strong> Slide images, graphs, diagrams and equations may be missing from the extracted text. Open the original PowerPoint to verify every question, its suggested answer and any multiple valid responses.</p>
