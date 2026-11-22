@@ -41,7 +41,7 @@ export async function inspectYear7Zip(file:File):Promise<Resource[]> {
     if(!size || size>20*1024*1024)throw new Error(`File size not supported: ${path}`);
     uncompressed+=size;
     if(uncompressed>180*1024*1024)throw new Error("Uncompressed ZIP exceeds 180 MB.");
-    resources.push({path,entry,filename:path.split("/").at(-1)!,unit:type.unit,kind:type.kind,bytes:size});
+    resources.push({path,entry,filename:path.split("/")[path.split("/").length-1],unit:type.unit,kind:type.kind,bytes:size});
   }
   const expected=inventory.summary.powerpoints+inventory.summary.guidancePdfs;
   if(resources.length!==expected)throw new Error(`Expected ${expected} files; found ${resources.length}. Verify this is the complete Year 7 ZIP.`);
@@ -123,7 +123,7 @@ export default function KS3BulkSources(){
     </>}
     <div style={{marginTop:16}}><button type="button" className="secondary small" onClick={()=>void refresh()} disabled={busy}>Show stored Year 7 files</button>
       {!!stored.length&&<p><strong>{stored.length} stored resources</strong> (may include multiple uploads of a topic).</p>}
-      {!!stored.length&&<details><summary>View stored private resources</summary><ul>{stored.map(r=><li key={r.id}>{r.unit} · {r.resource_type} · <button type="button" className="secondary small" onClick={()=>void open(r.storage_path)}>{r.original_filename}</button></li>)}</ul></details>}
+      {!!stored.length&&<details><summary>View stored private resources</summary><ul>{stored.map(r=><li key={r.id}>{r.unit_code} · {r.resource_type} · <button type="button" className="secondary small" onClick={()=>void open(r.storage_path)}>{r.original_filename}</button></li>)}</ul></details>}
     </div>
     {notice&&<p role="status">{notice}</p>}
     {error&&<p role="alert">{error}</p>}
