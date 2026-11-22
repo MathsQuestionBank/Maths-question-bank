@@ -46,9 +46,9 @@ export default function KS3ProblemSolving() {
   const worksheet = pilot.filter(q => selected.includes(q.id));
   const visible = onlySelected ? worksheet : filtered;
   const toggle = (id: string) => setSelected(current => current.includes(id) ? current.filter(x => x !== id) : [...current, id]);
-  return <section className="panel saved-panel ks3-area">
-    <p>White Rose Maths V2 curriculum alignment · KS3 departmental pilot</p>
-    <p>Browse independently written problem-solving questions. Only the first three Year 7 autumn pilot examples are available so far; full V2 small-step mapping and database-backed content are still to be added.</p>
+  return <section className="panel ks3-area">
+    <p className="print-hide">White Rose Maths V2 curriculum alignment · KS3 departmental pilot</p>
+    <p className="print-hide">Browse independently written problem-solving questions. Only the first three Year 7 autumn pilot examples are available so far; full V2 small-step mapping and database-backed content are still to be added.</p>
     <div className="filter-grid print-hide">
       <label>Year group<select value={year} onChange={e => { setYear(Number(e.target.value) as Year); setBlock("All blocks"); setOnlySelected(false); }}>{years.map(y => <option key={y} value={y}>Year {y}</option>)}</select></label>
       <label>Term<select value={term} onChange={e => { setTerm(e.target.value as Term); setBlock("All blocks"); setOnlySelected(false); }}>{terms.map(t => <option key={t}>{t}</option>)}</select></label>
