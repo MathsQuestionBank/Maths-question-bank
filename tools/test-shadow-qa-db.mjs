@@ -5,8 +5,7 @@ import { registerVerifiedQa, verifyIntake } from "./shadow-qa-verifier.mjs";
 import { createHash } from "node:crypto";
 import JSZip from "jszip";
 import { inspectShadowBundle, sha } from "../src/shadowBundle.ts";
-import { evaluateShadowQa } from "../src/shadowQa.ts";
-import { readQaEvidence } from "../src/shadowQaPort.ts";
+import { evaluateShadowQa, readQaEvidence } from "../src/shadowQa.ts";
 
 const db = new PGlite();
 const owner = "11111111-1111-1111-1111-111111111111";

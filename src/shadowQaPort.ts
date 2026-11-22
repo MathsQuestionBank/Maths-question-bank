@@ -1,6 +1,6 @@
 import JSZip from "jszip";
 import { BUCKET, inspectShadowBundle, sha, type Original } from "./shadowBundle";
-import { evaluateShadowQa, isBundlePath, parseShadowQaPack, shadowQaRuleVersion, type Part, type QaEvent } from "./shadowQa";
+import { evaluateShadowQa, isBundlePath, shadowQaRuleVersion, type Part, type QaEvent, type QaEvidence } from "./shadowQa";
 import { shadowStagingPort } from "./shadowStagingPort";
 import { supabase } from "./supabase";
 
@@ -46,13 +46,6 @@ export async function readQaImages(manifest: QaManifest, number: number): Promis
   return new Blob([new Uint8Array(bytes).buffer], { type: "image/png" });
  }));
 }
-
-export async function readQaEvidence(file: File) {
- if (file.size > 300000) throw Error("The QA evidence pack exceeds 300 KB.");
- const raw = new Uint8Array(await file.arrayBuffer());
- return { pack: parseShadowQaPack(JSON.parse(new TextDecoder().decode(raw))), version: `${shadowQaRuleVersion}.${await sha(raw)}` };
-}
-export type QaEvidence = Awaited<ReturnType<typeof readQaEvidence>>;
 
 export async function runShadowQa(intake: ReviewIntake, evidence?: QaEvidence) {
  await shadowStagingPort.owner();

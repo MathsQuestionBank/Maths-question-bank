@@ -40,7 +40,7 @@ Provision a dedicated PostgreSQL login through the database administration proce
 
 Provide the approved source-reader bindings `MQB_IMPORT_EMAIL` and `MQB_IMPORT_PASSWORD` to the private runner. Supply `MQB_QA_APPROVED_PACK_SHA256` from a separately controlled verifier job configuration after reviewing the pack's transcription and rubric against the sources. The upload owner must have no access to the verifier database login or to this approval configuration. The verifier compares the approved digest before reading the intake and recomputes the complete report from the private staged bytes and current original-question evidence. It accepts no browser-generated final report.
 
-Run from the repository root with Node 20 or later.
+Run from the repository root with Node 22 or later.
 
 ```sh
 npx vite-node --script tools/verify-shadow-qa.mjs INTAKE_UUID /private/evidence.json

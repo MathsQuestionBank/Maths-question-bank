@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { decisions, reviewState, shadowQaRuleVersion, type QaEvent } from "./shadowQa";
-import { listQaEvents, readQaEvidence, readQaImages, readQaManifest, recordQaEvent, runShadowQa,
- type QaEvidence, type QaManifest, type ReviewIntake } from "./shadowQaPort";
+import { decisions, readQaEvidence, reviewState, shadowQaRuleVersion, type QaEvidence, type QaEvent } from "./shadowQa";
+import { listQaEvents, readQaImages, readQaManifest, recordQaEvent, runShadowQa,
+ type QaManifest, type ReviewIntake } from "./shadowQaPort";
 
 const title = (value: string) => value.replace(/-/g, " ");
 const labels = { approved: "Approve", "approved-with-changes": "Approve with changes", held: "Hold", rejected: "Reject" };

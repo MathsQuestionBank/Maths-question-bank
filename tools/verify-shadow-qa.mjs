@@ -1,7 +1,8 @@
 import { readFile, writeFile } from "node:fs/promises";
 import pg from "pg";
 import { supabase } from "../src/supabase.ts";
-import { readQaEvidence, runShadowQa } from "../src/shadowQaPort.ts";
+import { runShadowQa } from "../src/shadowQaPort.ts";
+import { readQaEvidence } from "../src/shadowQa.ts";
 import { checkApprovedEvidence, registerVerifiedQa, verifyIntake } from "./shadow-qa-verifier.mjs";
 
 const [id, path, mode, reportPath, extra] = process.argv.slice(2);

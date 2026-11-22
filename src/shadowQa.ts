@@ -1,4 +1,4 @@
-import type { Bundle } from "./shadowBundle";
+import { sha, type Bundle } from "./shadowBundle";
 import { foundationCheck } from "./shadowQaFoundation";
 
 export const shadowQaRuleVersion = "shadow-qa-3";
@@ -91,6 +91,13 @@ export function parseShadowQaPack(value: unknown): RulePack {
  }
  return value as unknown as RulePack;
 }
+
+export async function readQaEvidence(file: File) {
+ if (file.size > 300000) throw Error("The QA evidence pack exceeds 300 KB.");
+ const raw = new Uint8Array(await file.arrayBuffer());
+ return { pack: parseShadowQaPack(JSON.parse(new TextDecoder().decode(raw))), version: `${shadowQaRuleVersion}.${await sha(raw)}` };
+}
+export type QaEvidence = Awaited<ReturnType<typeof readQaEvidence>>;
 
 function arithmeticPass(calculation: Arithmetic) {
  const [tokens, expected] = calculation;
