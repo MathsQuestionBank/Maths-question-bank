@@ -10,7 +10,7 @@ const bundle: Bundle = {
 };
 const pack: RulePack = { manifestHash: "manifest", questions: {
  1: { mathematics: "Evaluate two halves.", marking: "The scheme awards the exact sum.",
-  skill: "Add fractions using a common denominator, supported by the task.", calculation: [[0.5, 0.5, "+"], 1],
+  skill: "Add fractions using a common denominator, supported by the task.", calculations: { Q01: [[1, 2, "/", 1, 2, "/", "+"], 1] },
   links: [{ part: "Q01", kind: "lower-demand-variant", originalHash: "original-image", evidence: "Original needs a conversion." }] },
 } };
 const taxonomy = new Set(["Fractions"]);
@@ -32,8 +32,25 @@ describe("shadow QA evidence", () => {
    .toMatchObject({ status: "exception", mathematics: { state: "pass" }, marking: { state: "exception" } });
  });
  it("fails a calculation when the result disagrees with the marking evidence", () => {
-  expect(evaluate([{ ...pack, questions: { 1: { ...pack.questions[1], calculation: [[1, 1, "+"], 1] } } }]))
+  expect(evaluate([{ ...pack, questions: { 1: { ...pack.questions[1], calculations: { Q01: [[1, 1, "+"], 1] } } } }]))
    .toMatchObject({ status: "exception", mathematics: { state: "exception" } });
+ });
+ it("keeps written-only and partially checked multipart questions unresolved", () => {
+  const rule = pack.questions[1];
+  expect(evaluate([{ ...pack, questions: { 1: { ...rule, calculations: undefined } } }]))
+   .toMatchObject({ status: "exception", mathematics: { state: "exception", evidence: expect.stringContaining("Q01") } });
+  const multipart = { ...bundle, manifest: { parts: [{ ...part, question: "Q01a" }, { ...part, question: "Q01b" }] } };
+  const partial = { ...pack, questions: { 1: { ...rule, calculations: { Q01a: [[1, 1, "+"], 2] as const } } } };
+  expect(evaluateShadowQa(multipart, taxonomy, originals, [partial])[0])
+   .toMatchObject({ status: "exception", mathematics: { evidence: expect.stringContaining("Q01b") } });
+ });
+ it("checks exact rational equality and rejects invalid expressions", () => {
+  const rule = pack.questions[1];
+  for (const calculation of [[[1, 3, "/"], [1, 3]], [[1, 0, "/"], 0], [[1, "+", 1], 2],
+    [[1, 1_000_000_000, "/"], 0]] as const) {
+   const result = evaluate([{ ...pack, questions: { 1: { ...rule, calculations: { Q01: calculation } } } }]);
+   expect(result.mathematics.state).toBe(Array.isArray(calculation[1]) ? "pass" : "exception");
+  }
  });
  it("rejects malformed private packs and cross-question link evidence", () => {
   const rule = pack.questions[1];

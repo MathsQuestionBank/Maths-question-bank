@@ -1,11 +1,11 @@
 import type { Bundle } from "./shadowBundle";
 
-export const shadowQaRuleVersion = "shadow-qa-1";
+export const shadowQaRuleVersion = "shadow-qa-2";
 export const linkKinds = ["exact-replacement", "skill-variant", "lower-demand-variant", "unsuitable"] as const;
 export type LinkKind = typeof linkKinds[number];
 export type Part = { question: string; marks: number; topic: string; skill: string; proposed_original_question_id: string };
 export type LinkEvidence = { part: string; kind: LinkKind; evidence: string };
-export type Check = { state: "pass" | "exception"; evidence: string };
+export type Check = { state: "pass" | "exception"; evidence: string; method?: "part-calculations" };
 export type QaQuestion = {
  number: number;
  status: "qa-passed" | "exception";
@@ -15,13 +15,14 @@ export type QaQuestion = {
  links: LinkEvidence[];
  annotation?: string;
 };
+type Calculation = readonly [readonly (number | "+" | "-" | "*" | "/")[], number | readonly [number, number]];
 export type Rule = {
  mathematics: string;
  marking: string;
  skill: string;
  annotation?: string;
  markingException?: boolean;
- calculation?: readonly [readonly (number | "+" | "-" | "*" | "/")[], number];
+ calculations?: Readonly<Record<string, Calculation>>;
  links: readonly { part: string; kind: LinkKind; evidence: string; originalHash: string }[];
 };
 export type RulePack = { manifestHash: string; questions: Readonly<Record<number, Rule>> };
@@ -40,6 +41,7 @@ export type QaEvent = {
   manifestHash?: string;
   bundleHash?: string;
   ruleVersion?: string;
+  batchVerified?: boolean;
  };
 };
 export const decisions = ["approved", "approved-with-changes", "held", "rejected"] as const;
@@ -69,29 +71,38 @@ export function parseShadowQaPack(value: unknown): RulePack {
    }
    refs.add(link.part);
   }
-  if (rule.calculation !== undefined) {
-   const calculation = rule.calculation;
-   if (!Array.isArray(calculation) || calculation.length !== 2) throw Error("Invalid independent calculation.");
-   const [tokens, expected] = calculation;
-   if (!Array.isArray(tokens) || tokens.length < 3 || tokens.length > 100
-    || !tokens.every(token => Number.isFinite(token) || ["+", "-", "*", "/"].includes(token))
-    || !Number.isFinite(expected)) throw Error("Invalid independent calculation.");
+  if (rule.calculations !== undefined) {
+   if (!isObject(rule.calculations) || Object.keys(rule.calculations).length > 26) throw Error("Invalid part calculations.");
+   for (const [part, calculation] of Object.entries(rule.calculations)) {
+    if (!/^Q[0-9]{2}[a-z]*$/.test(part) || Number(part.slice(1, 3)) !== Number(number)
+     || !Array.isArray(calculation) || calculation.length !== 2) throw Error("Invalid independent calculation.");
+    const [tokens, expected] = calculation;
+    const integer = (value: unknown) => typeof value === "number" && Number.isSafeInteger(value) && Math.abs(value) <= 1e9;
+    if (!Array.isArray(tokens) || tokens.length < 3 || tokens.length > 50
+     || !tokens.every(token => integer(token) || ["+", "-", "*", "/"].includes(token))
+     || !(integer(expected) || (Array.isArray(expected) && expected.length === 2
+      && expected.every(integer) && expected[1] > 0))) throw Error("Invalid independent calculation.");
+   }
   }
  }
  return value as unknown as RulePack;
 }
 
-function arithmeticPass(calculation: NonNullable<Rule["calculation"]>) {
+function arithmeticPass(calculation: Calculation) {
  const [tokens, expected] = calculation;
- const stack: number[] = [];
+ const stack: Array<[bigint, bigint]> = [];
  for (const token of tokens) {
-  if (typeof token === "number") { stack.push(token); continue; }
+  if (typeof token === "number") { stack.push([BigInt(token), 1n]); continue; }
   const right = stack.pop();
   const left = stack.pop();
-  if (left === undefined || right === undefined || (token === "/" && right === 0)) return false;
-  stack.push(token === "+" ? left + right : token === "-" ? left - right : token === "*" ? left * right : left / right);
+  if (!left || !right || (token === "/" && right[0] === 0n)) return false;
+  const [a, b] = left;
+  const [c, d] = right;
+  stack.push(token === "+" ? [a*d + c*b, b*d] : token === "-" ? [a*d - c*b, b*d] :
+   token === "*" ? [a*c, b*d] : [a*d, b*c]);
  }
- return stack.length === 1 && Number.isFinite(stack[0]) && Math.abs(stack[0] - expected) < 1e-9;
+ const [numerator, denominator] = typeof expected === "number" ? [expected, 1] : expected;
+ return stack.length === 1 && stack[0][0] * BigInt(denominator) === BigInt(numerator) * stack[0][1];
 }
 
 export function isBundlePath(path: string, paperId: string) {
@@ -114,14 +125,18 @@ export function evaluateShadowQa(
  return [...groups.entries()].sort(([a], [b]) => a - b).map(([number, parts]) => {
   const rule = pack?.questions[number];
   const hasLabels = parts.every(part => part.skill.split(";").every(label => taxonomy.has(label.trim())));
-  const mathPass = !!rule && (!rule.calculation || arithmeticPass(rule.calculation));
+  const missing = parts.filter(part => !rule?.calculations?.[part.question]).map(part => part.question);
+  const mathPass = !!rule && missing.length === 0
+   && parts.every(part => arithmeticPass(rule.calculations![part.question]));
   const markingPass = mathPass && !rule?.markingException;
   const skillPass = !!rule && hasLabels;
   return {
    number, status: mathPass && markingPass && skillPass ? "qa-passed" : "exception",
    mathematics: { state: mathPass ? "pass" : "exception",
     evidence: !rule ? "No source-bound mathematical rule covers this question." :
-     mathPass ? rule.mathematics : "The independent calculation did not reproduce the expected answer." },
+     mathPass ? rule.mathematics : missing.length ? `Needs independently checkable mathematics for ${missing.join(", ")}.`
+      : "An independent part calculation did not reproduce the expected answer.",
+    ...(mathPass ? { method: "part-calculations" as const } : {}) },
    marking: { state: markingPass ? "pass" : "exception",
     evidence: mathPass && rule ? rule.marking : "Marking requires verified mathematical evidence." },
    skill: { state: skillPass ? "pass" : "exception",

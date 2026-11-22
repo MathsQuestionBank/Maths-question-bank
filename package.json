@@ -23,6 +23,7 @@
     "vite": "^5.4.15"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.3.14",
     "@napi-rs/canvas": "0.1.100",
     "@playwright/test": "^1.56.1",
     "@types/react": "^18.3.18",

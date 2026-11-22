@@ -38,7 +38,7 @@ export default function ShadowQaReview({ intake }: { intake: ReviewIntake }) {
  const sameManifest = !!manifest && (!run || manifest.hash === run.payload.manifestHash);
  const version = run?.payload.ruleVersion;
  const currentVersion = sameManifest && (version === shadowQaRuleVersion || !!version?.startsWith(shadowQaRuleVersion + "."));
- const evidenceUsed = !!evidence && events.some(event => event.kind === "run" && event.payload.ruleVersion === evidence.version);
+ const evidenceUsed = !!evidence && events.some(event => event.kind === "run" && event.payload.batchVerified && event.payload.ruleVersion === evidence.version);
  const canRun = loaded && sameManifest && (!run || !!evidence && !evidenceUsed);
  async function selectEvidence(file: File | undefined) {
   setEvidence(undefined);
@@ -99,7 +99,7 @@ export default function ShadowQaReview({ intake }: { intake: ReviewIntake }) {
  const filtered = filter === "all" ? questions : filter === "passed" ? passed :
   filter === "audit" ? questions.filter(item => sample.includes(item.number)) : exceptions;
  const canAudit = current && currentVersion && !failed && !batched && sample.includes(current.number) && !audited.has(current.number);
- const canDecide = current && currentVersion && (failed || current.status === "exception");
+ const canDecide = current && currentVersion && run?.payload.batchVerified && (failed || current.status === "exception");
 
  return <section aria-label="Shadow paper quality review">
   <h4>Shadow paper quality review</h4>
@@ -119,13 +119,14 @@ export default function ShadowQaReview({ intake }: { intake: ReviewIntake }) {
   {run && <>
    <p>{passed.length} QA passed · {exceptions.length} unresolved · {approved.length} teacher approved · {rejected.length} rejected · {questions.length} questions</p>
    <p className="hint">Rules {run.payload.ruleVersion} · Audit {audited.size} of {sample.length}</p>
+   {!run.payload.batchVerified && <p role="status">No trusted verification matches this report. Review is provisional. Decision recording is locked.</p>}
    {failed && <p role="alert">Sample audit found a substantive error. Batch approval is blocked. Review the escalated questions individually or rerun with a corrected rule version.</p>}
    <div className="library-toolbar">
     <label>Show questions <select value={filter} onChange={e => { setFilter(e.target.value); setSelected(undefined); }}>
      <option value="exceptions">Unresolved exceptions</option><option value="audit">Audit sample</option>
      <option value="passed">QA passed</option><option value="all">All questions</option>
     </select></label>
-    <button type="button" className="primary" disabled={busy || !currentVersion || failed || batched || !sampleComplete}
+    <button type="button" className="primary" disabled={busy || !currentVersion || failed || batched || !run.payload.batchVerified || !sampleComplete}
      onClick={() => void save("batch")}>Approve QA-passed batch ({passed.length})</button>
    </div>
    <ul aria-label="Review questions" className="row" style={{ display: "flex", gap: 8, flexWrap: "wrap", listStyle: "none", padding: 0 }}>
