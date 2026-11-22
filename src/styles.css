@@ -835,3 +835,14 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
  .ks3-area article{break-inside:avoid;page-break-inside:avoid}
  .ks3-area .print-hide{display:none!important}
 }
+
+/* KS3 review-first PowerPoint intake */
+.ks3-importer{margin-top:24px;padding:22px}
+.ks3-importer input[type="file"]{display:block;margin:10px 0 18px;max-width:100%}
+.ks3-importer .filter-grid{margin:14px 0}
+.ks3-importer-preview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:14px 0}
+.ks3-importer-preview>div{background:#f8fafc;border:1px solid #dce3ea;border-radius:8px;padding:14px;min-width:0}
+.ks3-importer-preview h3{font-size:15px;margin:0 0 8px}
+.ks3-importer-preview pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;line-height:1.6;margin:0}
+@media(max-width:700px){.ks3-importer-preview{grid-template-columns:1fr}}
+@media print{.ks3-importer{display:none!important}}
