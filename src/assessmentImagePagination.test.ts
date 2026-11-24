@@ -1,5 +1,5 @@
 import {describe,it,expect} from "vitest";
-import {croppedImageSize,imageBlankBands,paginateAssessmentImage,assessmentPrintWidthMm,assessmentImagePageMm} from "./assessmentImagePagination";
+import {croppedImageSize,imageBlankBands,paginateAssessmentImage,assessmentPrintWidthMm,assessmentImagePageMm,compactTrailingPrintHeight} from "./assessmentImagePagination";
 const pixels=(width:number,height:number)=>new Uint8ClampedArray(width*height*4).fill(255);
 function ink(data:Uint8ClampedArray,width:number,x:number,y:number){const i=(y*width+x)*4;data[i]=data[i+1]=data[i+2]=0;}
 describe("readable A4 image pagination",()=>{
@@ -42,6 +42,29 @@ describe("readable A4 image pagination",()=>{
  it("does not drop or trim long blank working spaces at page boundaries",()=>{
   const plan=paginateAssessmentImage(1000,6000,[{top:100,bottom:5900}]);
   expect(plan.slices[0].top).toBe(0);expect(plan.slices[plan.slices.length-1]?.bottom).toBe(6000);expect(plan.slices.reduce((n,s)=>n+s.bottom-s.top,0)).toBeCloseTo(6000,8);
+ });
+ it("reduces only verified long trailing whitespace while retaining 32 mm for working",()=>{
+  const width=1000,height=1800;
+  const compact=compactTrailingPrintHeight(width,height,[{top:500,bottom:1800}]);
+  expect(compact).toBeCloseTo(500+1000*32/180);
+  const sliced=paginateAssessmentImage(width,compact,[{top:500,bottom:1800}]);
+  expect(sliced.slices).toHaveLength(1);
+  expect(sliced.slices[0].bottom).toBeCloseTo(compact);
+ });
+ it("does not compact short blank margins, unverified scans or interior graph whitespace",()=>{
+  const w=1000,h=1600;
+  expect(compactTrailingPrintHeight(w,h,[{top:1350,bottom:1600}])).toBe(h);
+  expect(compactTrailingPrintHeight(w,h,[{top:200,bottom:1600}],false)).toBe(h);
+  expect(compactTrailingPrintHeight(w,h,[{top:100,bottom:500},{top:1300,bottom:1420}])).toBe(h);
+  expect(compactTrailingPrintHeight(w,h,[{top:0,bottom:1600}])).toBe(h);
+ });
+ it("never clips the last printed ink line or blank space needed beside tables",()=>{
+  const w=200,h=400,data=pixels(w,h);
+  for(let y=60;y<=180;y++)for(const x of [30,100,170])ink(data,w,x,y);
+  const bands=imageBlankBands(data,w,h);
+  const compact=compactTrailingPrintHeight(w,h,bands);
+  expect(compact).toBeGreaterThan(180);
+  expect(compact).toBeLessThan(h);
  });
  it("keeps oversized continuous regions at readable scale and reports the unavoidable split",()=>{
   const plan=paginateAssessmentImage(1000,4000,[]);

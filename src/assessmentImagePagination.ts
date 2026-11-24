@@ -64,12 +64,22 @@ export function paginateAssessmentImage(width:number,height:number,bands:BlankBa
  return {width,height,slices,...(forced||!analysisAvailable?{warning:analysisAvailable?"A continuous image region is taller than the available A4 space and crosses a page boundary. Check the page preview for a diagram or table crossing that boundary; the image has not been reduced or trimmed.":"Whitespace could not be checked for this image. It is printed at full width across pages; check the page preview for a diagram or table crossing a boundary."}:{})};
 }
 
+/** Reduce only a verified blank tail in the *print viewport*, not the stored crop.
+ * Retain 32 mm of clear working room, and never compact short gaps, blank scans
+ * with no preceding ink, or images whose pixels could not be inspected. */
+export function compactTrailingPrintHeight(width:number,height:number,bands:BlankBand[],analysisAvailable=true):number{
+ if(!analysisAvailable||!Number.isFinite(width)||width<=0||!Number.isFinite(height)||height<=0)return height;
+ const tail=bands.find(b=>b.top>0&&b.bottom>=height-1e-6);
+ if(!tail||height-tail.top<width*55/assessmentPrintWidthMm)return height;
+ return Math.min(height,tail.top+width*32/assessmentPrintWidthMm);
+}
+
 const plans=new Map<string,Promise<ImagePagination>>();
 /** In-memory only, bounded cache. Private source URLs and pixels are never
  * persisted or sent to another service. Short images need no canvas or fetch. */
 export function prepareImagePagination(image:HTMLImageElement,crop:Crop,firstHeightMm=firstPageMm):Promise<ImagePagination>{
  const {width,height}=croppedImageSize(image.naturalWidth,image.naturalHeight,crop);
- if(height/width<=firstHeightMm/assessmentPrintWidthMm)return Promise.resolve(paginateAssessmentImage(width,height,[],true,firstHeightMm));
+ if(height/width<=70/assessmentPrintWidthMm)return Promise.resolve(paginateAssessmentImage(width,height,[],true,firstHeightMm));
  const key=JSON.stringify([image.src,image.naturalWidth,image.naturalHeight,crop,firstHeightMm]);
  const cached=plans.get(key);if(cached)return cached;
  const promise=(async()=>{
@@ -93,7 +103,9 @@ export function prepareImagePagination(image:HTMLImageElement,crop:Crop,firstHei
     canvas.width=canvas.width;data=read();
    }
    const bands=imageBlankBands(data,canvas.width,canvas.height).map(band=>({top:band.top*height/canvas.height,bottom:band.bottom*height/canvas.height}));
-   return paginateAssessmentImage(width,height,bands,true,firstHeightMm);
+   const visibleHeight=compactTrailingPrintHeight(width,height,bands);
+   const plan=paginateAssessmentImage(width,visibleHeight,bands,true,firstHeightMm);
+   return {...plan,height};
   }catch{return paginateAssessmentImage(width,height,[],false,firstHeightMm);}
   finally{bitmap?.close();if(url)URL.revokeObjectURL(url);canvas.width=0;canvas.height=0;}
  })();
