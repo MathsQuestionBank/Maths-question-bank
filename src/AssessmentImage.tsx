@@ -18,7 +18,8 @@ export default function AssessmentImage({continuationLabel,firstPageHeightMm=215
   void prepareImagePagination(image,props.crop,firstPageHeightMm).then(next=>{if(!cancelled)setResult({identity,plan:next});});
   return()=>{cancelled=true;};
  },[image,identity,firstPageHeightMm,props.src,props.crop.top,props.crop.right,props.crop.bottom,props.crop.left]);
- // A single slice may still be a safely shortened print viewport.\n const paginated=!!plan&&(plan.slices.length>1||plan.slices[0].bottom<plan.height);
+ // A single slice may still be a safely shortened print viewport.
+ const paginated=!!plan&&(plan.slices.length>1||plan.slices[0].bottom<plan.height);
  const sliceNumbering=(top:number,bottom:number)=>{
   const layout=props.automaticNumbering;if(!layout)return undefined;
   const start=layout.imageHeight*props.crop.top/100+top,end=layout.imageHeight*props.crop.top/100+bottom;
