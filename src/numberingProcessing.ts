@@ -11,6 +11,14 @@ export type NumberingResult=
  |{status:"manual";mask:NumberingMask;reused:boolean}
  |{status:"unsupported";reason:string}
  |{status:"processing"};
+/** Reject automatic renumbering when the source total is not located.
+ * Otherwise a fallback new total would print alongside the original total. */
+export function requireVerifiedPrintedTotal(result:NumberingResult,replaceTotal:boolean):NumberingResult{
+ if(replaceTotal&&result.status==="ready"&&result.layout.totalRects.length===0){
+  return {status:"unsupported",reason:"The original printed marks total was not located. Review a cover in Advanced numbering adjustment, or use original numbering."};
+ }
+ return result;
+}
 const POSITIONS_KEY="mqb-numbering-layouts-v1";
 const CORRECTIONS_KEY="mqb-numbering-corrections-v1";
 const VERSION="source-numbering-1";
