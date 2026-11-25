@@ -230,7 +230,7 @@ test("legacy multipart indices heading renumbers as question 1 in a five-questio
  await expect(page.locator(".paper-question")).toHaveCount(5);
  await expect(page.locator(".paper-question .assessment-question-number")).toHaveText(chosen.map((_,i)=>`Question ${i+1}`));
  await expect(frame.locator(".mqb-auto-number-text")).toHaveText("1");
- await expect(frame.locator(".mqb-auto-total-text")).toHaveText("(Total for Question 1 is 5 marks)");
+ await expect(page.locator(".paper-question").first().locator(".mqb-auto-total-text")).toHaveText("(Total for Question 1 is 5 marks)");
  await expect(page.locator(".paper-question").first()).toContainText("2022_3H_Q14a, 2022_3H_Q14b");
  const after=await frame.screenshot(),regions=[...affected.layout.numberRects,...affected.layout.totalRects.map(t=>t.rect)];
  compareOutsideTargets(await pixelData(before),await pixelData(after),regions,5);
