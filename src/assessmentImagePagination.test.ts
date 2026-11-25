@@ -1,5 +1,5 @@
 import {describe,it,expect} from "vitest";
-import {croppedImageSize,imageBlankBands,paginateAssessmentImage,assessmentPrintWidthMm,assessmentImagePageMm,compactTrailingPrintHeight} from "./assessmentImagePagination";
+import {croppedImageSize,imageBlankBands,paginateAssessmentImage,assessmentPrintWidthMm,assessmentImagePageMm,compactTrailingPrintHeight,paginateAssessmentPrintImage} from "./assessmentImagePagination";
 const pixels=(width:number,height:number)=>new Uint8ClampedArray(width*height*4).fill(255);
 function ink(data:Uint8ClampedArray,width:number,x:number,y:number){const i=(y*width+x)*4;data[i]=data[i+1]=data[i+2]=0;}
 describe("readable A4 image pagination",()=>{
@@ -42,6 +42,27 @@ describe("readable A4 image pagination",()=>{
  it("does not drop or trim long blank working spaces at page boundaries",()=>{
   const plan=paginateAssessmentImage(1000,6000,[{top:100,bottom:5900}]);
   expect(plan.slices[0].top).toBe(0);expect(plan.slices[plan.slices.length-1]?.bottom).toBe(6000);expect(plan.slices.reduce((n,s)=>n+s.bottom-s.top,0)).toBeCloseTo(6000,8);
+ });
+ it("compacts a verified interior blank work region and keeps the final answer and footer",()=>{
+  const w=730,h=1020;
+  const plan=paginateAssessmentPrintImage(w,h,[{top:260,bottom:900},{top:980,bottom:1020}],true,220);
+  expect(plan.slices).toHaveLength(2);
+  expect(plan.slices[0].top).toBe(0);
+  expect(plan.slices[0].bottom).toBeGreaterThan(260);
+  expect(plan.slices[1].top).toBeLessThan(900);
+  expect(plan.slices[1].bottom).toBe(1020);
+  expect(plan.slices[1].inlineWithPrevious).toBe(true);
+  expect((plan.slices.reduce((sum,s)=>sum+s.bottom-s.top,0)/w)*180).toBeLessThan(220);
+ });
+ it("does not compact if analysis is unavailable or final source region is substantial",()=>{
+  const w=730,h=1020,bands=[{top:260,bottom:900}];
+  expect(paginateAssessmentPrintImage(w,h,bands,false,220).slices.some(s=>s.inlineWithPrevious)).toBe(false);
+  expect(paginateAssessmentPrintImage(w,h,[{top:260,bottom:700}],true,220).slices.some(s=>s.inlineWithPrevious)).toBe(false);
+ });
+ it("does not compact an internal graph gap or sacrifice a question's working space",()=>{
+  const w=730,h=1020;
+  const plan=paginateAssessmentPrintImage(w,h,[{top:250,bottom:480},{top:700,bottom:830}],true,220);
+  expect(plan.slices.some(s=>s.inlineWithPrevious)).toBe(false);
  });
  it("reduces only verified long trailing whitespace while retaining 32 mm for working",()=>{
   const width=1000,height=1800;

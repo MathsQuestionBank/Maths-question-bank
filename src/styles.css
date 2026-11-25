@@ -801,6 +801,8 @@ button.dashboard-tile:hover{border-color:#16737a;box-shadow:0 7px 22px #123e4d18
  .paper-question:has(.assessment-image-block),.mark-scheme-item:has(.assessment-image-block){padding-top:3mm;padding-bottom:0}
  .paper-question:has(.assessment-image-block)>.working-space{display:none}
  .assessment-image-viewport{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+ .assessment-image-slices.is-compact{break-inside:avoid!important;page-break-inside:avoid!important}
+ .assessment-image-page.is-compact-followup{break-before:auto!important;page-break-before:auto!important;border:0;margin:0;padding:0}
 }
 
 .historical-chart-controls {display:flex;flex-wrap:wrap;align-items:center;gap:16px}
