@@ -53,6 +53,7 @@ export default function NumberingOverlay({layout,crop,number,marks,replaceTotals
   // across the nearby answer line or alter question number boxes.
   const total=className==="mqb-auto-total-mask";
   const fringe=total?1.5:.5;
+  if(!total)return <rect className={className} x={r.left-fringe} y={r.top-fringe} width={r.width+fringe*2} height={r.height+fringe*2} fill="#fff"/>;
   const upper=total?Math.min(r.height*2.8,view.width*.055):0;
   const top=Math.max(view.top,r.top-upper);
   const bottom=Math.min(view.top+view.height,r.top+r.height+fringe);
