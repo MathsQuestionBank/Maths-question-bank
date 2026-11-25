@@ -19,7 +19,7 @@ describe("source-coordinate numbering overlays",()=>{
  });
  it("covers source total glyphs that extend above an imperfect PDF-text box",()=>{
   const html=renderToStaticMarkup(<NumberingOverlay layout={layout} crop={crop} number="1" marks={5}/>);
-  const total=html.match(/<rect class="mqb-auto-total-mask"[^>]*>/)?.[0]||"";
+  const total=html.match(/<rect[^>]*class="mqb-auto-total-mask"[^>]*>/)?.[0]||"";
   const y=Number(total.match(/ y="([\\d.-]+)"/)?.[1]);
   const h=Number(total.match(/ height="([\\d.-]+)"/)?.[1]);
   expect(y).toBeLessThan(400-50); // protect more than three printed text lines above the detected box
@@ -30,7 +30,7 @@ describe("source-coordinate numbering overlays",()=>{
  it("does not extend a footer cover beyond the cropped source bounds",()=>{
   const nearTop={...layout,totalRects:[{rect:{left:.5,top:.02,width:.35,height:.03},marks:5}]};
   const html=renderToStaticMarkup(<NumberingOverlay layout={nearTop} crop={{...crop,top:1}} number="1" marks={5}/>);
-  const total=html.match(/<rect class="mqb-auto-total-mask"[^>]*>/)?.[0]||"";
+  const total=html.match(/<rect[^>]*class="mqb-auto-total-mask"[^>]*>/)?.[0]||"";
   expect(Number(total.match(/ y="([\\d.-]+)"/)?.[1])).toBeGreaterThanOrEqual(8);
  });
  it("can cover an earlier compact source viewport without duplicating the replacement text",()=>{
