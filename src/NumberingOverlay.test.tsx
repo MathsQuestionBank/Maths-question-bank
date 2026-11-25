@@ -33,6 +33,12 @@ describe("source-coordinate numbering overlays",()=>{
   const total=html.match(/<rect class="mqb-auto-total-mask"[^>]*>/)?.[0]||"";
   expect(Number(total.match(/ y="([\\d.-]+)"/)?.[1])).toBeGreaterThanOrEqual(8);
  });
+ it("can cover an earlier compact source viewport without duplicating the replacement text",()=>{
+  const html=renderToStaticMarkup(<NumberingOverlay layout={layout} crop={crop} number="1" marks={5} maskOnlyTotalIndices={[0]}/>);
+  expect(html).toContain('mqb-auto-total-mask');
+  expect(html).not.toContain('mqb-auto-total-text');
+  expect(html).toContain('mqb-auto-number-text');
+ });
  it("does not stretch a shorter replacement number or total statement",()=>{
   const context={font:"",measureText(text:string){return {width:text.length*6,actualBoundingBoxAscent:10,actualBoundingBoxDescent:2,actualBoundingBoxLeft:0,actualBoundingBoxRight:text.length*6}}};
   vi.stubGlobal("document",{createElement:()=>({getContext:()=>context})});

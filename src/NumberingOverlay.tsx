@@ -1,7 +1,7 @@
 import type { Crop } from "./CropEditor";
 import type { AutomaticNumberingLayout, NormalizedRect } from "./automaticNumbering";
 
-type Props={layout:AutomaticNumberingLayout;crop:Crop;number:string;marks?:number;replaceTotals?:boolean};
+type Props={layout:AutomaticNumberingLayout;crop:Crop;number:string;marks?:number;replaceTotals?:boolean;maskOnlyTotalIndices?:number[]};
 const fontFamily="'Times New Roman', Times, serif";
 let measurementDocument:Document|undefined;
 let measurementContext:CanvasRenderingContext2D|null=null;
@@ -19,7 +19,7 @@ function measuredText(text:string,size:number){
 /** The SVG uses the source image's pixel coordinates. Its viewBox is the same
  * crop as the underlying image, so neither screen width nor print scaling can
  * move a cover relative to the ink it replaces. */
-export default function NumberingOverlay({layout,crop,number,marks,replaceTotals=true}:Props){
+export default function NumberingOverlay({layout,crop,number,marks,replaceTotals=true,maskOnlyTotalIndices=[]}:Props){
  const width=layout.imageWidth,height=layout.imageHeight;
  const view={left:width*crop.left/100,top:height*crop.top/100,width:width*(100-crop.left-crop.right)/100,height:height*(100-crop.top-crop.bottom)/100};
  if(!(width>0&&height>0&&view.width>0&&view.height>0))return null;
@@ -67,7 +67,7 @@ export default function NumberingOverlay({layout,crop,number,marks,replaceTotals
    const r=box(rect),total=Number.isFinite(marks)?marks!:sourceMarks;
    const statement=`(Total for Question ${number} is ${total} ${total===1?"mark":"marks"})`;
    const font=fontMetrics(rect,statement);
-   return <g key={`total-${index}`}>{mask(rect,"mqb-auto-total-mask")}<svg x={r.left} y={r.top} width={r.width} height={r.height} viewBox={`${r.left} ${r.top} ${r.width} ${r.height}`} overflow="hidden"><text className="mqb-auto-total-text" x={r.left+r.width} y={font.baseline} textAnchor="end" fontSize={font.size} fontFamily={fontFamily} fontWeight="700" fill="#111" textLength={font.fit} lengthAdjust={font.fit?"spacingAndGlyphs":undefined}>{statement}</text></svg></g>;
+   return <g key={`total-${index}`}>{mask(rect,"mqb-auto-total-mask")}{!maskOnlyTotalIndices.includes(index)&&<svg x={r.left} y={r.top} width={r.width} height={r.height} viewBox={`${r.left} ${r.top} ${r.width} ${r.height}`} overflow="hidden"><text className="mqb-auto-total-text" x={r.left+r.width} y={font.baseline} textAnchor="end" fontSize={font.size} fontFamily={fontFamily} fontWeight="700" fill="#111" textLength={font.fit} lengthAdjust={font.fit?"spacingAndGlyphs":undefined}>{statement}</text></svg>}</g>;
   })}
  </svg>;
 }
