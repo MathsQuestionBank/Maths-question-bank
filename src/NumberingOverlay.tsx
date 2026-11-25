@@ -46,10 +46,17 @@ export default function NumberingOverlay({layout,crop,number,marks,replaceTotals
  };
  const mask=(rect:NormalizedRect,className:string)=>{
   const r=box(rect);
-  // A subpixel fringe removes antialiasing without using a guessed gutter or
-  // touching a rule below the statement. All positions remain source-derived.
-  const fringe=.5;
-  return <rect className={className} x={r.left-fringe} y={r.top-fringe} width={r.width+fringe*2} height={r.height+fringe*2} fill="#fff"/>;
+  // Source PDF-text boxes can describe the text baseline rather than all of its
+  // visible ink. In cropped/paginated print previews this previously left the
+  // *upper half* of original "Total for Question" statements visible above the
+  // white cover. Only totals get an extra upper safety margin; do not extend
+  // across the nearby answer line or alter question number boxes.
+  const total=className==="mqb-auto-total-mask";
+  const fringe=total?1.5:.5;
+  const upper=total?Math.min(r.height*2.8,view.width*.055):0;
+  const top=Math.max(view.top,r.top-upper);
+  const bottom=Math.min(view.top+view.height,r.top+r.height+fringe);
+  return <rect className={className} x={r.left-fringe} y={top-fringe} width={r.width+fringe*2} height={Math.max(0,bottom-top+fringe)} fill="#fff"/>;
  };
  return <svg className="mqb-automatic-numbering" aria-hidden="true" focusable="false" viewBox={`${view.left} ${view.top} ${view.width} ${view.height}`} preserveAspectRatio="xMinYMin meet" style={{position:"absolute",inset:0,width:"100%",height:"100%",overflow:"hidden",pointerEvents:"none",zIndex:3}}>
   {layout.numberRects.filter(visible).map((rect,index)=>{
