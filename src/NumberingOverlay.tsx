@@ -44,7 +44,7 @@ export default function NumberingOverlay({layout,crop,number,marks,replaceTotals
   const naturalWidth=metrics?Math.max(metrics.width,metrics.actualBoundingBoxLeft+metrics.actualBoundingBoxRight):size*(/\s/.test(text)?.45:.6)*text.length;
   return {size,baseline,fit:naturalWidth>r.width?r.width:undefined};
  };
- const mask=(rect:NormalizedRect,className:string)=>{
+ const mask=(rect:NormalizedRect,className:string,extended=false)=>{
   const r=box(rect);
   // Source PDF-text boxes can describe the text baseline rather than all of its
   // visible ink. In cropped/paginated print previews this previously left the
@@ -53,7 +53,7 @@ export default function NumberingOverlay({layout,crop,number,marks,replaceTotals
   // across the nearby answer line or alter question number boxes.
   const total=className==="mqb-auto-total-mask";
   const fringe=total?1.5:.5;
-  if(!total)return <rect className={className} x={r.left-fringe} y={r.top-fringe} width={r.width+fringe*2} height={r.height+fringe*2} fill="#fff"/>;
+  if(!total||!extended)return <rect className={className} x={r.left-fringe} y={r.top-fringe} width={r.width+fringe*2} height={r.height+fringe*2} fill="#fff"/>;
   const upper=total?Math.min(r.height*2.8,view.width*.055):0;
   const top=Math.max(view.top,r.top-upper);
   const bottom=Math.min(view.top+view.height,r.top+r.height+fringe);
@@ -69,7 +69,7 @@ export default function NumberingOverlay({layout,crop,number,marks,replaceTotals
    const r=box(rect),total=Number.isFinite(marks)?marks!:sourceMarks;
    const statement=`(Total for Question ${number} is ${total} ${total===1?"mark":"marks"})`;
    const font=fontMetrics(rect,statement);
-   return <g key={`total-${index}`}>{mask(rect,"mqb-auto-total-mask")}{!maskOnlyTotalIndices.includes(index)&&<svg x={r.left} y={r.top} width={r.width} height={r.height} viewBox={`${r.left} ${r.top} ${r.width} ${r.height}`} overflow="hidden"><text className="mqb-auto-total-text" x={r.left+r.width} y={font.baseline} textAnchor="end" fontSize={font.size} fontFamily={fontFamily} fontWeight="700" fill="#111" textLength={font.fit} lengthAdjust={font.fit?"spacingAndGlyphs":undefined}>{statement}</text></svg>}</g>;
+   return <g key={`total-${index}`}>{mask(rect,"mqb-auto-total-mask",maskOnlyTotalIndices.includes(index))}{!maskOnlyTotalIndices.includes(index)&&<svg x={r.left} y={r.top} width={r.width} height={r.height} viewBox={`${r.left} ${r.top} ${r.width} ${r.height}`} overflow="hidden"><text className="mqb-auto-total-text" x={r.left+r.width} y={font.baseline} textAnchor="end" fontSize={font.size} fontFamily={fontFamily} fontWeight="700" fill="#111" textLength={font.fit} lengthAdjust={font.fit?"spacingAndGlyphs":undefined}>{statement}</text></svg>}</g>;
   })}
  </svg>;
 }

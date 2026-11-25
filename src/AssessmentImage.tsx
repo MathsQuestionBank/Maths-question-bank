@@ -25,7 +25,8 @@ export default function AssessmentImage({continuationLabel,firstPageHeightMm=215
   const start=layout.imageHeight*props.crop.top/100+top,end=layout.imageHeight*props.crop.top/100+bottom;
   const intersects=(r:{top:number;height:number})=>r.top*layout.imageHeight<end&&(r.top+r.height)*layout.imageHeight>start;
   const coverTop=(r:{top:number;height:number})=>Math.max(0,r.top*layout.imageHeight-Math.min(r.height*layout.imageHeight*2.8,layout.imageWidth*(100-props.crop.left-props.crop.right)/100*.055));
-  const totals=layout.totalRects.filter(t=>(t.rect.top+t.rect.height)*layout.imageHeight>start&&coverTop(t.rect)<end);
+  const compact=plan?.slices.some(slice=>slice.inlineWithPrevious)===true;
+  const totals=layout.totalRects.filter(t=>compact?(t.rect.top+t.rect.height)*layout.imageHeight>start&&coverTop(t.rect)<end:intersects(t.rect));
   const maskOnlyTotalIndices=totals.flatMap((t,index)=>intersects(t.rect)?[]:[index]);
   return {automaticNumbering:{...layout,numberRects:layout.numberRects.filter(intersects),totalRects:totals},maskOnlyTotalIndices};
  };

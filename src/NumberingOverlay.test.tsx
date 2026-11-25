@@ -18,18 +18,18 @@ describe("source-coordinate numbering overlays",()=>{
   expect(textTag(html,"mqb-auto-total-text")).toContain('text-anchor="end"');
  });
  it("covers source total glyphs that extend above an imperfect PDF-text box",()=>{
-  const html=renderToStaticMarkup(<NumberingOverlay layout={layout} crop={crop} number="1" marks={5}/>);
+  const html=renderToStaticMarkup(<NumberingOverlay layout={layout} crop={crop} number="1" marks={5} maskOnlyTotalIndices={[0]}/>);
   const total=html.match(/<rect[^>]*class="mqb-auto-total-mask"[^>]*>/)?.[0]||"";
   const y=Number(total.match(/ y="([^"]+)"/)?.[1]);
   const h=Number(total.match(/ height="([^"]+)"/)?.[1]);
   expect(y).toBeLessThan(400-50); // protect more than three printed text lines above the detected box
   expect(y+h).toBeGreaterThan(430); // retain coverage through the detected footer
   expect(html).toContain('class="mqb-auto-number-mask" x="199.5" y="99.5"');
-  expect(html).toContain("(Total for Question 1 is 5 marks)");
+  expect(html).not.toContain("mqb-auto-total-text");
  });
  it("does not extend a footer cover beyond the cropped source bounds",()=>{
   const nearTop={...layout,totalRects:[{rect:{left:.5,top:.02,width:.35,height:.03},marks:5}]};
-  const html=renderToStaticMarkup(<NumberingOverlay layout={nearTop} crop={{...crop,top:1}} number="1" marks={5}/>);
+  const html=renderToStaticMarkup(<NumberingOverlay layout={nearTop} crop={{...crop,top:1}} number="1" marks={5} maskOnlyTotalIndices={[0]}/>);
   const total=html.match(/<rect[^>]*class="mqb-auto-total-mask"[^>]*>/)?.[0]||"";
   expect(Number(total.match(/ y="([^"]+)"/)?.[1])).toBeGreaterThanOrEqual(5);
  });
