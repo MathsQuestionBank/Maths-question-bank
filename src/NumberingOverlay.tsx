@@ -56,7 +56,8 @@ export default function NumberingOverlay({layout,crop,number,marks,replaceTotals
   const upper=total?Math.min(r.height*2.8,view.width*.055):0;
   const top=Math.max(view.top,r.top-upper);
   const bottom=Math.min(view.top+view.height,r.top+r.height+fringe);
-  return <rect className={className} x={r.left-fringe} y={top-fringe} width={r.width+fringe*2} height={Math.max(0,bottom-top+fringe)} fill="#fff"/>;
+  const start=Math.max(view.top,top-fringe),finish=Math.min(view.top+view.height,bottom+fringe);
+  return <rect className={className} x={r.left-fringe} y={start} width={r.width+fringe*2} height={Math.max(0,finish-start)} fill="#fff"/>;
  };
  return <svg className="mqb-automatic-numbering" aria-hidden="true" focusable="false" viewBox={`${view.left} ${view.top} ${view.width} ${view.height}`} preserveAspectRatio="xMinYMin meet" style={{position:"absolute",inset:0,width:"100%",height:"100%",overflow:"hidden",pointerEvents:"none",zIndex:3}}>
   {layout.numberRects.filter(visible).map((rect,index)=>{

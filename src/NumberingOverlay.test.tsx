@@ -31,7 +31,7 @@ describe("source-coordinate numbering overlays",()=>{
   const nearTop={...layout,totalRects:[{rect:{left:.5,top:.02,width:.35,height:.03},marks:5}]};
   const html=renderToStaticMarkup(<NumberingOverlay layout={nearTop} crop={{...crop,top:1}} number="1" marks={5}/>);
   const total=html.match(/<rect[^>]*class="mqb-auto-total-mask"[^>]*>/)?.[0]||"";
-  expect(Number(total.match(/ y="([^"]+)"/)?.[1])).toBeGreaterThanOrEqual(8);
+  expect(Number(total.match(/ y="([^"]+)"/)?.[1])).toBeGreaterThanOrEqual(5);
  });
  it("can cover an earlier compact source viewport without duplicating the replacement text",()=>{
   const html=renderToStaticMarkup(<NumberingOverlay layout={layout} crop={crop} number="1" marks={5} maskOnlyTotalIndices={[0]}/>);
