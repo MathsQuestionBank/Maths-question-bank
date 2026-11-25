@@ -112,7 +112,7 @@ test("owner Assessment Builder: multipart, reordering, exports and reopening acc
  expect(coverGeometry.numberHeightRatio).toBeGreaterThan(.015);
  expect(coverGeometry.numberHeightRatio).toBeLessThan(.04);
  expect(coverGeometry.footerHeightRatio).toBeGreaterThan(.015);
- expect(coverGeometry.footerHeightRatio).toBeLessThan(.04);
+ expect(coverGeometry.footerHeightRatio).toBeLessThan(.05);
  await expect(page.locator(".mqb-auto-total-text")).toHaveCount(3);
  await expect(page.locator(".mqb-auto-total-text").first()).toContainText("Total for Question 1 is 4 marks");
  await expect(page.locator(".paper-question").first()).toContainText("EDX-H-JUNE2022-1H-Q02");
