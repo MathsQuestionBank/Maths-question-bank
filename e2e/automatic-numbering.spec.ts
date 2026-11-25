@@ -157,7 +157,13 @@ test("source coordinates automatically replace real Edexcel numbers and totals a
  await expect(page.locator(".mqb-auto-total-text")).toHaveText(ordered.map((fixture,index)=>`(Total for Question ${index+1} is ${fixture.marks} ${fixture.marks===1?"mark":"marks"})`));
  await expect(frame.locator(".mqb-auto-number-text")).toHaveText("1");
  const after=await frame.screenshot();await saveImage(testInfo,"q14-renumbered-preview.png",after);
- const targets=[...reported.layout.numberRects,...reported.layout.totalRects.map(total=>total.rect)];
+ // The approved automatic footer cover also includes up to 0.85 source
+ // text-box heights above the extracted bounds. Pixel differences are only
+ // permitted inside this bounded footer region, never across mathematics.
+ const targets=[...reported.layout.numberRects,...reported.layout.totalRects.map(total=>{
+  const rect=total.rect,pad=Math.min(rect.height*.85,reported.layout.imageWidth/reported.layout.imageHeight*.018);
+  return {...rect,top:Math.max(0,rect.top-pad),height:rect.height+Math.min(rect.top,pad)};
+ })];
  const previewComparison=compareOutsideTargets(await pixelData(before),await pixelData(after),targets);
  const automaticPdf=await savePdf(page,testInfo,"real-edexcel-automatic-16-layouts");
  const originalRaster=await renderPdfFirstImage(originalPdf,reported,page),automaticRaster=await renderPdfFirstImage(automaticPdf,reported,page);
@@ -235,7 +241,10 @@ test("legacy multipart indices heading renumbers as question 1 in a five-questio
  await expect(frame.locator(".mqb-auto-number-text")).toHaveText("1");
  await expect(page.locator(".paper-question").first().locator(".mqb-auto-total-text")).toHaveText("(Total for Question 1 is 5 marks)");
  await expect(page.locator(".paper-question").first()).toContainText("2022_3H_Q14a, 2022_3H_Q14b");
- const after=await frame.screenshot(),regions=[...affected.layout.numberRects,...affected.layout.totalRects.map(t=>t.rect)];
+ const after=await frame.screenshot(),regions=[...affected.layout.numberRects,...affected.layout.totalRects.map(t=>{
+  const rect=t.rect,pad=Math.min(rect.height*.85,affected.layout.imageWidth/affected.layout.imageHeight*.018);
+  return {...rect,top:Math.max(0,rect.top-pad),height:rect.height+Math.min(rect.top,pad)};
+ })];
  compareOutsideTargets(await pixelData(before),await pixelData(after),regions,5);
  const pdf=await savePdf(page,testInfo,"multipart-five-questions-renumbered");
  const prior=await renderPdfFirstImage(originalPdf,affected,page),result=await renderPdfFirstImage(pdf,affected,page);

@@ -39,6 +39,16 @@ describe("source-coordinate numbering overlays",()=>{
   expect(html).not.toContain('mqb-auto-total-text');
   expect(html).toContain('mqb-auto-number-text');
  });
+ it("covers bounded PDF-text ink above original footer without touching number masks",()=>{
+  const html=renderToStaticMarkup(<NumberingOverlay layout={layout} crop={crop} number="1" marks={5}/>);
+  const tag=html.match(/<rect[^>]*class="mqb-auto-total-mask"[^>]*>/)?.[0]||"";
+  const y=Number(tag.match(/ y="([^"]+)"/)?.[1]);
+  const h=Number(tag.match(/ height="([^"]+)"/)?.[1]);
+  expect(y).toBeGreaterThanOrEqual(380); // at most one original text height above the label
+  expect(y).toBeLessThan(400); // original letter tops cannot survive the mask
+  expect(y+h).toBeGreaterThan(429);
+  expect(html).toContain('class="mqb-auto-number-mask" x="199.5" y="99.5" width="41" height="31"');
+ });
  it("does not stretch a shorter replacement number or total statement",()=>{
   const context={font:"",measureText(text:string){return {width:text.length*6,actualBoundingBoxAscent:10,actualBoundingBoxDescent:2,actualBoundingBoxLeft:0,actualBoundingBoxRight:text.length*6}}};
   vi.stubGlobal("document",{createElement:()=>({getContext:()=>context})});
