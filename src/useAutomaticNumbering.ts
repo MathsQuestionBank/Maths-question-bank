@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { AssessmentPrintAsset } from "./assessmentExport";
 import { isNumberingMaskReviewed, type NumberingMask } from "./numberingMasks";
-import { processNumbering, rememberManualNumbering, bindManualNumbering, numberingProcessingIdentity, type NumberingResult } from "./numberingProcessing";
+import { processNumbering, rememberManualNumbering, bindManualNumbering, numberingProcessingIdentity, requireVerifiedPrintedTotal, type NumberingResult } from "./numberingProcessing";
 
 /** Processing is automatic. Advanced manual decisions are image-specific and
  * reusable; uncertain detection never becomes a guessed opaque rectangle. */
@@ -20,7 +20,7 @@ export function useAutomaticNumbering(assets:AssessmentPrintAsset[],masks:Record
    setCache(previous=>({...previous,[identity]:{status:"processing"}}));
    void processNumbering(asset,replaceSourceTotals&&asset.kind==="question",masks[asset.maskKey],()=>wanted.current.has(identity)).then(result=>{
     if(stopped||manual.current.has(identity))return;
-    setCache(previous=>({...previous,[identity]:result}));
+    setCache(previous=>({...previous,[identity]:requireVerifiedPrintedTotal(result,replaceSourceTotals&&asset.kind==="question")}));
    });
   }
   return()=>{stopped=true};

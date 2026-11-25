@@ -1,5 +1,5 @@
 import {describe,it,expect} from "vitest";
-import {validAutomaticLayout} from "./numberingProcessing";
+import {validAutomaticLayout,requireVerifiedPrintedTotal,type NumberingResult} from "./numberingProcessing";
 const layout={version:1,originalNumber:14,imageWidth:834,imageHeight:1082,numberRects:[{left:.07,top:.03,width:.02,height:.015}],totalRects:[{rect:{left:.56,top:.94,width:.3,height:.02},marks:5}],method:"pdf-text"};
 describe("numbering layout validation before applying automatic covers",()=>{
  it("accepts complete source positions only for the matching image, reference and marks",()=>{
@@ -16,5 +16,12 @@ describe("numbering layout validation before applying automatic covers",()=>{
  it("requires explicit source proof before treating the original number as cropped out",()=>{
   expect(validAutomaticLayout({...layout,numberRects:[]},14,5)).toBe(false);
   expect(validAutomaticLayout({...layout,numberRects:[],numberAbsent:true},14,5)).toBe(true);
+ });
+ it("blocks a second printed total when the original footer has not been located",()=>{
+  const missing={status:"ready",layout:{...layout,totalRects:[]},reused:false} as NumberingResult;
+  expect(requireVerifiedPrintedTotal(missing,true).status).toBe("unsupported");
+  expect(requireVerifiedPrintedTotal(missing,false).status).toBe("ready");
+  const complete={status:"ready",layout,reused:false} as NumberingResult;
+  expect(requireVerifiedPrintedTotal(complete,true).status).toBe("ready");
  });
 });

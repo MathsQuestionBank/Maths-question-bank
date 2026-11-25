@@ -102,8 +102,9 @@ function compareOutsideTargets(before:{width:number;height:number;pixels:Uint8Cl
  expect(changedOutside,"Mathematics, parts, diagrams, rules and working area outside detected print must be unchanged").toBeLessThanOrEqual(8);
  return {changedOutside,changedInside,width:before.width,height:before.height};
 }
-/** Reconstruct the first source bitmap from its contiguous printed viewports.
- * A complete question can span pages; compare ALL its pixels, not just page 1. */
+/** Reconstruct retained source regions from every matching PDF image placement.
+ * Multiple compact viewports can now share one A4 page; all unchanged source
+ * pixels are compared, while omitted regions are verified blank scan bands. */
 async function renderPdfFirstImage(pdf:Buffer,fixture:Fixture,browserPage:Page){
  const slices=await browserPage.locator('.paper-question').first().locator('.assessment-image-viewport').evaluateAll(nodes=>nodes.map(n=>({top:Number(n.getAttribute('data-slice-top')),bottom:Number(n.getAttribute('data-slice-bottom'))})));
  const sourceSlices=slices.length?slices:[{top:0,bottom:fixture.layout.imageHeight}];
@@ -112,29 +113,31 @@ async function renderPdfFirstImage(pdf:Buffer,fixture:Fixture,browserPage:Page){
  const texts:string[]=[];
  for(let pageNumber=1;pageNumber<=document.numPages&&count<sourceSlices.length;pageNumber++){
   const page=await document.getPage(pageNumber),viewport=page.getViewport({scale:2}),operators=await page.getOperatorList();
-  let transform=[1,0,0,1,0,0],stack:number[][]=[],bounds:number[]|undefined;
+  let transform=[1,0,0,1,0,0],stack:number[][]=[],placements:number[][]=[];
   for(let index=0;index<operators.fnArray.length;index++){
    const fn=operators.fnArray[index],args=operators.argsArray[index];
    if(fn===OPS.save)stack.push([...transform]);
    else if(fn===OPS.restore)transform=stack.pop()||[1,0,0,1,0,0];
    else if(fn===OPS.transform)transform=Util.transform(transform,args);
-   else if(fn===OPS.paintImageXObject&&args[1]===fixture.layout.imageWidth&&args[2]===fixture.layout.imageHeight&&!bounds){
+   else if(fn===OPS.paintImageXObject&&args[1]===fixture.layout.imageWidth&&args[2]===fixture.layout.imageHeight){
     const a=[transform[4],transform[5]],b=[transform[0]+transform[2]+transform[4],transform[1]+transform[3]+transform[5]];
     const rect=viewport.convertToViewportRectangle([a[0],a[1],b[0],b[1]]);
-    bounds=[Math.min(rect[0],rect[2]),Math.min(rect[1],rect[3]),Math.abs(rect[2]-rect[0]),Math.abs(rect[3]-rect[1])];
+    placements.push([Math.min(rect[0],rect[2]),Math.min(rect[1],rect[3]),Math.abs(rect[2]-rect[0]),Math.abs(rect[3]-rect[1])]);
    }
   }
-  if(!bounds)continue;
-  const [left,top,width,height]=bounds;
-  if(!reconstructed){reconstructed=createCanvas(Math.round(width),Math.round(height));const ctx=reconstructed.getContext('2d');ctx.fillStyle='white';ctx.fillRect(0,0,reconstructed.width,reconstructed.height);}
-  const slice=sourceSlices[count++],from=slice.top/fixture.layout.imageHeight*height,to=slice.bottom/fixture.layout.imageHeight*height;
+  if(!placements.length)continue;
   const canvas=createCanvas(Math.ceil(viewport.width),Math.ceil(viewport.height));
   await page.render({canvas:canvas as any,canvasContext:canvas.getContext('2d') as any,viewport}).promise;
-  reconstructed.getContext('2d').drawImage(canvas,left,top+from,width,to-from,0,from,reconstructed.width,to-from);
+  for(const [left,top,width,height] of placements){
+   if(count>=sourceSlices.length)break;
+   if(!reconstructed){reconstructed=createCanvas(Math.round(width),Math.round(height));const ctx=reconstructed.getContext('2d');ctx.fillStyle='white';ctx.fillRect(0,0,reconstructed.width,reconstructed.height);}
+   const slice=sourceSlices[count++],from=slice.top/fixture.layout.imageHeight*height,to=slice.bottom/fixture.layout.imageHeight*height;
+   reconstructed.getContext('2d').drawImage(canvas,left,top+from,width,to-from,0,from,reconstructed.width,to-from);
+  }
   texts.push((await page.getTextContent()).items.map(item=>'str' in item?item.str:'').join(' '));
  }
  expect(reconstructed,'Actual PDF must contain the original full-resolution examination bitmap').toBeTruthy();
- expect(count,'Every contiguous source viewport must appear in the PDF').toBe(sourceSlices.length);
+ expect(count,'Every retained source viewport must appear in the PDF').toBe(sourceSlices.length);
  const image=reconstructed!,pixels=image.getContext('2d').getImageData(0,0,image.width,image.height).data,png=image.toBuffer('image/png');
  await document.destroy();return {width:image.width,height:image.height,pixels,png,text:texts.join(' ')};
 }
@@ -230,7 +233,7 @@ test("legacy multipart indices heading renumbers as question 1 in a five-questio
  await expect(page.locator(".paper-question")).toHaveCount(5);
  await expect(page.locator(".paper-question .assessment-question-number")).toHaveText(chosen.map((_,i)=>`Question ${i+1}`));
  await expect(frame.locator(".mqb-auto-number-text")).toHaveText("1");
- await expect(frame.locator(".mqb-auto-total-text")).toHaveText("(Total for Question 1 is 5 marks)");
+ await expect(page.locator(".paper-question").first().locator(".mqb-auto-total-text")).toHaveText("(Total for Question 1 is 5 marks)");
  await expect(page.locator(".paper-question").first()).toContainText("2022_3H_Q14a, 2022_3H_Q14b");
  const after=await frame.screenshot(),regions=[...affected.layout.numberRects,...affected.layout.totalRects.map(t=>t.rect)];
  compareOutsideTargets(await pixelData(before),await pixelData(after),regions,5);

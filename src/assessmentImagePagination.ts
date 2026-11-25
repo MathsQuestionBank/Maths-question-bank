@@ -5,7 +5,7 @@ import type {Crop} from "./CropEditor";
 export const assessmentPrintWidthMm=180;
 export const assessmentImagePageMm=255;
 const firstPageMm=215;
-export type ImageSlice={top:number;bottom:number};
+export type ImageSlice={top:number;bottom:number;inlineWithPrevious?:boolean};
 export type ImagePagination={width:number;height:number;slices:ImageSlice[];warning?:string};
 export type BlankBand={top:number;bottom:number};
 export function croppedImageSize(width:number,height:number,crop:Crop){
@@ -74,6 +74,32 @@ export function compactTrailingPrintHeight(width:number,height:number,bands:Blan
  return Math.min(height,tail.top+width*32/assessmentPrintWidthMm);
 }
 
+/** Print-only compaction of a verified blank band between question body/working
+ * and a small final answer/total region. All non-blank rows remain untouched.
+ * We retain 38 mm of working below the preceding ink and a 2 mm clear edge
+ * before the following ink. The source image/crop and overlay positions are
+ * unchanged; only an entirely blank interior interval is omitted from print. */
+export function paginateAssessmentPrintImage(width:number,height:number,bands:BlankBand[],analysisAvailable=true,firstHeightMm=firstPageMm):ImagePagination{
+ const visibleHeight=compactTrailingPrintHeight(width,height,bands,analysisAvailable);
+ if(analysisAvailable&&Number.isFinite(width)&&width>0&&Number.isFinite(visibleHeight)&&visibleHeight>0){
+  const mm=(pixels:number)=>pixels*assessmentPrintWidthMm/width;
+  const eligible=bands.filter(band=>band.top>0&&band.bottom<visibleHeight&&mm(band.bottom-band.top)>=70&&mm(visibleHeight-band.bottom)<=65&&mm(band.top)>=12);
+  // Prefer the largest verified uninterrupted empty interval, not a gap in a graph.
+  const band=eligible.sort((x,y)=>(y.bottom-y.top)-(x.bottom-x.top))[0];
+  if(band){
+   const headEnd=band.top+width*38/assessmentPrintWidthMm;
+   const tailStart=band.bottom-width*2/assessmentPrintWidthMm;
+   // Do not insert a second viewport unless at least 30 mm of truly blank
+   // source can be omitted and the complete result fits with its heading.
+   if(tailStart>headEnd&&mm(tailStart-headEnd)>=30&&mm(headEnd+visibleHeight-tailStart)<=Math.min(firstHeightMm-5,assessmentImagePageMm-5)){
+    return {width,height,slices:[{top:0,bottom:headEnd},{top:tailStart,bottom:visibleHeight,inlineWithPrevious:true}]};
+   }
+  }
+ }
+ const standard=paginateAssessmentImage(width,visibleHeight,bands,analysisAvailable,firstHeightMm);
+ return {...standard,height};
+}
+
 const plans=new Map<string,Promise<ImagePagination>>();
 /** In-memory only, bounded cache. Private source URLs and pixels are never
  * persisted or sent to another service. Short images need no canvas or fetch. */
@@ -104,8 +130,7 @@ export function prepareImagePagination(image:HTMLImageElement,crop:Crop,firstHei
    }
    const bands=imageBlankBands(data,canvas.width,canvas.height).map(band=>({top:band.top*height/canvas.height,bottom:band.bottom*height/canvas.height}));
    const visibleHeight=compactTrailingPrintHeight(width,height,bands);
-   const plan=paginateAssessmentImage(width,visibleHeight,bands,true,firstHeightMm);
-   return {...plan,height};
+   return paginateAssessmentPrintImage(width,height,bands,true,firstHeightMm);
   }catch{return paginateAssessmentImage(width,height,[],false,firstHeightMm);}
   finally{bitmap?.close();if(url)URL.revokeObjectURL(url);canvas.width=0;canvas.height=0;}
  })();

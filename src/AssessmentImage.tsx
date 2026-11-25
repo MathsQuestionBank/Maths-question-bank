@@ -30,8 +30,8 @@ export default function AssessmentImage({continuationLabel,firstPageHeightMm=215
   {!paginated&&<div className="assessment-source-image"><CroppedImage {...props} onImageReady={onImageReady}/></div>}
   {paginated&&<>
    {plan.warning&&<p className="assessment-pagination-warning print-hide" role="status">{plan.warning}</p>}
-   <div className="assessment-image-slices">{plan.slices.map((slice,index)=><div className={`assessment-image-page${index?" is-continuation":""}`} key={index}>
-    {index>0&&<div className="assessment-continuation-heading">{continuationLabel}</div>}
+   <div className={`assessment-image-slices${plan.slices.some(slice=>slice.inlineWithPrevious)?" is-compact":""}`}>{plan.slices.map((slice,index)=><div className={`assessment-image-page${index&&!slice.inlineWithPrevious?" is-continuation":""}${slice.inlineWithPrevious?" is-compact-followup":""}`} key={index}>
+    {index>0&&!slice.inlineWithPrevious&&<div className="assessment-continuation-heading">{continuationLabel}</div>}
     <div className="assessment-image-viewport" data-slice-top={slice.top} data-slice-bottom={slice.bottom} style={{aspectRatio:String(plan.width/(slice.bottom-slice.top)),containerType:"inline-size"} as CSSProperties}>
      <div className="assessment-image-translation" style={{transform:`translateY(-${slice.top/plan.width*100}cqw)`}}><CroppedImage {...props} alt={`${props.alt} — page ${index+1} of ${plan.slices.length}`} automaticNumbering={sliceNumbering(slice.top,slice.bottom)}/></div>
     </div>
