@@ -1,0 +1,31 @@
+{
+  "year": 7,
+  "scheme": "Department 2026–27 (broadly WRM V2)",
+  "sourceArchive": "Year 7.zip",
+  "summary": {
+    "topics": 15,
+    "powerpoints": 15,
+    "guidancePdfs": 30,
+    "exemplarSlides": 1234
+  },
+  "topicSlides": {
+    "7.1": 51,
+    "7.2": 78,
+    "7.3": 53,
+    "7.4": 118,
+    "7.5": 112,
+    "7.6": 92,
+    "7.7": 125,
+    "7.8": 42,
+    "7.9": 103,
+    "7.10": 95,
+    "7.11": 109,
+    "7.12": 69,
+    "7.13": 59,
+    "7.14": 61,
+    "7.15": 67
+  },
+  "status": "inventory-only",
+  "rights": "third-party-reference-only",
+  "notes": "Metadata only. No original WRM slide text, images or teaching documents imported. Mixed slide counts require adaptive question-answer detection and manual review."
+}
